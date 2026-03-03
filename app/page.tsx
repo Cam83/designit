@@ -36,7 +36,7 @@ const lightTheme = {
   primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
   secondaryFg: "#666666", muted: "#f0f0f0", mutedFg: "#999999",
   accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
-  sidebar: "#ffffff", sidebarFg: "#666666", sidebarBorder: "#e0e0e0",
+  sidebar: "#ffffff", sidebarFg: "#666666", sidebarBorder: "#f0f0f0",
   fgAlpha30: "rgba(26,26,26,0.3)", fgAlpha10: "rgba(26,26,26,0.1)", 
   fgAlpha06: "rgba(26,26,26,0.06)", fgAlpha03: "rgba(26,26,26,0.03)", 
   fgAlpha20: "rgba(26,26,26,0.2)", fgAlpha70: "rgba(26,26,26,0.7)",
