@@ -1711,7 +1711,7 @@ export default function App() {
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode}/>
       <main style={{ ...s.main, position:"relative" }}>
-        <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px" }}>
+        <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px", background:t.card, color:t.fg }}>
           {breadcrumb.map((seg, i) => (
             <span key={i} style={{ display:"flex", alignItems:"center", gap:4 }}>
               {i > 0 && <span style={{ fontSize:13, color:t.secondaryFg }}>/</span>}
