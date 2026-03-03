@@ -45,17 +45,16 @@ const lightTheme = {
 }
 
 let t = darkTheme
-
-const s = {
-  sidebar: { width: 260, borderRight: `1px solid ${t.sidebarBorder}`, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 },
-  main: { flex: 1, display: "flex", flexDirection: "column", background: t.bg, overflow: "hidden", minWidth: 0 },
-  iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer" },
-  primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: t.fg, color: t.bg, cursor: "pointer" },
-  pillBtn: (active) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? t.fgAlpha30 : t.border}`, background: active ? t.fgAlpha10 : t.bg, color: active ? t.fg : t.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
-  outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 6, border: `1px solid ${t.border}`, background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12 },
-  dropdown: { position: "absolute", top: "100%", left: 0, marginTop: 4, background: t.popover, border: `1px solid ${t.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${t.shadowDark}`, zIndex: 50, minWidth: 180 },
-  dropdownItem: (active) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? t.fg : t.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" }),
-}
+let s = getStyles(t)
+  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 },
+  main: { flex: 1, display: "flex", flexDirection: "column", background: theme.bg, overflow: "hidden", minWidth: 0 },
+  iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
+  primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
+  pillBtn: (active) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? theme.fgAlpha30 : theme.border}`, background: active ? theme.fgAlpha10 : theme.bg, color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
+  outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 6, border: `1px solid ${theme.border}`, background: "transparent", color: theme.secondaryFg, cursor: "pointer", fontSize: 12 },
+  dropdown: { position: "absolute", top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
+  dropdownItem: (active) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" }),
+})
 
 function HoverRow({ selected, children, onClick, style }) {
   const [hov, setHov] = useState(false)
@@ -1690,6 +1689,7 @@ export default function App() {
 
   // Update theme based on mode
   t = isDarkMode ? darkTheme : lightTheme
+  s = getStyles(t)
 
   function renderMain() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
