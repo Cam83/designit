@@ -5,7 +5,7 @@ import {
   ChevronDown, LayoutGrid, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon
 } from "lucide-react"
 
 const getGlobalStyles = (theme) => `
@@ -790,12 +790,12 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
             <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>☀️ Light</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Light</span>
               <Check size={16} strokeWidth={2} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange(true); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>🌙 Dark</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Dark</span>
               <Check size={16} strokeWidth={2} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
           </div>
