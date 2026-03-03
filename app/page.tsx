@@ -8,9 +8,9 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter
 } from "lucide-react"
 
-const globalStyles = `
+const getGlobalStyles = (theme) => `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #000; color: #ededed; font-family: Inter, sans-serif; }
+  body { background: ${theme.bg}; color: ${theme.fg}; font-family: Inter, sans-serif; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(139,139,139,0.4); border-radius: 3px; }
@@ -18,13 +18,23 @@ const globalStyles = `
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 `
 
-const t = {
+const darkTheme = {
   bg: "#000000", fg: "#ededed", card: "#000000", popover: "#111111",
   primary: "#ededed", primaryFg: "#000000", secondary: "#1a1a1a",
   secondaryFg: "#a1a1a1", muted: "#1a1a1a", mutedFg: "#888888",
   accent: "#1a1a1a", accentFg: "#ededed", border: "#1f1f1f",
   sidebar: "#000000", sidebarFg: "#a1a1a1", sidebarBorder: "#1f1f1f",
 }
+
+const lightTheme = {
+  bg: "#ffffff", fg: "#1a1a1a", card: "#ffffff", popover: "#f5f5f5",
+  primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
+  secondaryFg: "#666666", muted: "#f0f0f0", mutedFg: "#999999",
+  accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
+  sidebar: "#ffffff", sidebarFg: "#666666", sidebarBorder: "#e0e0e0",
+}
+
+let t = darkTheme
 
 const s = {
   sidebar: { width: 260, borderRight: `1px solid ${t.sidebarBorder}`, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 },
@@ -643,10 +653,11 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange }) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange }) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [orgOpen, setOrgOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
 
   function setActive(name, bc) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
   function toggleLoc(i) {
@@ -665,7 +676,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
 
   return (
     <aside style={s.sidebar}>
-      <style>{globalStyles}</style>
+      <style>{getGlobalStyles(t)}</style>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 12px 4px" }}>
         <DropdownWrapper open={orgOpen} setOpen={setOrgOpen}
           trigger={
@@ -769,7 +780,21 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
-            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CR-avatar-Bz4EbF5HeVDJiGS7f3cWgRW6XtjgTN.jpeg" alt="CR Avatar" style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${t.border}`, objectFit: "cover" }} />
+        <DropdownWrapper open={avatarOpen} setOpen={setAvatarOpen}
+          trigger={
+            <HoverBtn onClick={() => setAvatarOpen(!avatarOpen)} 
+              style={{ display: "flex", alignItems: "center", cursor: "pointer", borderRadius: "50%", border: "none", background: "transparent" }}>
+              <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CR-avatar-Bz4EbF5HeVDJiGS7f3cWgRW6XtjgTN.jpeg" alt="CR Avatar" style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${t.border}`, objectFit: "cover" }} />
+            </HoverBtn>
+          }>
+          <div style={{ ...s.dropdown, width: 160, left: -60 }}>
+            <button onClick={() => { onThemeChange(!isDarkMode); setAvatarOpen(false) }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12, textAlign: "left" }}>
+              {isDarkMode ? "🌙 Dark Mode" : "☀️ Light Mode"}
+              <Check size={13} strokeWidth={1.5} style={{ visibility: "hidden" }}/>
+            </button>
+          </div>
+        </DropdownWrapper>
         <HoverBtn style={{ ...s.iconBtn, color: t.mutedFg }}><HelpCircle size={16} strokeWidth={1}/></HoverBtn>
       </div>
     </aside>
@@ -1643,9 +1668,13 @@ export default function App() {
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
   const [projects, setProjects] = useState(INITIAL_PROJECTS)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
+  const [isDarkMode, setIsDarkMode] = useState(true)
 
   const deptPeopleCounts = {}
   people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
+
+  // Update theme based on mode
+  t = isDarkMode ? darkTheme : lightTheme
 
   function renderMain() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
@@ -1665,7 +1694,7 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb}/>
+      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode}/>
       <main style={{ ...s.main, position:"relative" }}>
         <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px" }}>
           {breadcrumb.map((seg, i) => (
