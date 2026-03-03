@@ -1482,12 +1482,12 @@ function GridBg() {
 
 function ViewWrapper({ breadcrumb, children }) {
   return (
-    <div style={{ display:"flex", flex:1, flexDirection:"column" }}>
+    <div style={{ display:"flex", flex:1, flexDirection:"column", background:t.bg }}>
       <div style={{ padding:"20px 24px 16px" }}>
         <h2 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{breadcrumb[breadcrumb.length-1]}</h2>
         <p style={{ fontSize:13, color:t.mutedFg, marginTop:4 }}>{breadcrumb.length>=2 ? `The ${breadcrumb[breadcrumb.length-1]} for ${breadcrumb[0]}` : ""}</p>
       </div>
-      <div style={{ display:"flex", flex:1, alignItems:"center", justifyContent:"center" }}>{children}</div>
+      <div style={{ display:"flex", flex:1, alignItems:"center", justifyContent:"center", background:t.bg }}>{children}</div>
     </div>
   )
 }
