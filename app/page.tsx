@@ -866,7 +866,7 @@ function RolesAndRates({ roles, onRolesChange }) {
   const [showModal, setShowModal] = useState(false)
   const display = tab === "archived" ? [] : roles
   return (
-    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+    <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       {showModal && <AddRoleModal onAdd={r => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={roles.length} label="Roles" onAdd={() => setShowModal(true)}/>
@@ -935,7 +935,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   }
 
   return (
-    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+    <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       {showModal && view !== "departments" && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
       {showModal && view === "departments" && <AddDepartmentModal onAdd={d => onDepartmentsChange([...departments, d])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
@@ -1096,7 +1096,7 @@ function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
   const display = tab === "archived" ? [] : filtered
 
   return (
-    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+    <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={filtered.length} label="Projects" onAdd={() => {}}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
@@ -1333,7 +1333,7 @@ function Clients({ roles }) {
   const client = selectedClient !== null ? clients[selectedClient] : null
 
   return (
-    <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
+    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
         {client === null ? (
           <>
@@ -1414,7 +1414,7 @@ function ActivityLog() {
     return <CalendarClock size={13} strokeWidth={1.5}/>
   }
   return (
-    <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
+    <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden", background:t.bg }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{filtered.length} Events</h1>
