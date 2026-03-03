@@ -45,7 +45,8 @@ const lightTheme = {
 }
 
 let t = darkTheme
-let s = getStyles(t)
+
+const getStyles = (theme) => ({
   sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 },
   main: { flex: 1, display: "flex", flexDirection: "column", background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
@@ -55,6 +56,8 @@ let s = getStyles(t)
   dropdown: { position: "absolute", top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
   dropdownItem: (active) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" }),
 })
+
+let s = getStyles(t)
 
 function HoverRow({ selected, children, onClick, style }) {
   const [hov, setHov] = useState(false)
