@@ -152,9 +152,9 @@ function Collapsible({ expanded, children }) {
   )
 }
 
-function NikeLogo() {
+function NikeLogo({ isDarkMode }) {
   return (
-    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002_nike-logos-swoosh-white-0nPbb6zNJMvApD16nQ1CvQL4h5mmIp.png" alt="Nike" style={{ height: 24, width: "auto" }} />
+    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002_nike-logos-swoosh-white-0nPbb6zNJMvApD16nQ1CvQL4h5mmIp.png" alt="Nike" style={{ height: 24, width: "auto", filter: isDarkMode ? "none" : "brightness(0)" }} />
   )
 }
 
@@ -681,7 +681,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         <DropdownWrapper open={orgOpen} setOpen={setOrgOpen}
           trigger={
             <HoverBtn onClick={() => setOrgOpen(!orgOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 6px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", color: t.fg }}>
-              <NikeLogo/>
+              <NikeLogo isDarkMode={isDarkMode}/>
               <ChevronDown size={12} strokeWidth={1} color={t.secondaryFg} style={{ transform: orgOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
             </HoverBtn>
           }>
