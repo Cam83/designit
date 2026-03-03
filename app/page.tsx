@@ -1039,7 +1039,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
 function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   const [showModal, setShowModal] = useState(false)
   return (
-    <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
       {showModal && <AddProjectModal people={people} clients={clients} onAdd={p => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
