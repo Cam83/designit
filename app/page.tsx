@@ -787,7 +787,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CR-avatar-Bz4EbF5HeVDJiGS7f3cWgRW6XtjgTN.jpeg" alt="CR Avatar" style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${t.border}`, objectFit: "cover" }} />
             </HoverBtn>
           }>
-          <div style={{ ...s.dropdown, width: 180, right: 0, left: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
+          <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
             <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>☀️ Light</span>
