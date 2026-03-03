@@ -1714,8 +1714,8 @@ export default function App() {
         <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px" }}>
           {breadcrumb.map((seg, i) => (
             <span key={i} style={{ display:"flex", alignItems:"center", gap:4 }}>
-              {i > 0 && <span style={{ fontSize:13, color:t.mutedFg }}>/</span>}
-              <span style={{ fontSize:13, color: i===breadcrumb.length-1 ? t.fg : t.mutedFg, fontWeight: i===breadcrumb.length-1 ? 500 : 400 }}>{seg}</span>
+              {i > 0 && <span style={{ fontSize:13, color:t.secondaryFg }}>/</span>}
+              <span style={{ fontSize:13, color: i===breadcrumb.length-1 ? t.fg : t.secondaryFg, fontWeight: i===breadcrumb.length-1 ? 500 : 400 }}>{seg}</span>
             </span>
           ))}
         </nav>
