@@ -704,6 +704,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange }) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
+  const [dataHubHover, setDataHubHover] = useState(false)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const [orgOpen, setOrgOpen] = useState(false)
@@ -807,7 +808,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           ))
         )}
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 16 }} onMouseEnter={() => setDataHubHover(true)} onMouseLeave={() => setDataHubHover(false)}>
           <HoverBtn onClick={() => setDataHubExp(!dataHubExp)}
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -815,9 +816,11 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <HoverBtn onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg }}>
-                <MoreVertical size={14} strokeWidth={2}/>
-              </HoverBtn>
+              {dataHubHover && (
+                <HoverBtn onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg }}>
+                  <MoreVertical size={14} strokeWidth={2}/>
+                </HoverBtn>
+              )}
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
             </div>
           </HoverBtn>
