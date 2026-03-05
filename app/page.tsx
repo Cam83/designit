@@ -773,12 +773,11 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange }) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange }) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubHover, setDataHubHover] = useState(false)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
-  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const dataHubSettingsRef = useRef(null)
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -919,7 +918,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                       const newSet = new Set(visibleDataHubItems)
                       if (e.target.checked) newSet.add(item.name)
                       else newSet.delete(item.name)
-                      setVisibleDataHubItems(newSet)
+                      onVisibleDataHubItemsChange(newSet)
                     }} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
                     {item.name}
                   </label>
@@ -1944,6 +1943,7 @@ export default function App() {
   const [projects, setProjects] = useState(ENHANCED_INITIAL_PROJECTS)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
 
   const deptPeopleCounts = {}
   people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -1971,7 +1971,7 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode}/>
+      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems}/>
       <main style={{ ...s.main, position:"relative" }}>
         <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px", background:t.card, color:t.fg }}>
           {breadcrumb.map((seg, i) => (
