@@ -5,7 +5,7 @@ import {
   ChevronDown, LayoutGrid, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical
 } from "lucide-react"
 
 const getGlobalStyles = (theme) => `
@@ -704,6 +704,8 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange }) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
+  const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
 
@@ -812,11 +814,34 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <span style={{ color: "rgba(237,237,237,0.7)" }}><Database size={16} strokeWidth={1}/></span>
               <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
-            <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <HoverBtn onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg }}>
+                <MoreVertical size={14} strokeWidth={2}/>
+              </HoverBtn>
+              <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+            </div>
           </HoverBtn>
+          {dataHubSettingsOpen && (
+            <div style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
+              <div style={{ padding: "8px" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
+                {dataHubItems.map(item => (
+                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                    <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
+                      const newSet = new Set(visibleDataHubItems)
+                      if (e.target.checked) newSet.add(item.name)
+                      else newSet.delete(item.name)
+                      setVisibleDataHubItems(newSet)
+                    }} style={{ cursor: "pointer" }}/>
+                    {item.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           <Collapsible expanded={dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
-              {dataHubItems.map(item => (
+              {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 16 }}>
                   {item.icon}{item.name}
