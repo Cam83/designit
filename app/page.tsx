@@ -825,7 +825,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <HoverBtn onClick={() => setDataHubExp(!dataHubExp)}
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "rgba(237,237,237,0.7)" }}><Database size={16} strokeWidth={1}/></span>
+              <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
               <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
