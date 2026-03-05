@@ -1250,6 +1250,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
   columns.push({ label: "Code", flex: "1fr", key: "code" })
   if (visibleItems.has("Clients")) columns.push({ label: "Client", flex: "1fr", key: "client" })
   columns.push({ label: "Office", flex: "1fr", key: "office" })
+  if (visibleItems.has("Business units")) columns.push({ label: "Business Unit", flex: "1fr", key: "unit" })
   columns.push({ label: "Owner", flex: "1fr", key: "owner" })
   
   const gridCols = columns.map(c => c.flex).join(" ")
@@ -1283,6 +1284,9 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
                 <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
               )}
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
+              {visibleItems.has("Business units") && (
+                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.unit || "—"}</span>
+              )}
               <span style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
                   {people[p.ownerId]?.name.charAt(0) || "?"}
@@ -1299,6 +1303,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
             { label: "Code", value: projects[selectedIdx].code },
             ...(visibleItems.has("Clients") ? [{ label: "Client", value: clients[projects[selectedIdx].clientId]?.name }] : []),
             { label: "Office", value: projects[selectedIdx].office },
+            ...(visibleItems.has("Business units") ? [{ label: "Business Unit", value: projects[selectedIdx].unit || "—" }] : []),
             { label: "Owner", value: people[projects[selectedIdx].ownerId]?.name },
             { label: "Stage", value: projects[selectedIdx].stage },
             { label: "Budget", value: `$${projects[selectedIdx].budget.toLocaleString()}` },
