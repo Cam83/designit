@@ -1950,7 +1950,8 @@ export default function App() {
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
-  const enhancedProjects = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
+  const businessUnitProjects = getBusinessUnitProjects()
+  const enhancedProjects = [...INITIAL_PROJECTS, ...businessUnitProjects]
   const [projects, setProjects] = useState(enhancedProjects)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
