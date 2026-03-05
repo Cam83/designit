@@ -225,12 +225,7 @@ const INITIAL_CONTRACTORS = [
   { name: "Luke Skywalker", roleId: 1, departmentId: 2, office: "Sydney" },
   { name: "Han Solo", roleId: 3, departmentId: 1, office: "Melbourne" },
 ]
-const INITIAL_PROJECTS = [
-  { name: "Website Redesign", code: "WEB-001", clientId: 0, stage: "active", margin: 25, budget: 50000, startDate: "2026-01-15", endDate: "2026-04-30", ownerId: 0, office: "Sydney" },
-  { name: "Mobile App", code: "APP-001", clientId: 1, stage: "planning", margin: 30, budget: 75000, startDate: "2026-02-01", endDate: "2026-08-31", ownerId: 1, office: "Melbourne" },
-  { name: "Brand Identity", code: "BRD-001", clientId: 0, stage: "completed", margin: 35, budget: 25000, startDate: "2025-10-01", endDate: "2025-12-15", ownerId: 2, office: "New York" },
-  { name: "Dashboard Dev", code: "DASH-001", clientId: 2, stage: "active", margin: 28, budget: 60000, startDate: "2026-01-20", endDate: "2026-06-30", ownerId: 3, office: "London" },
-]
+const INITIAL_PROJECTS = []
 
 const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
