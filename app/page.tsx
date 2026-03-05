@@ -300,23 +300,38 @@ const CLIENTS_FULL = [
 ]
 
 const BUSINESS_UNITS_FULL = [
-  { name: "North America Division", employees: 145, projects: 8, departments: [
-    { title: "Budget Allocation", budget: 450000, spent: 285000, currency: "USD", linkedRoles: [{roleId:0,allocation:15},{roleId:1,allocation:12},{roleId:2,allocation:25},{roleId:3,allocation:10},{roleId:4,allocation:8},{roleId:5,allocation:5}] },
-    { title: "Q1 Planning", budget: 200000, spent: 85000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:18},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  { name: "Airmax", employees: 145, projects: 8, departments: [
+    { title: "Marketing Campaign", budget: 450000, spent: 285000, currency: "USD", linkedRoles: [{roleId:0,allocation:15},{roleId:1,allocation:12},{roleId:2,allocation:25},{roleId:3,allocation:10},{roleId:4,allocation:8},{roleId:5,allocation:5}] },
+    { title: "Product Launch", budget: 200000, spent: 85000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:18},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
-  { name: "EMEA Division", employees: 98, projects: 12, departments: [
-    { title: "Budget Allocation", budget: 380000, spent: 220000, currency: "EUR", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
-    { title: "Workforce Planning", budget: 150000, spent: 65000, currency: "EUR", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:6},{roleId:2,allocation:14},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
+  { name: "LeBron", employees: 98, projects: 12, departments: [
+    { title: "Design Development", budget: 380000, spent: 220000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+    { title: "Athlete Relations", budget: 150000, spent: 65000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:6},{roleId:2,allocation:14},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
   ]},
-  { name: "APAC Division", employees: 112, projects: 10, departments: [
-    { title: "Budget Allocation", budget: 420000, spent: 195000, currency: "AUD", linkedRoles: [{roleId:0,allocation:14},{roleId:1,allocation:11},{roleId:2,allocation:22},{roleId:3,allocation:9},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
+  { name: "Jordan", employees: 112, projects: 10, departments: [
+    { title: "Heritage Marketing", budget: 420000, spent: 195000, currency: "USD", linkedRoles: [{roleId:0,allocation:14},{roleId:1,allocation:11},{roleId:2,allocation:22},{roleId:3,allocation:9},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
   ]},
-  { name: "Product Division", employees: 156, projects: 15, departments: [
-    { title: "Budget Allocation", budget: 520000, spent: 340000, currency: "USD", linkedRoles: [{roleId:0,allocation:18},{roleId:1,allocation:14},{roleId:2,allocation:28},{roleId:3,allocation:12},{roleId:4,allocation:10},{roleId:5,allocation:6}] },
-    { title: "Innovation Fund", budget: 250000, spent: 120000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+  { name: "Nike Runnings", employees: 156, projects: 15, departments: [
+    { title: "Performance Research", budget: 520000, spent: 340000, currency: "USD", linkedRoles: [{roleId:0,allocation:18},{roleId:1,allocation:14},{roleId:2,allocation:28},{roleId:3,allocation:12},{roleId:4,allocation:10},{roleId:5,allocation:6}] },
+    { title: "Technology Innovation", budget: 250000, spent: 120000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
   ]},
-  { name: "Operations Division", employees: 78, projects: 6, departments: [
-    { title: "Budget Allocation", budget: 280000, spent: 150000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:7},{roleId:2,allocation:14},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  { name: "Nike Football", employees: 78, projects: 6, departments: [
+    { title: "Team Partnerships", budget: 280000, spent: 150000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:7},{roleId:2,allocation:14},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "Nike Sportswear", employees: 134, projects: 11, departments: [
+    { title: "Lifestyle Marketing", budget: 395000, spent: 210000, currency: "USD", linkedRoles: [{roleId:0,allocation:13},{roleId:1,allocation:9},{roleId:2,allocation:21},{roleId:3,allocation:8},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Nike Training", employees: 89, projects: 7, departments: [
+    { title: "Fitness Program", budget: 310000, spent: 160000, currency: "USD", linkedRoles: [{roleId:0,allocation:9},{roleId:1,allocation:8},{roleId:2,allocation:16},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "Nike SB", employees: 67, projects: 5, departments: [
+    { title: "Skate Culture", budget: 240000, spent: 130000, currency: "USD", linkedRoles: [{roleId:0,allocation:7},{roleId:1,allocation:6},{roleId:2,allocation:12},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
+  ]},
+  { name: "Zoom Air", employees: 103, projects: 9, departments: [
+    { title: "Technology Development", budget: 360000, spent: 190000, currency: "USD", linkedRoles: [{roleId:0,allocation:11},{roleId:1,allocation:9},{roleId:2,allocation:19},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Converse", employees: 91, projects: 8, departments: [
+    { title: "Brand Strategy", budget: 330000, spent: 175000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:17},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
 ]
 
