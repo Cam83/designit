@@ -405,7 +405,6 @@ function getBusinessUnitProjects() {
 }
 
 const BUSINESS_UNIT_PROJECTS = getBusinessUnitProjects()
-const ENHANCED_INITIAL_PROJECTS = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
 
 const globalSidebarItems = [
   { name: "Dashboard", icon: <Gauge size={16} strokeWidth={1}/> },
@@ -1237,12 +1236,13 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   )
 }
 
-function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients }) {
+function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients, filteredBusinessUnit, onFilterClear }) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const isAll = selectedOffices.length === ALL_OFFICES.length
-  const filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
+  let filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
+  if (filteredBusinessUnit) filtered = filtered.filter(p => p.unit === filteredBusinessUnit)
   const display = tab === "archived" ? [] : filtered
 
   const columns = []
@@ -1258,9 +1258,16 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
-        <SectionHeader count={filtered.length} label="Projects" onAdd={() => {}}/>
+        <SectionHeader count={filtered.length} label={filteredBusinessUnit ? `Projects - ${filteredBusinessUnit}` : "Projects"} onAdd={() => {}}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
-          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            {filteredBusinessUnit && (
+              <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredBusinessUnit}
+              </HoverBtn>
+            )}
+          </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
@@ -1567,7 +1574,7 @@ function Clients({ roles }) {
   )
 }
 
-function BusinessUnits({ roles }) {
+function BusinessUnits({ roles, onProjectsClick }) {
   const [tab, setTab] = useState("active")
   const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
   const [selectedUnit, setSelectedUnit] = useState(null)
@@ -1601,7 +1608,7 @@ function BusinessUnits({ roles }) {
                     <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.projectsList?.length || 0}</span>
+                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:"#0066cc", cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
                 </HoverRow>
               ))}
@@ -1945,10 +1952,12 @@ export default function App() {
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
-  const [projects, setProjects] = useState(ENHANCED_INITIAL_PROJECTS)
+  const enhancedProjects = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
+  const [projects, setProjects] = useState(enhancedProjects)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
+  const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
 
   const deptPeopleCounts = {}
   people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -1961,9 +1970,9 @@ export default function App() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
-    if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
+    if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
-    if (activeItem === "Business units") return <BusinessUnits roles={roles}/>
+    if (activeItem === "Business units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
