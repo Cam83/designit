@@ -300,37 +300,78 @@ const CLIENTS_FULL = [
 ]
 
 const BUSINESS_UNITS_FULL = [
-  { name: "Airmax", employees: 145, projects: 8, departments: [
+  { name: "Airmax", employees: 145, projects: 3, projectsList: [
+    { title: "Airmax 90 Retro Redux", status: "Active", team: 12, budget: 285000 },
+    { title: "Airmax Summer Collection", status: "Active", team: 8, budget: 165000 },
+    { title: "Airmax Sustainability Initiative", status: "Planning", team: 5, budget: 95000 },
+  ], departments: [
     { title: "Marketing Campaign", budget: 450000, spent: 285000, currency: "USD", linkedRoles: [{roleId:0,allocation:15},{roleId:1,allocation:12},{roleId:2,allocation:25},{roleId:3,allocation:10},{roleId:4,allocation:8},{roleId:5,allocation:5}] },
     { title: "Product Launch", budget: 200000, spent: 85000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:18},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
-  { name: "LeBron", employees: 98, projects: 12, departments: [
+  { name: "LeBron", employees: 98, projects: 4, projectsList: [
+    { title: "LeBron XX Performance Testing", status: "Active", team: 15, budget: 340000 },
+    { title: "LeBron Signature Lifestyle Line", status: "Active", team: 10, budget: 220000 },
+    { title: "LeBron Global Tour Campaign", status: "In Progress", team: 8, budget: 155000 },
+    { title: "LeBron Kids Collection", status: "Planning", team: 6, budget: 85000 },
+  ], departments: [
     { title: "Design Development", budget: 380000, spent: 220000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
     { title: "Athlete Relations", budget: 150000, spent: 65000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:6},{roleId:2,allocation:14},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
   ]},
-  { name: "Jordan", employees: 112, projects: 10, departments: [
+  { name: "Jordan", employees: 112, projects: 3, projectsList: [
+    { title: "Air Jordan 39 Release", status: "Active", team: 18, budget: 425000 },
+    { title: "Jordan Heritage Museum Digital", status: "Active", team: 7, budget: 145000 },
+    { title: "Jordan Women's Expansion", status: "Planning", team: 9, budget: 195000 },
+  ], departments: [
     { title: "Heritage Marketing", budget: 420000, spent: 195000, currency: "USD", linkedRoles: [{roleId:0,allocation:14},{roleId:1,allocation:11},{roleId:2,allocation:22},{roleId:3,allocation:9},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
   ]},
-  { name: "Nike Runnings", employees: 156, projects: 15, departments: [
+  { name: "Nike Runnings", employees: 156, projects: 5, projectsList: [
+    { title: "Vaporfly Elite Development", status: "Active", team: 20, budget: 580000 },
+    { title: "NextGen Running App", status: "Active", team: 14, budget: 320000 },
+    { title: "Marathon Training Series", status: "In Progress", team: 11, budget: 240000 },
+    { title: "Trail Running Expansion", status: "Active", team: 9, budget: 185000 },
+    { title: "Running Analytics Platform", status: "Planning", team: 8, budget: 165000 },
+  ], departments: [
     { title: "Performance Research", budget: 520000, spent: 340000, currency: "USD", linkedRoles: [{roleId:0,allocation:18},{roleId:1,allocation:14},{roleId:2,allocation:28},{roleId:3,allocation:12},{roleId:4,allocation:10},{roleId:5,allocation:6}] },
     { title: "Technology Innovation", budget: 250000, spent: 120000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
   ]},
-  { name: "Nike Football", employees: 78, projects: 6, departments: [
+  { name: "Nike Football", employees: 78, projects: 3, projectsList: [
+    { title: "Phantom GX Elite Campaign", status: "Active", team: 13, budget: 295000 },
+    { title: "Football Academy Sponsorship", status: "Active", team: 7, budget: 125000 },
+    { title: "Women's Football Growth", status: "Planning", team: 9, budget: 185000 },
+  ], departments: [
     { title: "Team Partnerships", budget: 280000, spent: 150000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:7},{roleId:2,allocation:14},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
-  { name: "Nike Sportswear", employees: 134, projects: 11, departments: [
+  { name: "Nike Sportswear", employees: 134, projects: 4, projectsList: [
+    { title: "Essentials Collection Redesign", status: "Active", team: 12, budget: 275000 },
+    { title: "Sustainability Material Research", status: "In Progress", team: 8, budget: 165000 },
+    { title: "Urban Lifestyle Campaign", status: "Active", team: 10, budget: 225000 },
+    { title: "Vintage Revival Series", status: "Planning", team: 6, budget: 95000 },
+  ], departments: [
     { title: "Lifestyle Marketing", budget: 395000, spent: 210000, currency: "USD", linkedRoles: [{roleId:0,allocation:13},{roleId:1,allocation:9},{roleId:2,allocation:21},{roleId:3,allocation:8},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
   ]},
-  { name: "Nike Training", employees: 89, projects: 7, departments: [
+  { name: "Nike Training", employees: 89, projects: 3, projectsList: [
+    { title: "Metcon Innovation Program", status: "Active", team: 11, budget: 245000 },
+    { title: "Fitness App Integration", status: "In Progress", team: 9, budget: 185000 },
+    { title: "Training Equipment Redesign", status: "Planning", team: 7, budget: 135000 },
+  ], departments: [
     { title: "Fitness Program", budget: 310000, spent: 160000, currency: "USD", linkedRoles: [{roleId:0,allocation:9},{roleId:1,allocation:8},{roleId:2,allocation:16},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
-  { name: "Nike SB", employees: 67, projects: 5, departments: [
+  { name: "Nike SB", employees: 67, projects: 2, projectsList: [
+    { title: "SB Dunk Premium Series", status: "Active", team: 8, budget: 165000 },
+    { title: "Skate Park Partnership Network", status: "Active", team: 5, budget: 95000 },
+  ], departments: [
     { title: "Skate Culture", budget: 240000, spent: 130000, currency: "USD", linkedRoles: [{roleId:0,allocation:7},{roleId:1,allocation:6},{roleId:2,allocation:12},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
   ]},
-  { name: "Zoom Air", employees: 103, projects: 9, departments: [
+  { name: "Zoom Air", employees: 103, projects: 2, projectsList: [
+    { title: "Zoom Air Cushioning Tech Gen 4", status: "Active", team: 14, budget: 325000 },
+    { title: "Cross-Sport Zoom Integration", status: "Planning", team: 8, budget: 175000 },
+  ], departments: [
     { title: "Technology Development", budget: 360000, spent: 190000, currency: "USD", linkedRoles: [{roleId:0,allocation:11},{roleId:1,allocation:9},{roleId:2,allocation:19},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
   ]},
-  { name: "Converse", employees: 91, projects: 8, departments: [
+  { name: "Converse", employees: 91, projects: 2, projectsList: [
+    { title: "Chuck Taylor All Star 2050", status: "Active", team: 10, budget: 245000 },
+    { title: "Converse Collaboration Series", status: "In Progress", team: 7, budget: 155000 },
+  ], departments: [
     { title: "Brand Strategy", budget: 330000, spent: 175000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:17},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
 ]
@@ -1484,6 +1525,7 @@ function BusinessUnits({ roles }) {
   const [tab, setTab] = useState("active")
   const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
   const [selectedUnit, setSelectedUnit] = useState(null)
+  const [viewTab, setViewTab] = useState("departments")
   const [selectedDept, setSelectedDept] = useState(null)
   function updateUnit(idx, updated) { setUnits(prev => prev.map((u,i) => i===idx ? updated : u)) }
   const unit = selectedUnit !== null ? units[selectedUnit] : null
@@ -1507,13 +1549,13 @@ function BusinessUnits({ roles }) {
                 {["Business Unit","Employees","Projects","Departments"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
               </div>
               {(tab==="archived"?[]:units).map((u,i) => (
-                <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setSelectedDept(null) }}
+                <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setViewTab("departments"); setSelectedDept(null) }}
                   style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
                   <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
                     <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.projects}</span>
+                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.projectsList?.length || 0}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
                 </HoverRow>
               ))}
@@ -1532,21 +1574,43 @@ function BusinessUnits({ roles }) {
               <button style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <Tabs active={tab} onChange={setTab} tabs={[{label:`${unit.departments.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+              <Tabs active={viewTab} onChange={setViewTab} tabs={[
+                {label:`${unit.projectsList?.length || 0} Projects`,value:"projects"},
+                {label:`${unit.departments.length} Departments`,value:"departments"}
+              ]}/>
             </div>
             <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                {["Department","Budget","Spent","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-              </div>
-              {unit.departments.map((dept, i) => (
-                <HoverRow key={i} selected={selectedDept===i} onClick={() => setSelectedDept(i)}
-                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                  <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{dept.title}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.budget.toLocaleString()}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.spent.toLocaleString()}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{dept.linkedRoles.length}</span>
-                </HoverRow>
-              ))}
+              {viewTab === "projects" ? (
+                <>
+                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                    {["Project","Team Size","Budget","Status"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+                  </div>
+                  {unit.projectsList?.map((proj, i) => (
+                    <HoverRow key={i} selected={false}
+                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{proj.title}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{proj.team}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${proj.budget.toLocaleString()}</span>
+                      <span style={{ fontSize:12, display:"flex", alignItems:"center", padding:"4px 8px", borderRadius:4, background: proj.status === "Active" ? "#d4edda" : proj.status === "In Progress" ? "#fff3cd" : "#e7e7e7", color: proj.status === "Active" ? "#155724" : proj.status === "In Progress" ? "#856404" : "#666" }}>{proj.status}</span>
+                    </HoverRow>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                    {["Department","Budget","Spent","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+                  </div>
+                  {unit.departments.map((dept, i) => (
+                    <HoverRow key={i} selected={selectedDept===i} onClick={() => setSelectedDept(i)}
+                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{dept.title}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.budget.toLocaleString()}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.spent.toLocaleString()}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{dept.linkedRoles.length}</span>
+                    </HoverRow>
+                  ))}
+                </>
+              )}
             </div>
           </>
         )}
