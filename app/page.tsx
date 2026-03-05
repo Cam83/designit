@@ -708,6 +708,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const dataHubSettingsRef = useRef(null)
+  const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
