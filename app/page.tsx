@@ -902,9 +902,9 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               {dataHubHover && (
-                <HoverBtn onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg }}>
+                <div onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg, cursor: "pointer" }}>
                   <MoreVertical size={14} strokeWidth={2}/>
-                </HoverBtn>
+                </div>
               )}
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
             </div>
@@ -1238,13 +1238,22 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   )
 }
 
-function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
+function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients }) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const isAll = selectedOffices.length === ALL_OFFICES.length
   const filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
   const display = tab === "archived" ? [] : filtered
+
+  const columns = []
+  columns.push({ label: "Project", flex: "2fr", key: "name" })
+  columns.push({ label: "Code", flex: "1fr", key: "code" })
+  if (visibleItems.has("Clients")) columns.push({ label: "Client", flex: "1fr", key: "client" })
+  columns.push({ label: "Office", flex: "1fr", key: "office" })
+  columns.push({ label: "Owner", flex: "1fr", key: "owner" })
+  
+  const gridCols = columns.map(c => c.flex).join(" ")
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
@@ -1259,19 +1268,21 @@ function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
           <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-            {["Project","Code","Client","Office","Owner"].map(h => (
-              <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>
+          <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
+            {columns.map(col => (
+              <span key={col.key} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{col.label}</span>
             ))}
           </div>
           {display.map((p, idx) => (
             <HoverRow key={idx} selected={selectedIdx === projects.indexOf(p)} onClick={() => setSelectedIdx(projects.indexOf(p))}
-              style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
+              style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
                 <InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
               </span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>{p.code}</span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+              {visibleItems.has("Clients") && (
+                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+              )}
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
               <span style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
@@ -1284,10 +1295,10 @@ function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
         </div>
       </div>
       {selectedIdx !== null && projects[selectedIdx] && (
-        <Sheet title={projects[selectedIdx].name} subtitle={`${clients[projects[selectedIdx].clientId]?.name} · ${projects[selectedIdx].office}`} onClose={() => setSelectedIdx(null)}>
+        <Sheet title={projects[selectedIdx].name} subtitle={visibleItems.has("Clients") ? `${clients[projects[selectedIdx].clientId]?.name} · ${projects[selectedIdx].office}` : projects[selectedIdx].office} onClose={() => setSelectedIdx(null)}>
           <DetailGrid items={[
             { label: "Code", value: projects[selectedIdx].code },
-            { label: "Client", value: clients[projects[selectedIdx].clientId]?.name },
+            ...(visibleItems.has("Clients") ? [{ label: "Client", value: clients[projects[selectedIdx].clientId]?.name }] : []),
             { label: "Office", value: projects[selectedIdx].office },
             { label: "Owner", value: people[projects[selectedIdx].ownerId]?.name },
             { label: "Stage", value: projects[selectedIdx].stage },
@@ -1945,7 +1956,7 @@ export default function App() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
-    if (activeItem === "Projects") return <ProjectsDataHub projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
+    if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
     if (activeItem === "Business units") return <BusinessUnits roles={roles}/>
     if (activeItem === "Activity log") return <ActivityLog/>
