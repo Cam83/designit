@@ -34,9 +34,9 @@ const darkTheme = {
 const lightTheme = {
   bg: "#ffffff", fg: "#1a1a1a", card: "#ffffff", popover: "#f5f5f5",
   primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
-  secondaryFg: "#333333", muted: "#f0f0f0", mutedFg: "#555555",
+  secondaryFg: "#1a1a1a", muted: "#f0f0f0", mutedFg: "#333333",
   accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
-  sidebar: "#ffffff", sidebarFg: "#333333", sidebarBorder: "#f0f0f0",
+  sidebar: "#ffffff", sidebarFg: "#1a1a1a", sidebarBorder: "#f0f0f0",
   fgAlpha30: "rgba(26,26,26,0.3)", fgAlpha10: "rgba(26,26,26,0.1)", 
   fgAlpha06: "rgba(26,26,26,0.06)", fgAlpha03: "rgba(26,26,26,0.03)", 
   fgAlpha20: "rgba(26,26,26,0.2)", fgAlpha70: "rgba(26,26,26,0.7)",
