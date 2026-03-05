@@ -707,8 +707,20 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const [dataHubHover, setDataHubHover] = useState(false)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
-  const [orgOpen, setOrgOpen] = useState(false)
+  const dataHubSettingsRef = useRef(null)
   const [avatarOpen, setAvatarOpen] = useState(false)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dataHubSettingsRef.current && !dataHubSettingsRef.current.contains(event.target)) {
+        setDataHubSettingsOpen(false)
+      }
+    }
+    if (dataHubSettingsOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [dataHubSettingsOpen])
 
   function setActive(name, bc) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
   function toggleLoc(i) {
@@ -825,7 +837,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </div>
           </HoverBtn>
           {dataHubSettingsOpen && (
-            <div style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
+            <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
                 {dataHubItems.map(item => (
@@ -835,7 +847,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                       if (e.target.checked) newSet.add(item.name)
                       else newSet.delete(item.name)
                       setVisibleDataHubItems(newSet)
-                    }} style={{ cursor: "pointer" }}/>
+                    }} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
                     {item.name}
                   </label>
                 ))}
