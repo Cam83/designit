@@ -372,14 +372,49 @@ const BUSINESS_UNITS_FULL = [
   ]},
 ]
 
+const SAMPLE_NOTES_POOL = [
+  [
+    { text: "Kicked off with the full team — good energy, everyone aligned on Q1 goals.", author: "Amy Santiago", timestamp: Date.now() - 1000 * 60 * 60 * 48 },
+    { text: "Budget reviewed and approved. Starting creative brief this week.", author: "Jake Peralta", timestamp: Date.now() - 1000 * 60 * 60 * 24 },
+  ],
+  [
+    { text: "Client flagged some concerns around timeline. Scheduling a sync for Monday.", author: "Rosa Diaz", timestamp: Date.now() - 1000 * 60 * 60 * 72 },
+  ],
+  [
+    { text: "Design phase complete. Moving into development sprint next week.", author: "Charles Boyle", timestamp: Date.now() - 1000 * 60 * 60 * 36 },
+    { text: "Stakeholder review went well — minor copy tweaks requested.", author: "Amy Santiago", timestamp: Date.now() - 1000 * 60 * 90 },
+  ],
+  [
+    { text: "Resource allocation confirmed. Terry is leading the delivery team.", author: "Terry Jeffords", timestamp: Date.now() - 1000 * 60 * 60 * 120 },
+    { text: "Blocked on approval from legal — following up today.", author: "Rosa Diaz", timestamp: Date.now() - 1000 * 60 * 60 * 10 },
+  ],
+  [
+    { text: "First milestone hit on time. Team is in good shape.", author: "Jake Peralta", timestamp: Date.now() - 1000 * 60 * 45 },
+  ],
+  [
+    { text: "Vendor contract signed. Deliverables expected end of month.", author: "Monica Geller", timestamp: Date.now() - 1000 * 60 * 60 * 60 },
+    { text: "Internal review scheduled for Thursday. Deck needs updating.", author: "Charles Boyle", timestamp: Date.now() - 1000 * 60 * 60 * 5 },
+  ],
+  [
+    { text: "Budget variance flagged — need sign-off from finance before proceeding.", author: "Amy Santiago", timestamp: Date.now() - 1000 * 60 * 60 * 30 },
+  ],
+  [
+    { text: "Campaign assets delivered. Waiting on client sign-off.", author: "Rachel Green", timestamp: Date.now() - 1000 * 60 * 60 * 18 },
+  ],
+]
+
 function getBusinessUnitProjects() {
   const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
   const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
   const allProjects = []
-  
+
   BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
     if (unit.projectsList) {
       unit.projectsList.forEach((proj, idx) => {
+        const globalIdx = allProjects.length
+        const sampleNotes = globalIdx % 2 === 0
+          ? SAMPLE_NOTES_POOL[globalIdx % SAMPLE_NOTES_POOL.length]
+          : undefined
         allProjects.push({
           name: proj.title,
           code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
@@ -391,7 +426,9 @@ function getBusinessUnitProjects() {
           endDate: "2026-12-31",
           ownerId: Math.floor(Math.random() * 6),
           office: offices[Math.floor(Math.random() * offices.length)],
-          unit: unit.name
+          unit: unit.name,
+          health: ["on-track","at-risk","off-track"][Math.floor(Math.random() * 3)],
+          notes: sampleNotes,
         })
       })
     }
@@ -421,7 +458,7 @@ const dataHubItems = [
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
-  { name: "Business units", icon: <Building2 size={16} strokeWidth={1}/> },
+  { name: "Business Units", icon: <Building2 size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
@@ -965,14 +1002,14 @@ function RoleSelector({ roleId, roles, onChange }) {
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
         <HoverBtn onClick={e => { e.stopPropagation(); setOpen(!open) }}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: t.accent, border: "none", color: t.fg, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 28, padding: "0 8px", borderRadius: 6, border: `1px solid ${t.border}`, background: "transparent", color: t.fg, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
           {roles[roleId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
         </HoverBtn>
       }>
-      <div style={{ ...s.dropdown, width: 200 }}>
+      <div style={{ ...s.dropdown, width: 180 }}>
         {roles.map((r, i) => (
           <button key={i} onClick={e => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === roleId)}>
-            {r.name} {i === roleId && <Check size={13} strokeWidth={1.5}/>}
+            {r.name} {i === roleId && <Check size={11} strokeWidth={1.5}/>}
           </button>
         ))}
       </div>
@@ -1183,9 +1220,164 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   )
 }
 
+function relTime(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000)
+  if (m < 1) return "just now"
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  return `${Math.floor(h / 24)}d ago`
+}
+
+function NotesCell({ notes, onClick }) {
+  const hasNotes = notes && notes.length > 0
+  const last = hasNotes ? notes[notes.length - 1] : null
+  return (
+    <button onClick={e => { e.stopPropagation(); onClick() }}
+      style={{ display:"flex", alignItems:"flex-start", gap:7, background:"transparent", border:"none", padding:0, cursor:"pointer", width:"100%", textAlign:"left" }}>
+      {hasNotes ? (
+        <>
+          <div style={{ width:20, height:20, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:9, fontWeight:600, color:t.fg, flexShrink:0, marginTop:1 }}>
+            {last.author.charAt(0)}
+          </div>
+          <div style={{ overflow:"hidden", minWidth:0 }}>
+            <div style={{ fontSize:12, color:t.secondaryFg, lineHeight:1.4, display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden", marginBottom:3 }}>
+              {last.text}
+            </div>
+            <div style={{ fontSize:11, color:t.mutedFg }}>
+              {last.author.split(" ")[0]} · {relTime(last.timestamp)}
+            </div>
+          </div>
+        </>
+      ) : (
+        <span style={{ fontSize:12, color:t.mutedFg }}>Add note…</span>
+      )}
+    </button>
+  )
+}
+
+function NotesPanel({ project, currentUser, onClose, onUpdate }) {
+  const [draft, setDraft] = useState("")
+  const notes = project.notes || []
+  const bottomRef = useRef(null)
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [notes.length])
+
+  function submit() {
+    const text = draft.trim()
+    if (!text) return
+    const updated = [...notes, { text, author: currentUser, timestamp: Date.now() }]
+    onUpdate(updated)
+    setDraft("")
+  }
+
+  function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() }
+  }
+
+  return (
+    <div style={{ width:340, flexShrink:0, borderLeft:`1px solid ${t.border}`, background:t.bg, display:"flex", flexDirection:"column", height:"100%" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:`1px solid ${t.border}`, padding:"16px 20px" }}>
+        <div>
+          <h2 style={{ fontSize:15, fontWeight:600, color:t.fg }}>Notes</h2>
+          <p style={{ fontSize:12, color:t.mutedFg, marginTop:2 }}>{project.name}</p>
+        </div>
+        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+      </div>
+      <div style={{ flex:1, overflowY:"auto", padding:"16px 20px", display:"flex", flexDirection:"column", gap:16 }}>
+        {notes.length === 0 && (
+          <p style={{ fontSize:13, color:t.mutedFg, textAlign:"center", marginTop:32 }}>No notes yet. Add the first one below.</p>
+        )}
+        {notes.map((n, i) => (
+          <div key={i} style={{ display:"flex", gap:10 }}>
+            <div style={{ width:28, height:28, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:600, color:t.fg, flexShrink:0 }}>
+              {n.author.charAt(0)}
+            </div>
+            <div style={{ flex:1 }}>
+              <div style={{ display:"flex", alignItems:"baseline", gap:6, marginBottom:4 }}>
+                <span style={{ fontSize:12, fontWeight:600, color:t.fg }}>{n.author}</span>
+                <span style={{ fontSize:11, color:t.mutedFg }}>{relTime(n.timestamp)}</span>
+              </div>
+              <p style={{ fontSize:13, color:t.secondaryFg, lineHeight:1.5, whiteSpace:"pre-wrap" }}>{n.text}</p>
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef}/>
+      </div>
+      <div style={{ padding:"12px 20px", borderTop:`1px solid ${t.border}` }}>
+        <textarea
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="Leave a note… (Enter to send)"
+          rows={3}
+          style={{ width:"100%", background:t.muted, border:`1px solid ${t.border}`, borderRadius:8, padding:"8px 10px", fontSize:13, color:t.fg, resize:"none", outline:"none", fontFamily:"inherit", boxSizing:"border-box" }}
+        />
+        <button onClick={submit}
+          style={{ marginTop:8, width:"100%", padding:"7px 0", borderRadius:6, border:"none", background:t.fg, color:t.bg, fontSize:12, fontWeight:500, cursor:"pointer" }}>
+          Add note
+        </button>
+      </div>
+    </div>
+  )
+}
+
+const PT_COLS_CONFIG = [
+  { key: "name",      label: "Project", flex: "1.5fr" },
+  { key: "notes",     label: "Notes",   flex: "240px" },
+  { key: "health",    label: "Health",  flex: "120px" },
+  { key: "client",    label: "Client",  flex: "1fr" },
+  { key: "stage",     label: "Stage",   flex: "0.6fr" },
+  { key: "margin",    label: "Margin",  flex: "0.8fr" },
+  { key: "budget",    label: "Budget",  flex: "1fr" },
+  { key: "startDate", label: "Start",   flex: "1fr" },
+  { key: "endDate",   label: "End",     flex: "1fr" },
+  { key: "owner",     label: "Owner",   flex: "0.8fr" },
+]
+
 function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   const [showModal, setShowModal] = useState(false)
+  const [colOrder, setColOrder] = useState(PT_COLS_CONFIG.map(c => c.key))
+  const [dragKey, setDragKey] = useState(null)
+  const [dropKey, setDropKey] = useState(null)
+  const [notesIdx, setNotesIdx] = useState(null)
+  const currentUser = people[1]?.name || "Amy Santiago"
+
+  const cols = colOrder.map(k => PT_COLS_CONFIG.find(c => c.key === k))
+  const gridCols = cols.map(c => c.flex).join(" ")
+
+  function onDragStart(key) { setDragKey(key) }
+  function onDragOver(e, key) { e.preventDefault(); setDropKey(key) }
+  function onDrop(key) {
+    if (!dragKey || dragKey === key) { setDragKey(null); setDropKey(null); return }
+    const order = [...colOrder]
+    const from = order.indexOf(dragKey)
+    const to = order.indexOf(key)
+    order.splice(from, 1)
+    order.splice(to, 0, dragKey)
+    setColOrder(order)
+    setDragKey(null)
+    setDropKey(null)
+  }
+
+  function renderCell(col, p, i) {
+    const k = col.key
+    switch (k) {
+      case "name":      return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, fontWeight:500, color:t.fg }}><InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background:"transparent" }}/></span>
+      case "client":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{clients[p.clientId]?.name}</span>
+      case "stage":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:10, height:10, borderRadius:"50%", background:STAGE_COLORS[p.stage] }}/></span>
+      case "margin":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{p.margin}%</span>
+      case "budget":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>${p.budget.toLocaleString()}</span>
+      case "startDate": return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.startDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
+      case "endDate":   return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.endDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
+      case "owner":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg }}>{people[p.ownerId]?.name.charAt(0) || "?"}</div></span>
+      case "health":    return <span key={k} style={{ display:"flex", alignItems:"center" }}><HealthDropdown value={p.health || "on-track"} onChange={v => { const u=[...projects]; u[i].health=v; onProjectsChange(u) }}/></span>
+      case "notes":     return <span key={k} style={{ display:"flex", alignItems:"flex-start", paddingTop:4 }}><NotesCell notes={p.notes} onClick={() => setNotesIdx(i)}/></span>
+      default:          return null
+    }
+  }
+
   return (
+    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
     <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
       {showModal && <AddProjectModal people={people} clients={clients} onAdd={p => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
@@ -1199,37 +1391,39 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
         </div>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 0.6fr 0.8fr 1fr 1fr 1fr 0.8fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0", gap: 8 }}>
-          {["Project","Client","Stage","Margin","Budget","Start","End","Owner"].map(h => (
-            <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>
+        <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0", gap: 8 }}>
+          {cols.map(col => (
+            <span key={col.key}
+              draggable
+              onDragStart={() => onDragStart(col.key)}
+              onDragOver={e => onDragOver(e, col.key)}
+              onDrop={() => onDrop(col.key)}
+              onDragEnd={() => { setDragKey(null); setDropKey(null) }}
+              style={{ fontSize:12, fontWeight:500, color: dropKey === col.key ? t.fg : t.mutedFg, cursor:"grab", userSelect:"none", display:"flex", alignItems:"center", gap:4, borderLeft: dropKey === col.key ? `2px solid ${t.fg}` : "2px solid transparent", paddingLeft: 2, transition:"border-color 0.1s, color 0.1s", opacity: dragKey === col.key ? 0.4 : 1 }}>
+              {col.label}
+            </span>
           ))}
         </div>
         {projects.map((p, i) => (
           <HoverRow key={i} selected={false} onClick={() => {}}
-            style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 0.6fr 0.8fr 1fr 1fr 1fr 0.8fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "default", gap: 8, transition: "background 0.1s" }}>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, fontWeight: 500, color: t.fg }}>
-              <InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
-            </span>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
-            <span style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: STAGE_COLORS[p.stage] }}/>
-            </span>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.margin}%</span>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>${p.budget.toLocaleString()}</span>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>
-              {new Date(p.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </span>
-            <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>
-              {new Date(p.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </span>
-            <span style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
-                {people[p.ownerId]?.name.charAt(0) || "?"}
-              </div>
-            </span>
+            style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "default", gap: 8, transition: "background 0.1s" }}>
+            {cols.map(col => renderCell(col, p, i))}
           </HoverRow>
         ))}
       </div>
+    </div>
+    {notesIdx !== null && projects[notesIdx] && (
+      <NotesPanel
+        project={projects[notesIdx]}
+        currentUser={currentUser}
+        onClose={() => setNotesIdx(null)}
+        onUpdate={updated => {
+          const u = [...projects]
+          u[notesIdx] = { ...u[notesIdx], notes: updated }
+          onProjectsChange(u)
+        }}
+      />
+    )}
     </div>
   )
 }
@@ -1248,7 +1442,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
   columns.push({ label: "Code", flex: "1fr", key: "code" })
   if (visibleItems.has("Clients")) columns.push({ label: "Client", flex: "1fr", key: "client" })
   columns.push({ label: "Office", flex: "1fr", key: "office" })
-  if (visibleItems.has("Business units")) columns.push({ label: "Business Unit", flex: "1fr", key: "unit" })
+  if (visibleItems.has("Business Units")) columns.push({ label: "Business Unit", flex: "1fr", key: "unit" })
   columns.push({ label: "Owner", flex: "1fr", key: "owner" })
   
   const gridCols = columns.map(c => c.flex).join(" ")
@@ -1289,7 +1483,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
                 <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
               )}
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
-              {visibleItems.has("Business units") && (
+              {visibleItems.has("Business Units") && (
                 <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.unit || "—"}</span>
               )}
               <span style={{ display: "flex", alignItems: "center" }}>
@@ -1308,7 +1502,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
             { label: "Code", value: projects[selectedIdx].code },
             ...(visibleItems.has("Clients") ? [{ label: "Client", value: clients[projects[selectedIdx].clientId]?.name }] : []),
             { label: "Office", value: projects[selectedIdx].office },
-            ...(visibleItems.has("Business units") ? [{ label: "Business Unit", value: projects[selectedIdx].unit || "—" }] : []),
+            ...(visibleItems.has("Business Units") ? [{ label: "Business Unit", value: projects[selectedIdx].unit || "—" }] : []),
             { label: "Owner", value: people[projects[selectedIdx].ownerId]?.name },
             { label: "Stage", value: projects[selectedIdx].stage },
             { label: "Budget", value: `$${projects[selectedIdx].budget.toLocaleString()}` },
@@ -1316,6 +1510,40 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
         </Sheet>
       )}
     </div>
+  )
+}
+
+const HEALTH_OPTIONS = [
+  { value: "on-track",  label: "On Track",  color: "#22c55e" },
+  { value: "at-risk",   label: "At Risk",   color: "#f59e0b" },
+  { value: "off-track", label: "Off Track", color: "#ef4444" },
+]
+
+function HealthDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const current = HEALTH_OPTIONS.find(o => o.value === value) || HEALTH_OPTIONS[0]
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={e => { e.stopPropagation(); setOpen(!open) }}
+          style={{ display:"flex", alignItems:"center", gap:6, height:24, padding:"0 8px", borderRadius:12, background: current.color + "18", border:`1px solid ${current.color}40`, cursor:"pointer", fontSize:11, fontWeight:500, color: current.color }}>
+          <span style={{ width:6, height:6, borderRadius:"50%", background: current.color, flexShrink:0 }}/>
+          {current.label}
+          <ChevronDown size={10} strokeWidth={2}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width:130 }}>
+        {HEALTH_OPTIONS.map(o => (
+          <button key={o.value} onClick={e => { e.stopPropagation(); onChange(o.value); setOpen(false) }} style={{ ...s.dropdownItem(o.value === value), display:"flex", alignItems:"center" }}>
+            <span style={{ display:"flex", alignItems:"center", gap:8, flex:1 }}>
+              <span style={{ width:6, height:6, borderRadius:"50%", background:o.color, flexShrink:0 }}/>
+              {o.label}
+            </span>
+            {o.value === value && <Check size={11} strokeWidth={1.5}/>}
+          </button>
+        ))}
+      </div>
+    </DropdownWrapper>
   )
 }
 
@@ -1586,7 +1814,7 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
         {unit === null ? (
           <>
-            <SectionHeader count={units.length} label="Business units" onAdd={() => {}}/>
+            <SectionHeader count={units.length} label="Business Units" onAdd={() => {}}/>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
               <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All regions<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
               <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
@@ -1950,9 +2178,7 @@ export default function App() {
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
-  const businessUnitProjects = getBusinessUnitProjects()
-  const enhancedProjects = [...INITIAL_PROJECTS, ...businessUnitProjects]
-  const [projects, setProjects] = useState(enhancedProjects)
+  const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
@@ -1972,7 +2198,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
-    if (activeItem === "Business units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
+    if (activeItem === "Business Units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
