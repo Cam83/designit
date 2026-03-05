@@ -1056,7 +1056,7 @@ function RolesAndRates({ roles, onRolesChange }) {
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts }) {
+function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState(null)
@@ -1084,7 +1084,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>
-              {view === "departments" ? `${departments.length} Departments` : `${filtered.length} ${view === "employees" ? "Employees" : "Contractors"}`}
+              {filteredBusinessUnit ? `${filteredBusinessUnit} - ` : ""}{view === "departments" ? `${departments.length} Departments` : `${filtered.length} ${view === "employees" ? "Employees" : "Contractors"}`}
             </h1>
             <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
           </div>
@@ -1093,6 +1093,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            {filteredBusinessUnit && (
+              <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredBusinessUnit}
+              </HoverBtn>
+            )}
             <div style={{ width: 1, height: 16, background: t.border, margin: "0 6px" }}/>
             {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
               <HoverBtn key={v} onClick={() => { setView(v); setSelectedPerson(null) }} style={s.pillBtn(view === v)}>
@@ -1567,7 +1572,7 @@ function Clients({ roles }) {
   )
 }
 
-function BusinessUnits({ roles, onProjectsClick }) {
+function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
   const [tab, setTab] = useState("active")
   const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
   const [selectedUnit, setSelectedUnit] = useState(null)
@@ -1600,7 +1605,7 @@ function BusinessUnits({ roles, onProjectsClick }) {
                   <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
                     <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
+                  <span onClick={() => onEmployeesClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.employees}</span>
                   <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
                 </HoverRow>
@@ -1952,6 +1957,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
+  const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
 
   const deptPeopleCounts = {}
   people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -1962,11 +1968,11 @@ export default function App() {
 
   function renderMain() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
-    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts}/>
+    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
-    if (activeItem === "Business units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }}/>
+    if (activeItem === "Business units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
