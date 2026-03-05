@@ -299,7 +299,27 @@ const CLIENTS_FULL = [
   ]},
 ]
 
-// ── Nav data ──
+const BUSINESS_UNITS_FULL = [
+  { name: "North America Division", employees: 145, projects: 8, departments: [
+    { title: "Budget Allocation", budget: 450000, spent: 285000, currency: "USD", linkedRoles: [{roleId:0,allocation:15},{roleId:1,allocation:12},{roleId:2,allocation:25},{roleId:3,allocation:10},{roleId:4,allocation:8},{roleId:5,allocation:5}] },
+    { title: "Q1 Planning", budget: 200000, spent: 85000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:18},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "EMEA Division", employees: 98, projects: 12, departments: [
+    { title: "Budget Allocation", budget: 380000, spent: 220000, currency: "EUR", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+    { title: "Workforce Planning", budget: 150000, spent: 65000, currency: "EUR", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:6},{roleId:2,allocation:14},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
+  ]},
+  { name: "APAC Division", employees: 112, projects: 10, departments: [
+    { title: "Budget Allocation", budget: 420000, spent: 195000, currency: "AUD", linkedRoles: [{roleId:0,allocation:14},{roleId:1,allocation:11},{roleId:2,allocation:22},{roleId:3,allocation:9},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Product Division", employees: 156, projects: 15, departments: [
+    { title: "Budget Allocation", budget: 520000, spent: 340000, currency: "USD", linkedRoles: [{roleId:0,allocation:18},{roleId:1,allocation:14},{roleId:2,allocation:28},{roleId:3,allocation:12},{roleId:4,allocation:10},{roleId:5,allocation:6}] },
+    { title: "Innovation Fund", budget: 250000, spent: 120000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Operations Division", employees: 78, projects: 6, departments: [
+    { title: "Budget Allocation", budget: 280000, spent: 150000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:7},{roleId:2,allocation:14},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+]
+
 const globalSidebarItems = [
   { name: "Dashboard", icon: <Gauge size={16} strokeWidth={1}/> },
   { name: "Report", icon: <BarChart3 size={16} strokeWidth={1}/> },
@@ -322,6 +342,7 @@ const dataHubItems = [
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
+  { name: "Business units", icon: <Building2 size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
@@ -1403,6 +1424,81 @@ function Clients({ roles }) {
   )
 }
 
+function BusinessUnits({ roles }) {
+  const [tab, setTab] = useState("active")
+  const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
+  const [selectedUnit, setSelectedUnit] = useState(null)
+  const [selectedDept, setSelectedDept] = useState(null)
+  function updateUnit(idx, updated) { setUnits(prev => prev.map((u,i) => i===idx ? updated : u)) }
+  const unit = selectedUnit !== null ? units[selectedUnit] : null
+
+  return (
+    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
+      <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
+        {unit === null ? (
+          <>
+            <SectionHeader count={units.length} label="Business units" onAdd={() => {}}/>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
+              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All regions<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
+              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+              <Tabs active={tab} onChange={setTab} tabs={[{label:`${units.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                {["Business Unit","Employees","Projects","Departments"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+              </div>
+              {(tab==="archived"?[]:units).map((u,i) => (
+                <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setSelectedDept(null) }}
+                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                  <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
+                    <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
+                  </span>
+                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
+                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.projects}</span>
+                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
+                </HoverRow>
+              ))}
+              {tab==="archived" && <div style={{ display:"flex", justifyContent:"center", padding:"64px 0" }}><p style={{ fontSize:13, color:t.mutedFg }}>No archived business units</p></div>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                <HoverBtn onClick={() => { setSelectedUnit(null); setSelectedDept(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
+                  <ChevronLeft size={18} strokeWidth={1.5}/>
+                </HoverBtn>
+                <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{unit.name}</h1>
+              </div>
+              <button style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <Tabs active={tab} onChange={setTab} tabs={[{label:`${unit.departments.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                {["Department","Budget","Spent","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+              </div>
+              {unit.departments.map((dept, i) => (
+                <HoverRow key={i} selected={selectedDept===i} onClick={() => setSelectedDept(i)}
+                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                  <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{dept.title}</span>
+                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.budget.toLocaleString()}</span>
+                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.spent.toLocaleString()}</span>
+                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{dept.linkedRoles.length}</span>
+                </HoverRow>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ActivityLog() {
   const [sourceFilter, setSourceFilter] = useState("all")
   const [filterOpen, setFilterOpen] = useState(false)
@@ -1700,6 +1796,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
+    if (activeItem === "Business units") return <BusinessUnits roles={roles}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
