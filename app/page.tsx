@@ -404,8 +404,6 @@ function getBusinessUnitProjects() {
   return allProjects
 }
 
-const BUSINESS_UNIT_PROJECTS = getBusinessUnitProjects()
-
 const globalSidebarItems = [
   { name: "Dashboard", icon: <Gauge size={16} strokeWidth={1}/> },
   { name: "Report", icon: <BarChart3 size={16} strokeWidth={1}/> },
@@ -1288,11 +1286,11 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
               </span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>{p.code}</span>
               {visibleItems.has("Clients") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", fontSize: 12, fontWeight: 500, color: t.fg, background: t.muted, padding: "4px 10px", borderRadius: 12, cursor: "pointer", border: `1px solid ${t.border}` }}>{clients[p.clientId]?.name}</span>
               )}
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", fontSize: 12, fontWeight: 500, color: t.fg, background: t.muted, padding: "4px 10px", borderRadius: 12, cursor: "pointer", border: `1px solid ${t.border}` }}>{p.office}</span>
               {visibleItems.has("Business units") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.unit || "—"}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", fontSize: 12, fontWeight: 500, color: t.fg, background: t.muted, padding: "4px 10px", borderRadius: 12, cursor: "pointer", border: `1px solid ${t.border}` }}>{p.unit || "—"}</span>
               )}
               <span style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
@@ -1608,7 +1606,7 @@ function BusinessUnits({ roles, onProjectsClick }) {
                     <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
-                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:"#0066cc", cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
+                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:500, color:t.fg, background:t.muted, padding:"4px 10px", borderRadius:12, cursor:"pointer", border:`1px solid ${t.border}`, transition:"all 0.2s" }} onMouseOver={(e) => e.target.style.background = t.accent} onMouseOut={(e) => e.target.style.background = t.muted}>{u.projectsList?.length || 0}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
                 </HoverRow>
               ))}
