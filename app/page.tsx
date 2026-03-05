@@ -232,36 +232,7 @@ const INITIAL_PROJECTS = [
   { name: "Dashboard Dev", code: "DASH-001", clientId: 2, stage: "active", margin: 28, budget: 60000, startDate: "2026-01-20", endDate: "2026-06-30", ownerId: 3, office: "London" },
 ]
 
-function getBusinessUnitProjects() {
-  const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
-  const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
-  let projectId = 0
-  const allProjects = []
-  
-  BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
-    if (unit.projectsList) {
-      unit.projectsList.forEach((proj, idx) => {
-        allProjects.push({
-          name: proj.title,
-          code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
-          clientId: 0,
-          stage: stageMap[proj.status] || "planning",
-          margin: Math.floor(Math.random() * 15) + 20,
-          budget: proj.budget,
-          startDate: "2026-01-15",
-          endDate: "2026-12-31",
-          ownerId: Math.floor(Math.random() * 6),
-          office: offices[Math.floor(Math.random() * offices.length)],
-          unit: unit.name
-        })
-      })
-    }
-  })
-  return allProjects
-}
-
-const BUSINESS_UNIT_PROJECTS = getBusinessUnitProjects()
-const ENHANCED_INITIAL_PROJECTS = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
+const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
 const CURRENCIES = ["USD","AUD","GBP","EUR","CAD","NZD","SGD","JPY"]
@@ -405,6 +376,36 @@ const BUSINESS_UNITS_FULL = [
     { title: "Brand Strategy", budget: 330000, spent: 175000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:17},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
   ]},
 ]
+
+function getBusinessUnitProjects() {
+  const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
+  const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
+  const allProjects = []
+  
+  BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
+    if (unit.projectsList) {
+      unit.projectsList.forEach((proj, idx) => {
+        allProjects.push({
+          name: proj.title,
+          code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
+          clientId: 0,
+          stage: stageMap[proj.status] || "planning",
+          margin: Math.floor(Math.random() * 15) + 20,
+          budget: proj.budget,
+          startDate: "2026-01-15",
+          endDate: "2026-12-31",
+          ownerId: Math.floor(Math.random() * 6),
+          office: offices[Math.floor(Math.random() * offices.length)],
+          unit: unit.name
+        })
+      })
+    }
+  })
+  return allProjects
+}
+
+const BUSINESS_UNIT_PROJECTS = getBusinessUnitProjects()
+const ENHANCED_INITIAL_PROJECTS = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
 
 const globalSidebarItems = [
   { name: "Dashboard", icon: <Gauge size={16} strokeWidth={1}/> },
