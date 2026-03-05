@@ -1606,7 +1606,7 @@ function BusinessUnits({ roles, onProjectsClick }) {
                     <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.employees}</span>
-                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:"#0066cc", cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
+                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
                 </HoverRow>
               ))}
