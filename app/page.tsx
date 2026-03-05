@@ -5,7 +5,7 @@ import {
   ChevronDown, LayoutGrid, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical
 } from "lucide-react"
 
 const getGlobalStyles = (theme) => `
@@ -34,9 +34,9 @@ const darkTheme = {
 const lightTheme = {
   bg: "#ffffff", fg: "#1a1a1a", card: "#ffffff", popover: "#f5f5f5",
   primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
-  secondaryFg: "#333333", muted: "#f0f0f0", mutedFg: "#555555",
+  secondaryFg: "#1a1a1a", muted: "#f0f0f0", mutedFg: "#333333",
   accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
-  sidebar: "#ffffff", sidebarFg: "#333333", sidebarBorder: "#f0f0f0",
+  sidebar: "#ffffff", sidebarFg: "#1a1a1a", sidebarBorder: "#f0f0f0",
   fgAlpha30: "rgba(26,26,26,0.3)", fgAlpha10: "rgba(26,26,26,0.1)", 
   fgAlpha06: "rgba(26,26,26,0.06)", fgAlpha03: "rgba(26,26,26,0.03)", 
   fgAlpha20: "rgba(26,26,26,0.2)", fgAlpha70: "rgba(26,26,26,0.7)",
@@ -225,12 +225,8 @@ const INITIAL_CONTRACTORS = [
   { name: "Luke Skywalker", roleId: 1, departmentId: 2, office: "Sydney" },
   { name: "Han Solo", roleId: 3, departmentId: 1, office: "Melbourne" },
 ]
-const INITIAL_PROJECTS = [
-  { name: "Website Redesign", code: "WEB-001", clientId: 0, stage: "active", margin: 25, budget: 50000, startDate: "2026-01-15", endDate: "2026-04-30", ownerId: 0, office: "Sydney" },
-  { name: "Mobile App", code: "APP-001", clientId: 1, stage: "planning", margin: 30, budget: 75000, startDate: "2026-02-01", endDate: "2026-08-31", ownerId: 1, office: "Melbourne" },
-  { name: "Brand Identity", code: "BRD-001", clientId: 0, stage: "completed", margin: 35, budget: 25000, startDate: "2025-10-01", endDate: "2025-12-15", ownerId: 2, office: "New York" },
-  { name: "Dashboard Dev", code: "DASH-001", clientId: 2, stage: "active", margin: 28, budget: 60000, startDate: "2026-01-20", endDate: "2026-06-30", ownerId: 3, office: "London" },
-]
+const INITIAL_PROJECTS = []
+
 const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
@@ -299,7 +295,110 @@ const CLIENTS_FULL = [
   ]},
 ]
 
-// ── Nav data ──
+const BUSINESS_UNITS_FULL = [
+  { name: "Airmax", employees: 145, projects: 3, projectsList: [
+    { title: "Airmax 90 Retro Redux", status: "Active", team: 12, budget: 285000 },
+    { title: "Airmax Summer Collection", status: "Active", team: 8, budget: 165000 },
+    { title: "Airmax Sustainability Initiative", status: "Planning", team: 5, budget: 95000 },
+  ], departments: [
+    { title: "Marketing Campaign", budget: 450000, spent: 285000, currency: "USD", linkedRoles: [{roleId:0,allocation:15},{roleId:1,allocation:12},{roleId:2,allocation:25},{roleId:3,allocation:10},{roleId:4,allocation:8},{roleId:5,allocation:5}] },
+    { title: "Product Launch", budget: 200000, spent: 85000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:18},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "LeBron", employees: 98, projects: 4, projectsList: [
+    { title: "LeBron XX Performance Testing", status: "Active", team: 15, budget: 340000 },
+    { title: "LeBron Signature Lifestyle Line", status: "Active", team: 10, budget: 220000 },
+    { title: "LeBron Global Tour Campaign", status: "In Progress", team: 8, budget: 155000 },
+    { title: "LeBron Kids Collection", status: "Planning", team: 6, budget: 85000 },
+  ], departments: [
+    { title: "Design Development", budget: 380000, spent: 220000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+    { title: "Athlete Relations", budget: 150000, spent: 65000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:6},{roleId:2,allocation:14},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
+  ]},
+  { name: "Jordan", employees: 112, projects: 3, projectsList: [
+    { title: "Air Jordan 39 Release", status: "Active", team: 18, budget: 425000 },
+    { title: "Jordan Heritage Museum Digital", status: "Active", team: 7, budget: 145000 },
+    { title: "Jordan Women's Expansion", status: "Planning", team: 9, budget: 195000 },
+  ], departments: [
+    { title: "Heritage Marketing", budget: 420000, spent: 195000, currency: "USD", linkedRoles: [{roleId:0,allocation:14},{roleId:1,allocation:11},{roleId:2,allocation:22},{roleId:3,allocation:9},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Nike Runnings", employees: 156, projects: 5, projectsList: [
+    { title: "Vaporfly Elite Development", status: "Active", team: 20, budget: 580000 },
+    { title: "NextGen Running App", status: "Active", team: 14, budget: 320000 },
+    { title: "Marathon Training Series", status: "In Progress", team: 11, budget: 240000 },
+    { title: "Trail Running Expansion", status: "Active", team: 9, budget: 185000 },
+    { title: "Running Analytics Platform", status: "Planning", team: 8, budget: 165000 },
+  ], departments: [
+    { title: "Performance Research", budget: 520000, spent: 340000, currency: "USD", linkedRoles: [{roleId:0,allocation:18},{roleId:1,allocation:14},{roleId:2,allocation:28},{roleId:3,allocation:12},{roleId:4,allocation:10},{roleId:5,allocation:6}] },
+    { title: "Technology Innovation", budget: 250000, spent: 120000, currency: "USD", linkedRoles: [{roleId:0,allocation:12},{roleId:1,allocation:10},{roleId:2,allocation:20},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Nike Football", employees: 78, projects: 3, projectsList: [
+    { title: "Phantom GX Elite Campaign", status: "Active", team: 13, budget: 295000 },
+    { title: "Football Academy Sponsorship", status: "Active", team: 7, budget: 125000 },
+    { title: "Women's Football Growth", status: "Planning", team: 9, budget: 185000 },
+  ], departments: [
+    { title: "Team Partnerships", budget: 280000, spent: 150000, currency: "USD", linkedRoles: [{roleId:0,allocation:8},{roleId:1,allocation:7},{roleId:2,allocation:14},{roleId:3,allocation:6},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "Nike Sportswear", employees: 134, projects: 4, projectsList: [
+    { title: "Essentials Collection Redesign", status: "Active", team: 12, budget: 275000 },
+    { title: "Sustainability Material Research", status: "In Progress", team: 8, budget: 165000 },
+    { title: "Urban Lifestyle Campaign", status: "Active", team: 10, budget: 225000 },
+    { title: "Vintage Revival Series", status: "Planning", team: 6, budget: 95000 },
+  ], departments: [
+    { title: "Lifestyle Marketing", budget: 395000, spent: 210000, currency: "USD", linkedRoles: [{roleId:0,allocation:13},{roleId:1,allocation:9},{roleId:2,allocation:21},{roleId:3,allocation:8},{roleId:4,allocation:7},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Nike Training", employees: 89, projects: 3, projectsList: [
+    { title: "Metcon Innovation Program", status: "Active", team: 11, budget: 245000 },
+    { title: "Fitness App Integration", status: "In Progress", team: 9, budget: 185000 },
+    { title: "Training Equipment Redesign", status: "Planning", team: 7, budget: 135000 },
+  ], departments: [
+    { title: "Fitness Program", budget: 310000, spent: 160000, currency: "USD", linkedRoles: [{roleId:0,allocation:9},{roleId:1,allocation:8},{roleId:2,allocation:16},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+  { name: "Nike SB", employees: 67, projects: 2, projectsList: [
+    { title: "SB Dunk Premium Series", status: "Active", team: 8, budget: 165000 },
+    { title: "Skate Park Partnership Network", status: "Active", team: 5, budget: 95000 },
+  ], departments: [
+    { title: "Skate Culture", budget: 240000, spent: 130000, currency: "USD", linkedRoles: [{roleId:0,allocation:7},{roleId:1,allocation:6},{roleId:2,allocation:12},{roleId:3,allocation:5},{roleId:4,allocation:4},{roleId:5,allocation:2}] },
+  ]},
+  { name: "Zoom Air", employees: 103, projects: 2, projectsList: [
+    { title: "Zoom Air Cushioning Tech Gen 4", status: "Active", team: 14, budget: 325000 },
+    { title: "Cross-Sport Zoom Integration", status: "Planning", team: 8, budget: 175000 },
+  ], departments: [
+    { title: "Technology Development", budget: 360000, spent: 190000, currency: "USD", linkedRoles: [{roleId:0,allocation:11},{roleId:1,allocation:9},{roleId:2,allocation:19},{roleId:3,allocation:8},{roleId:4,allocation:6},{roleId:5,allocation:4}] },
+  ]},
+  { name: "Converse", employees: 91, projects: 2, projectsList: [
+    { title: "Chuck Taylor All Star 2050", status: "Active", team: 10, budget: 245000 },
+    { title: "Converse Collaboration Series", status: "In Progress", team: 7, budget: 155000 },
+  ], departments: [
+    { title: "Brand Strategy", budget: 330000, spent: 175000, currency: "USD", linkedRoles: [{roleId:0,allocation:10},{roleId:1,allocation:8},{roleId:2,allocation:17},{roleId:3,allocation:7},{roleId:4,allocation:5},{roleId:5,allocation:3}] },
+  ]},
+]
+
+function getBusinessUnitProjects() {
+  const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
+  const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
+  const allProjects = []
+  
+  BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
+    if (unit.projectsList) {
+      unit.projectsList.forEach((proj, idx) => {
+        allProjects.push({
+          name: proj.title,
+          code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
+          clientId: 0,
+          stage: stageMap[proj.status] || "planning",
+          margin: Math.floor(Math.random() * 15) + 20,
+          budget: proj.budget,
+          startDate: "2026-01-15",
+          endDate: "2026-12-31",
+          ownerId: Math.floor(Math.random() * 6),
+          office: offices[Math.floor(Math.random() * offices.length)],
+          unit: unit.name
+        })
+      })
+    }
+  })
+  return allProjects
+}
+
 const globalSidebarItems = [
   { name: "Dashboard", icon: <Gauge size={16} strokeWidth={1}/> },
   { name: "Report", icon: <BarChart3 size={16} strokeWidth={1}/> },
@@ -322,6 +421,7 @@ const dataHubItems = [
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
+  { name: "Business units", icon: <Building2 size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
@@ -665,11 +765,26 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange }) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange }) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
+  const [dataHubHover, setDataHubHover] = useState(false)
+  const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
+  const dataHubSettingsRef = useRef(null)
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dataHubSettingsRef.current && !dataHubSettingsRef.current.contains(event.target)) {
+        setDataHubSettingsOpen(false)
+      }
+    }
+    if (dataHubSettingsOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [dataHubSettingsOpen])
 
   function setActive(name, bc) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
   function toggleLoc(i) {
@@ -769,18 +884,43 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           ))
         )}
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 16 }} onMouseEnter={() => setDataHubHover(true)} onMouseLeave={() => setDataHubHover(false)}>
           <HoverBtn onClick={() => setDataHubExp(!dataHubExp)}
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "rgba(237,237,237,0.7)" }}><Database size={16} strokeWidth={1}/></span>
+              <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
               <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
-            <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              {dataHubHover && (
+                <div onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg, cursor: "pointer" }}>
+                  <MoreVertical size={14} strokeWidth={2}/>
+                </div>
+              )}
+              <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+            </div>
           </HoverBtn>
+          {dataHubSettingsOpen && (
+            <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
+              <div style={{ padding: "8px" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
+                {dataHubItems.map(item => (
+                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                    <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
+                      const newSet = new Set(visibleDataHubItems)
+                      if (e.target.checked) newSet.add(item.name)
+                      else newSet.delete(item.name)
+                      onVisibleDataHubItemsChange(newSet)
+                    }} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                    {item.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           <Collapsible expanded={dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
-              {dataHubItems.map(item => (
+              {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 16 }}>
                   {item.icon}{item.name}
@@ -916,7 +1056,7 @@ function RolesAndRates({ roles, onRolesChange }) {
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts }) {
+function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState(null)
@@ -944,7 +1084,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>
-              {view === "departments" ? `${departments.length} Departments` : `${filtered.length} ${view === "employees" ? "Employees" : "Contractors"}`}
+              {filteredBusinessUnit ? `${filteredBusinessUnit} - ` : ""}{view === "departments" ? `${departments.length} Departments` : `${filtered.length} ${view === "employees" ? "Employees" : "Contractors"}`}
             </h1>
             <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
           </div>
@@ -953,6 +1093,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            {filteredBusinessUnit && (
+              <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredBusinessUnit}
+              </HoverBtn>
+            )}
             <div style={{ width: 1, height: 16, background: t.border, margin: "0 6px" }}/>
             {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
               <HoverBtn key={v} onClick={() => { setView(v); setSelectedPerson(null) }} style={s.pillBtn(view === v)}>
@@ -1089,20 +1234,38 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   )
 }
 
-function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
+function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients, filteredBusinessUnit, onFilterClear }) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const isAll = selectedOffices.length === ALL_OFFICES.length
-  const filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
+  let filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
+  if (filteredBusinessUnit) filtered = filtered.filter(p => p.unit === filteredBusinessUnit)
   const display = tab === "archived" ? [] : filtered
+
+  const columns = []
+  columns.push({ label: "Project", flex: "2fr", key: "name" })
+  columns.push({ label: "Code", flex: "1fr", key: "code" })
+  if (visibleItems.has("Clients")) columns.push({ label: "Client", flex: "1fr", key: "client" })
+  columns.push({ label: "Office", flex: "1fr", key: "office" })
+  if (visibleItems.has("Business units")) columns.push({ label: "Business Unit", flex: "1fr", key: "unit" })
+  columns.push({ label: "Owner", flex: "1fr", key: "owner" })
+  
+  const gridCols = columns.map(c => c.flex).join(" ")
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
-        <SectionHeader count={filtered.length} label="Projects" onAdd={() => {}}/>
+        <SectionHeader count={filtered.length} label={filteredBusinessUnit ? `Projects - ${filteredBusinessUnit}` : "Projects"} onAdd={() => {}}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
-          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            {filteredBusinessUnit && (
+              <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredBusinessUnit}
+              </HoverBtn>
+            )}
+          </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
@@ -1110,20 +1273,25 @@ function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
           <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-            {["Project","Code","Client","Office","Owner"].map(h => (
-              <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>
+          <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
+            {columns.map(col => (
+              <span key={col.key} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{col.label}</span>
             ))}
           </div>
           {display.map((p, idx) => (
             <HoverRow key={idx} selected={selectedIdx === projects.indexOf(p)} onClick={() => setSelectedIdx(projects.indexOf(p))}
-              style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
+              style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
                 <InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
               </span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>{p.code}</span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+              {visibleItems.has("Clients") && (
+                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+              )}
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
+              {visibleItems.has("Business units") && (
+                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.unit || "—"}</span>
+              )}
               <span style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
                   {people[p.ownerId]?.name.charAt(0) || "?"}
@@ -1135,11 +1303,12 @@ function ProjectsDataHub({ projects, onProjectsChange, people, clients }) {
         </div>
       </div>
       {selectedIdx !== null && projects[selectedIdx] && (
-        <Sheet title={projects[selectedIdx].name} subtitle={`${clients[projects[selectedIdx].clientId]?.name} · ${projects[selectedIdx].office}`} onClose={() => setSelectedIdx(null)}>
+        <Sheet title={projects[selectedIdx].name} subtitle={visibleItems.has("Clients") ? `${clients[projects[selectedIdx].clientId]?.name} · ${projects[selectedIdx].office}` : projects[selectedIdx].office} onClose={() => setSelectedIdx(null)}>
           <DetailGrid items={[
             { label: "Code", value: projects[selectedIdx].code },
-            { label: "Client", value: clients[projects[selectedIdx].clientId]?.name },
+            ...(visibleItems.has("Clients") ? [{ label: "Client", value: clients[projects[selectedIdx].clientId]?.name }] : []),
             { label: "Office", value: projects[selectedIdx].office },
+            ...(visibleItems.has("Business units") ? [{ label: "Business Unit", value: projects[selectedIdx].unit || "—" }] : []),
             { label: "Owner", value: people[projects[selectedIdx].ownerId]?.name },
             { label: "Stage", value: projects[selectedIdx].stage },
             { label: "Budget", value: `$${projects[selectedIdx].budget.toLocaleString()}` },
@@ -1399,6 +1568,104 @@ function Clients({ roles }) {
       {client !== null && selectedRC !== null && (
         <RateCardSheet client={client} clientIdx={selectedClient} rcIdx={selectedRC} roles={roles} onUpdateClients={updateClient} onClose={() => setSelectedRC(null)}/>
       )}
+    </div>
+  )
+}
+
+function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
+  const [tab, setTab] = useState("active")
+  const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
+  const [selectedUnit, setSelectedUnit] = useState(null)
+  const [viewTab, setViewTab] = useState("departments")
+  const [selectedDept, setSelectedDept] = useState(null)
+  function updateUnit(idx, updated) { setUnits(prev => prev.map((u,i) => i===idx ? updated : u)) }
+  const unit = selectedUnit !== null ? units[selectedUnit] : null
+
+  return (
+    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
+      <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
+        {unit === null ? (
+          <>
+            <SectionHeader count={units.length} label="Business units" onAdd={() => {}}/>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
+              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All regions<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
+              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+              <Tabs active={tab} onChange={setTab} tabs={[{label:`${units.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                {["Business Unit","Employees","Projects","Departments"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+              </div>
+              {(tab==="archived"?[]:units).map((u,i) => (
+                <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setViewTab("departments"); setSelectedDept(null) }}
+                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                  <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
+                    <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
+                  </span>
+                  <span onClick={() => onEmployeesClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.employees}</span>
+                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
+                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
+                </HoverRow>
+              ))}
+              {tab==="archived" && <div style={{ display:"flex", justifyContent:"center", padding:"64px 0" }}><p style={{ fontSize:13, color:t.mutedFg }}>No archived business units</p></div>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                <HoverBtn onClick={() => { setSelectedUnit(null); setSelectedDept(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
+                  <ChevronLeft size={18} strokeWidth={1.5}/>
+                </HoverBtn>
+                <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{unit.name}</h1>
+              </div>
+              <button style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <Tabs active={viewTab} onChange={setViewTab} tabs={[
+                {label:`${unit.projectsList?.length || 0} Projects`,value:"projects"},
+                {label:`${unit.departments.length} Departments`,value:"departments"}
+              ]}/>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
+              {viewTab === "projects" ? (
+                <>
+                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                    {["Project","Team Size","Budget","Status"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+                  </div>
+                  {unit.projectsList?.map((proj, i) => (
+                    <HoverRow key={i} selected={false}
+                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{proj.title}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{proj.team}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${proj.budget.toLocaleString()}</span>
+                      <span style={{ fontSize:12, display:"flex", alignItems:"center", padding:"4px 8px", borderRadius:4, background: proj.status === "Active" ? "#d4edda" : proj.status === "In Progress" ? "#fff3cd" : "#e7e7e7", color: proj.status === "Active" ? "#155724" : proj.status === "In Progress" ? "#856404" : "#666" }}>{proj.status}</span>
+                    </HoverRow>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
+                    {["Department","Budget","Spent","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
+                  </div>
+                  {unit.departments.map((dept, i) => (
+                    <HoverRow key={i} selected={selectedDept===i} onClick={() => setSelectedDept(i)}
+                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
+                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{dept.title}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.budget.toLocaleString()}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.spent.toLocaleString()}</span>
+                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{dept.linkedRoles.length}</span>
+                    </HoverRow>
+                  ))}
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
@@ -1683,9 +1950,14 @@ export default function App() {
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
-  const [projects, setProjects] = useState(INITIAL_PROJECTS)
+  const businessUnitProjects = getBusinessUnitProjects()
+  const enhancedProjects = [...INITIAL_PROJECTS, ...businessUnitProjects]
+  const [projects, setProjects] = useState(enhancedProjects)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
+  const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
+  const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
 
   const deptPeopleCounts = {}
   people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -1696,10 +1968,11 @@ export default function App() {
 
   function renderMain() {
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
-    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts}/>
+    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
-    if (activeItem === "Projects") return <ProjectsDataHub projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
+    if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
+    if (activeItem === "Business units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
@@ -1712,7 +1985,7 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode}/>
+      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems}/>
       <main style={{ ...s.main, position:"relative" }}>
         <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px", background:t.card, color:t.fg }}>
           {breadcrumb.map((seg, i) => (
