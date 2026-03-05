@@ -231,7 +231,37 @@ const INITIAL_PROJECTS = [
   { name: "Brand Identity", code: "BRD-001", clientId: 0, stage: "completed", margin: 35, budget: 25000, startDate: "2025-10-01", endDate: "2025-12-15", ownerId: 2, office: "New York" },
   { name: "Dashboard Dev", code: "DASH-001", clientId: 2, stage: "active", margin: 28, budget: 60000, startDate: "2026-01-20", endDate: "2026-06-30", ownerId: 3, office: "London" },
 ]
-const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
+
+function getBusinessUnitProjects() {
+  const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
+  const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
+  let projectId = 0
+  const allProjects = []
+  
+  BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
+    if (unit.projectsList) {
+      unit.projectsList.forEach((proj, idx) => {
+        allProjects.push({
+          name: proj.title,
+          code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
+          clientId: 0,
+          stage: stageMap[proj.status] || "planning",
+          margin: Math.floor(Math.random() * 15) + 20,
+          budget: proj.budget,
+          startDate: "2026-01-15",
+          endDate: "2026-12-31",
+          ownerId: Math.floor(Math.random() * 6),
+          office: offices[Math.floor(Math.random() * offices.length)],
+          unit: unit.name
+        })
+      })
+    }
+  })
+  return allProjects
+}
+
+const BUSINESS_UNIT_PROJECTS = getBusinessUnitProjects()
+const ENHANCED_INITIAL_PROJECTS = [...INITIAL_PROJECTS, ...BUSINESS_UNIT_PROJECTS]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
 const CURRENCIES = ["USD","AUD","GBP","EUR","CAD","NZD","SGD","JPY"]
@@ -1899,7 +1929,7 @@ export default function App() {
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
-  const [projects, setProjects] = useState(INITIAL_PROJECTS)
+  const [projects, setProjects] = useState(ENHANCED_INITIAL_PROJECTS)
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
 
