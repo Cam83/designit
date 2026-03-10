@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect, useMemo } from "react"
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, cloneElement } from "react"
 import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 
@@ -54,7 +54,7 @@ const getStyles = (theme: any) => ({
   primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
   pillBtn: (active: any) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? theme.fgAlpha30 : theme.border}`, background: active ? theme.fgAlpha10 : theme.bg, color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
   outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 8, border: `1px solid ${theme.border}`, background: "transparent", color: theme.secondaryFg, cursor: "pointer", fontSize: 12 },
-  dropdown: { position: "absolute" as const, top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
+  dropdown: { position: "absolute" as const, top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 200, minWidth: 180 },
   dropdownItem: (active: any) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" as const }),
 })
 
@@ -66,6 +66,21 @@ function HoverRow({ selected, children, onClick, style }: any) {
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{ ...style, background: selected ? t.fgAlpha06 : hov ? t.fgAlpha03 : "transparent" }}>
       {children}
+    </div>
+  )
+}
+
+function RowCheckbox({ checked, indeterminate, onClick }: any) {
+  return (
+    <div
+      onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClick?.() }}
+      style={{ width: 12, height: 12, border: `1px solid ${checked || indeterminate ? t.primary : t.fgAlpha30}`, borderRadius: 3, background: checked ? t.primary : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "border-color 0.1s, background 0.1s" }}>
+      {checked && (
+        <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+          <path d="M1 3L3 5L7 1" stroke={t.primaryFg} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {indeterminate && !checked && <div style={{ width: 6, height: 1, background: t.primary, borderRadius: 1 }}/>}
     </div>
   )
 }
@@ -99,6 +114,7 @@ function DataTableRow({ selected, onClick, template, children }: any) {
 }
 
 function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, emptyNode }: any) {
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const table = useReactTable({
     data,
     columns,
@@ -107,10 +123,20 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
     defaultColumn: { minSize: 60 },
   })
   const hg = table.getHeaderGroups()[0]
-  const gridTemplate = hg?.headers.map((h: any) => `${h.getSize()}px`).join(" ") ?? ""
+  const rows = table.getRowModel().rows
+  const allSelected = rows.length > 0 && rows.every((_: any, i: number) => selectedRows.has(i))
+  const someSelected = !allSelected && rows.some((_: any, i: number) => selectedRows.has(i))
+  const toggleRow = (idx: number) => setSelectedRows(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n })
+  const toggleAll = () => setSelectedRows(allSelected ? new Set() : new Set(rows.map((_: any, i: number) => i)))
+  const cbCol = "24px"
+  const dataTemplate = hg?.headers.map((h: any) => `${h.getSize()}px`).join(" ") ?? ""
+  const gridTemplate = `${cbCol} ${dataTemplate}`
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
       <div style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
+        </div>
         {hg?.headers.map((header: any) => (
           <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center" }}>
             {flexRender(header.column.columnDef.header, header.getContext())}
@@ -118,12 +144,15 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
           </div>
         ))}
       </div>
-      {table.getRowModel().rows.map((row: any) => (
+      {rows.map((row: any, idx: number) => (
         <DataTableRow
           key={row.id}
-          selected={isRowSelected?.(row.original, row.index)}
+          selected={isRowSelected?.(row.original, row.index) || selectedRows.has(idx)}
           onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
           template={gridTemplate}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
+          </div>
           {row.getVisibleCells().map((cell: any) => (
             <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", overflow: "hidden" }}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -131,7 +160,7 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
           ))}
         </DataTableRow>
       ))}
-      {emptyNode && table.getRowModel().rows.length === 0 && emptyNode}
+      {emptyNode && rows.length === 0 && emptyNode}
     </div>
   )
 }
@@ -148,14 +177,37 @@ function HoverBtn({ style, children, onClick, title, disabled }: any) {
 }
 
 function DropdownWrapper({ trigger, children, open, setOpen }: any) {
-  const ref = useRef<HTMLDivElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const dropRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{top:number,left:number}|null>(null)
+  useLayoutEffect(() => {
+    if (!open) { setPos(null); return }
+    if (wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect()
+      const spaceBelow = window.innerHeight - r.bottom
+      const openAbove = spaceBelow < 200
+      setPos({ top: openAbove ? r.top - 4 : r.bottom + 4, left: r.left, transform: openAbove ? "translateY(-100%)" : undefined })
+    }
+  }, [open])
   useEffect(() => {
     if (!open) return
-    function h(e: any) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    function h(e: any) {
+      if (wrapRef.current?.contains(e.target)) return
+      if (dropRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
     document.addEventListener("mousedown", h)
     return () => document.removeEventListener("mousedown", h)
   }, [open, setOpen])
-  return <div ref={ref} style={{ position: "relative" }}>{trigger}{open && children}</div>
+  return (
+    <div ref={wrapRef} style={{ position: "relative" }}>
+      {trigger}
+      {open && pos && cloneElement(children as any, {
+        ref: dropRef,
+        style: { ...(children as any).props.style, position: "fixed", top: pos.top, bottom: "auto", left: pos.left, right: "auto", marginTop: 0, marginBottom: 0, transform: (pos as any).transform }
+      })}
+    </div>
+  )
 }
 
 function InlineEdit({ value, onChange, style }: any) {
@@ -173,11 +225,11 @@ function InlineEdit({ value, onChange, style }: any) {
   if (editing) return (
     <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commit}
       onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false) } }}
-      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 8, padding: "2px 8px", outline: "none", fontFamily: "inherit", ...style }} />
+      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 8, padding: "2px 8px 2px 0", outline: "none", fontFamily: "inherit", ...style }} />
   )
   return (
     <button onClick={() => { setDraft(value); setEditing(true) }}
-      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
+      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px 2px 0", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
       {value}
     </button>
   )
@@ -528,7 +580,8 @@ const dataHubItems = [
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
-  { name: "Brands", icon: <Building2 size={16} strokeWidth={1}/> },
+  { name: "Rate cards", icon: <DollarSign size={16} strokeWidth={1}/> },
+  { name: "Brands", icon: <Pyramid size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
@@ -928,7 +981,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         </DropdownWrapper>
         <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer" }}>
           <Bell size={14} strokeWidth={1} color={t.mutedFg}/>
-          <span style={{ fontSize: 11, fontWeight: 500, color: t.fg }}>23</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: t.fg }}>23</span>
         </HoverBtn>
       </div>
 
@@ -1068,11 +1121,11 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
 // ── Role selectors ──
 function RoleSelector({ roleId, roles, onChange }: any) {
   const [open, setOpen] = useState(false)
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
-        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 28, padding: "0 8px", borderRadius: 6, border: `1px solid ${t.border}`, background: "transparent", color: t.fg, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={trig}>
           {roles[roleId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
         </HoverBtn>
       }>
@@ -1089,18 +1142,18 @@ function RoleSelector({ roleId, roles, onChange }: any) {
 
 function DeptSelector({ departmentId, departments, onChange }: any) {
   const [open, setOpen] = useState(false)
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
-        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }}>
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={trig}>
           {departments[departmentId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width: 200 }}>
         {departments.map((d: any, i: any) => (
           <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === departmentId)}>
-            {d.name} {i === departmentId && <Check size={13} strokeWidth={1}/>}
+            {d.name} {i === departmentId && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1498,7 +1551,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={filtered.length} label={filteredBusinessUnit ? `Projects - ${filteredBusinessUnit}` : "Projects"} onAdd={() => {}}/>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
             {filteredBusinessUnit && (
@@ -1762,7 +1815,74 @@ function Clients({ roles }: any) {
         {client === null ? (
           <>
             <SectionHeader count={clients.length} label="Clients" onAdd={() => {}}/>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
+              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+              <Tabs active={tab} onChange={setTab} tabs={[{label:`${clients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Client", size: 300, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
+                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.rateCards.length}</span> },
+                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.projects}</span> },
+              ]}
+              data={tab==="archived"?[]:clients}
+              onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
+            />
+          </>
+        ) : (
+          <>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                <HoverBtn onClick={() => { setSelectedClient(null); setSelectedRC(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
+                  <ChevronLeft size={18} strokeWidth={1}/>
+                </HoverBtn>
+                <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{client.name}</h1>
+              </div>
+              <button style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+              <Tabs active={tab} onChange={setTab} tabs={[{label:`${client.rateCards.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
+                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
+                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
+                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
+              ]}
+              data={client.rateCards}
+              onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedRC}
+            />
+          </>
+        )}
+      </div>
+      {client !== null && selectedRC !== null && (
+        <RateCardSheet client={client} clientIdx={selectedClient} rcIdx={selectedRC} roles={roles} onUpdateClients={updateClient} onClose={() => setSelectedRC(null)}/>
+      )}
+    </div>
+  )
+}
+
+function RateCards({ roles }: any) {
+  const [tab, setTab] = useState("active")
+  const [clients, setClients] = useState(CLIENTS_FULL)
+  const [selectedClient, setSelectedClient] = useState<number|null>(null)
+  const [selectedRC, setSelectedRC] = useState<number|null>(null)
+  function updateClient(idx: any, updated: any) { setClients((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
+  const client = selectedClient !== null ? clients[selectedClient] : null
+
+  return (
+    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
+      <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
+        {client === null ? (
+          <>
+            <SectionHeader count={clients.length} label="Rate cards" onAdd={() => {}}/>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
               <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
               <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
             </div>
@@ -1830,7 +1950,7 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
         {unit === null ? (
           <>
             <SectionHeader count={units.length} label="Brands" onAdd={() => {}}/>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
               <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All regions<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
               <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
             </div>
@@ -1913,7 +2033,7 @@ function ActivityLog() {
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden", background:t.bg }}>
       <SectionHeader count={filtered.length} label="Events" onAdd={() => {}}/>
-      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
+      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"0 24px 12px" }}>
         <DropdownWrapper open={filterOpen} setOpen={setFilterOpen}
           trigger={
             <HoverBtn onClick={() => setFilterOpen(!filterOpen)} style={s.pillBtn(sourceFilter!=="all")}>
@@ -2182,6 +2302,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
+    if (activeItem === "Rate cards") return <RateCards roles={roles}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
