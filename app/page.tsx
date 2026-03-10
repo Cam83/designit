@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import {
-  ChevronDown, LayoutGrid, Gauge, BarChart3, Clock, Users, Database,
+  ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical
 } from "lucide-react"
+import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 
 const getGlobalStyles = (theme: any) => `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,15 +33,15 @@ const darkTheme = {
 }
 
 const lightTheme = {
-  bg: "#ffffff", fg: "#1a1a1a", card: "#ffffff", popover: "#f5f5f5",
-  primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
-  secondaryFg: "#1a1a1a", muted: "#f0f0f0", mutedFg: "#333333",
-  accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
-  sidebar: "#F8F7F9", sidebarFg: "#1a1a1a", sidebarBorder: "#f0f0f0",
-  fgAlpha30: "rgba(26,26,26,0.3)", fgAlpha10: "rgba(26,26,26,0.1)", 
-  fgAlpha06: "rgba(26,26,26,0.06)", fgAlpha03: "rgba(26,26,26,0.03)", 
-  fgAlpha20: "rgba(26,26,26,0.2)", fgAlpha70: "rgba(26,26,26,0.7)",
-  borderAlpha25: "rgba(26,26,26,0.15)", scrollAlpha40: "rgba(180,180,180,0.4)",
+  bg: "#ffffff", fg: "#0B0C10", card: "#ffffff", popover: "#f5f5f5",
+  primary: "#0B0C10", primaryFg: "#ffffff", secondary: "#f0f0f0",
+  secondaryFg: "#0B0C10", muted: "#f0f0f0", mutedFg: "#333333",
+  accent: "#f0f0f0", accentFg: "#0B0C10", border: "#e0e0e0",
+  sidebar: "#F8F7F9", sidebarFg: "#0B0C10", sidebarBorder: "#f0f0f0",
+  fgAlpha30: "rgba(11,12,16,0.3)", fgAlpha10: "rgba(11,12,16,0.1)",
+  fgAlpha06: "rgba(11,12,16,0.06)", fgAlpha03: "rgba(11,12,16,0.03)",
+  fgAlpha20: "rgba(11,12,16,0.2)", fgAlpha70: "rgba(11,12,16,0.7)",
+  borderAlpha25: "rgba(11,12,16,0.15)", scrollAlpha40: "rgba(180,180,180,0.4)",
   scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)"
 }
 
@@ -65,6 +66,72 @@ function HoverRow({ selected, children, onClick, style }: any) {
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{ ...style, background: selected ? t.fgAlpha06 : hov ? t.fgAlpha03 : "transparent" }}>
       {children}
+    </div>
+  )
+}
+
+function ColResizeHandle({ header }: any) {
+  const [hov, setHov] = useState(false)
+  const isResizing = header.column.getIsResizing()
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => { if (!isResizing) setHov(false) }}
+      onMouseDown={header.getResizeHandler()}
+      onTouchStart={header.getResizeHandler()}
+      style={{ position: "absolute", top: 0, right: -3, width: 7, height: "100%", cursor: "col-resize", zIndex: 10, display: "flex", alignItems: "stretch", justifyContent: "center", userSelect: "none" as const }}>
+      <div style={{ width: 2, background: (hov || isResizing) ? "#3b82f6" : "transparent", borderRadius: 1 }}/>
+    </div>
+  )
+}
+
+function DataTableRow({ selected, onClick, template, children }: any) {
+  const [hov, setHov] = useState(false)
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      onClick={onClick}
+      style={{ display: "grid", gridTemplateColumns: template, borderBottom: `1px solid ${t.border}`, cursor: onClick ? "pointer" : "default", background: selected ? t.fgAlpha06 : hov ? t.fgAlpha03 : "transparent", transition: "background 0.1s" }}>
+      {children}
+    </div>
+  )
+}
+
+function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, emptyNode }: any) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    columnResizeMode: "onChange" as any,
+    defaultColumn: { minSize: 60 },
+  })
+  const hg = table.getHeaderGroups()[0]
+  const gridTemplate = hg?.headers.map((h: any) => `${h.getSize()}px`).join(" ") ?? ""
+  return (
+    <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
+      <div style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
+        {hg?.headers.map((header: any) => (
+          <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center" }}>
+            {flexRender(header.column.columnDef.header, header.getContext())}
+            {header.column.getCanResize() && <ColResizeHandle header={header}/>}
+          </div>
+        ))}
+      </div>
+      {table.getRowModel().rows.map((row: any) => (
+        <DataTableRow
+          key={row.id}
+          selected={isRowSelected?.(row.original, row.index)}
+          onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
+          template={gridTemplate}>
+          {row.getVisibleCells().map((cell: any) => (
+            <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", overflow: "hidden" }}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </div>
+          ))}
+        </DataTableRow>
+      ))}
+      {emptyNode && table.getRowModel().rows.length === 0 && emptyNode}
     </div>
   )
 }
@@ -178,6 +245,9 @@ function ProjectPlanIcon() {
 }
 function LogTeamIcon() {
   return <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M16.042 9.375V6.458C16.042 5.078 14.922 3.958 13.542 3.958H6.458C5.078 3.958 3.958 5.078 3.958 6.458V13.542C3.958 14.922 5.078 16.042 6.458 16.042H7.708" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/><path d="M11.563 16.042L9.792 8.958L16.042 12.523L12.917 13.357L11.563 16.042Z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+}
+function OfficeIcon() {
+  return <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11.875 3.95834H4.79165C4.33141 3.95834 3.95831 4.33144 3.95831 4.79168V15.2083C3.95831 15.6686 4.33141 16.0417 4.79165 16.0417H11.875C12.3352 16.0417 12.7083 15.6686 12.7083 15.2083V4.79168C12.7083 4.33144 12.3352 3.95834 11.875 3.95834Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/><path d="M14.7917 3.95834H15.2084C15.6686 3.95834 16.0417 4.33144 16.0417 4.79168V15.2083C16.0417 15.6686 15.6686 16.0417 15.2084 16.0417H14.7917" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/></svg>
 }
 
 // ── Data ──
@@ -462,10 +532,10 @@ const dataHubItems = [
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
-  { name: "Global", icon: <LayoutGrid size={16} strokeWidth={1}/>, expanded: true, items: globalSidebarItems },
-  { name: "New York", icon: <LayoutGrid size={16} strokeWidth={1}/>, expanded: false, items: officeItemsMyTime },
-  { name: "London", icon: <LayoutGrid size={16} strokeWidth={1}/>, expanded: false, items: officeItems },
-  { name: "Sydney", icon: <LayoutGrid size={16} strokeWidth={1}/>, expanded: false, items: officeItems },
+  { name: "Global", icon: <OfficeIcon/>, expanded: true, items: globalSidebarItems },
+  { name: "New York", icon: <OfficeIcon/>, expanded: false, items: officeItemsMyTime },
+  { name: "London", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Sydney", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Americas", icon: <Layers size={16} strokeWidth={1}/>, expanded: false, children: [
     { name: "Austin", expanded: false, items: officeItems },
     { name: "Los Angeles", expanded: false, items: officeItems },
@@ -500,18 +570,18 @@ function OfficeFilter({ selected, onChange }: any) {
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
         <HoverBtn onClick={() => setOpen(!open)} style={{ ...s.pillBtn(!isAll), gap: 6 }}>
-          <Circle size={10} strokeWidth={1.5}/>{label}
-          <ChevronDown size={12} strokeWidth={1.5} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
+          <Circle size={10} strokeWidth={1}/>{label}
+          <ChevronDown size={12} strokeWidth={1} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
         </HoverBtn>
       }>
       <div style={s.dropdown}>
         <button onClick={() => onChange([...ALL_OFFICES])} style={s.dropdownItem(isAll)}>
-          All offices {isAll && <Check size={12} strokeWidth={1.5}/>}
+          All offices {isAll && <Check size={12} strokeWidth={1}/>}
         </button>
         <div style={{ height: 1, background: t.border, margin: "4px 0" }}/>
         {ALL_OFFICES.map(o => (
           <button key={o} onClick={() => toggleOffice(o)} style={s.dropdownItem(selected.includes(o))}>
-            {o} {selected.includes(o) && !isAll && <Check size={12} strokeWidth={1.5}/>}
+            {o} {selected.includes(o) && !isAll && <Check size={12} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -537,9 +607,9 @@ function SectionHeader({ count, label, onAdd }: any) {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 18, fontWeight: 400, fontFamily: "Lexend", color: t.fg }}>{count} {label}</h1>
-        <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
+        <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
       </div>
-      <button onClick={onAdd} style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
+      <button onClick={onAdd} style={{ ...s.primaryBtn, background: "rgba(46, 95, 232, 1)" }}><Plus size={16} strokeWidth={1}/></button>
     </div>
   )
 }
@@ -552,7 +622,7 @@ function Sheet({ title, subtitle, onClose, children, width = 380 }: any) {
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>{title}</h2>
           {subtitle && <p style={{ fontSize: 12, color: t.mutedFg, marginTop: 2 }}>{subtitle}</p>}
         </div>
-        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>{children}</div>
     </div>
@@ -581,14 +651,14 @@ function ActivityTimeline({ entries }: any) {
     renamed: { bg: "#451a03", fg: "#fb923c" },
   }
   function getIcon(type: any) {
-    if (type === "added" || type === "person_assigned") return <UserPlus size={13} strokeWidth={1.5}/>
-    if (type === "role_change" || type === "renamed") return <ArrowRightLeft size={13} strokeWidth={1.5}/>
-    if (type === "allocation") return <CalendarClock size={13} strokeWidth={1.5}/>
-    if (type === "office_transfer") return <Briefcase size={13} strokeWidth={1.5}/>
-    if (type === "created") return <CalendarClock size={13} strokeWidth={1.5}/>
-    if (type === "rate_change") return <DollarSign size={13} strokeWidth={1.5}/>
-    if (type === "person_removed") return <Users size={13} strokeWidth={1.5}/>
-    return <Settings size={13} strokeWidth={1.5}/>
+    if (type === "added" || type === "person_assigned") return <UserPlus size={13} strokeWidth={1}/>
+    if (type === "role_change" || type === "renamed") return <ArrowRightLeft size={13} strokeWidth={1}/>
+    if (type === "allocation") return <CalendarClock size={13} strokeWidth={1}/>
+    if (type === "office_transfer") return <Briefcase size={13} strokeWidth={1}/>
+    if (type === "created") return <CalendarClock size={13} strokeWidth={1}/>
+    if (type === "rate_change") return <DollarSign size={13} strokeWidth={1}/>
+    if (type === "person_removed") return <Users size={13} strokeWidth={1}/>
+    return <Settings size={13} strokeWidth={1}/>
   }
   return (
     <div style={{ position: "relative" }}>
@@ -630,7 +700,7 @@ function AddRoleModal({ onAdd, onClose }: any) {
       <div style={{ background: t.popover, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, width: 360, boxShadow: `0 8px 32px ${t.shadowDarker}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>Add role</h2>
-          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Role name</label>
@@ -679,7 +749,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
       <div style={{ background: t.popover, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, width: 400, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>Add {type === "contractor" ? "contractor" : "employee"}</h2>
-          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           <div>
@@ -724,7 +794,7 @@ function AddDepartmentModal({ onAdd, onClose }: any) {
       <div style={{ background: t.popover, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, width: 360, boxShadow: `0 8px 32px ${t.shadowDarker}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>Add department</h2>
-          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
         </div>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Department name</label>
@@ -772,7 +842,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
       <div style={{ background: t.popover, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, width: 480, boxShadow: `0 8px 32px ${t.shadowDarker}`, maxHeight: "90vh", overflowY: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>Add project</h2>
-          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+          <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color: t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
           <div style={{ gridColumn: "1/-1" }}>
@@ -931,7 +1001,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               {dataHubHover && (
                 <div onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg, cursor: "pointer" }}>
-                  <MoreVertical size={14} strokeWidth={2}/>
+                  <MoreVertical size={14} strokeWidth={1}/>
                 </div>
               )}
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
@@ -979,13 +1049,13 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
             <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Light</span>
-              <Check size={16} strokeWidth={2} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Light</span>
+              <Check size={16} strokeWidth={1} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange(true); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Dark</span>
-              <Check size={16} strokeWidth={2} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Dark</span>
+              <Check size={16} strokeWidth={1} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
           </div>
         </DropdownWrapper>
@@ -1003,13 +1073,13 @@ function RoleSelector({ roleId, roles, onChange }: any) {
       trigger={
         <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
           style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 28, padding: "0 8px", borderRadius: 6, border: `1px solid ${t.border}`, background: "transparent", color: t.fg, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
-          {roles[roleId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
+          {roles[roleId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width: 180 }}>
         {roles.map((r: any, i: any) => (
           <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === roleId)}>
-            {r.name} {i === roleId && <Check size={11} strokeWidth={1.5}/>}
+            {r.name} {i === roleId && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1024,13 +1094,13 @@ function DeptSelector({ departmentId, departments, onChange }: any) {
       trigger={
         <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
           style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }}>
-          {departments[departmentId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
+          {departments[departmentId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width: 200 }}>
         {departments.map((d: any, i: any) => (
           <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === departmentId)}>
-            {d.name} {i === departmentId && <Check size={13} strokeWidth={1.5}/>}
+            {d.name} {i === departmentId && <Check size={13} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1041,41 +1111,35 @@ function DeptSelector({ departmentId, departments, onChange }: any) {
 // ── Pages ──
 function RolesAndRates({ roles, onRolesChange }: any) {
   const [tab, setTab] = useState("active")
-  const [selectedIdx, setSelectedIdx] = useState(null)
+  const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [showModal, setShowModal] = useState(false)
   const display = tab === "archived" ? [] : roles
+  const rolesColumns = useMemo(() => [
+    { accessorKey: "name", header: "Role", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, name: v} : r))} style={{ background: "transparent" }}/></span> },
+    { accessorKey: "costRate", header: "Cost rate", size: 140, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEditRate value={row.original.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, costRate: v} : r))}/></span> },
+    { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.activePeople}</span> },
+    { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.unassigned}</span> },
+  ], [roles, onRolesChange])
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       {showModal && <AddRoleModal onAdd={(r: any) => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={roles.length} label="Roles" onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
-          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All offices<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
-          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
           <Tabs active={tab} onChange={setTab} tabs={[{ label: `${roles.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-            {["Role","Cost rate","Active people","Unassigned"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
-          </div>
-          {display.map((role: any, i: any) => (
-            <HoverRow key={i} selected={selectedIdx === i} onClick={() => setSelectedIdx(i)}
-              style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
-              <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEdit value={role.name} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,name:v} : r))} style={{ background: "transparent" }}/>
-              </span>
-              <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEditRate value={role.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,costRate:v} : r))}/>
-              </span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{role.activePeople}</span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{role.unassigned}</span>
-            </HoverRow>
-          ))}
-          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived roles</p></div>}
-        </div>
+        <DataTable
+          columns={rolesColumns}
+          data={display}
+          onRowClick={(_: any, idx: number) => setSelectedIdx(idx)}
+          isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived roles</p></div>}
+        />
       </div>
       {selectedIdx !== null && roles[selectedIdx] && (
         <Sheet title={roles[selectedIdx].name} subtitle={`$${roles[selectedIdx].costRate}/hr · ${roles[selectedIdx].activePeople} active`} onClose={() => setSelectedIdx(null)}>
@@ -1096,8 +1160,8 @@ function RolesAndRates({ roles, onRolesChange }: any) {
 function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }: any) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
-  const [selectedPerson, setSelectedPerson] = useState(null)
-  const [selectedDept, setSelectedDept] = useState(null)
+  const [selectedPerson, setSelectedPerson] = useState<number|null>(null)
+  const [selectedDept, setSelectedDept] = useState<number|null>(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const [showModal, setShowModal] = useState(false)
 
@@ -1133,64 +1197,50 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             <div style={{ width: 1, height: 16, background: t.border, margin: "0 6px" }}/>
             {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
               <HoverBtn key={v} onClick={() => { setView(v); setSelectedPerson(null) }} style={s.pillBtn(view === v)}>
-                <Circle size={10} strokeWidth={1.5} style={{ fill: view === v ? t.fg : "none" }}/>{l}
+                <Circle size={10} strokeWidth={1} style={{ fill: view === v ? t.fg : "none" }}/>{l}
               </HoverBtn>
             ))}
             <div style={{ width: 1, height: 16, background: t.border }}/>
             <HoverBtn onClick={() => { setView("departments"); setSelectedPerson(null) }} style={s.pillBtn(view === "departments")}>
-              <Circle size={10} strokeWidth={1.5} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
+              <Circle size={10} strokeWidth={1} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
             </HoverBtn>
           </div>
-          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
 
         {view !== "departments" ? (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
               <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-                {["Name","Role","Department","Office"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
-              </div>
-              {display.map((p: any, i: any) => (
-                <HoverRow key={i} selected={selectedPerson === i} onClick={() => setSelectedPerson(i)}
-                  style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
-                  <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                    <InlineEdit value={p.name} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background: "transparent" }}/>
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center" }} onClick={e => e.stopPropagation()}>
-                    <RoleSelector roleId={p.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,roleId:v} : x))}/>
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center" }} onClick={e => e.stopPropagation()}>
-                    <DeptSelector departmentId={p.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,departmentId:v} : x))}/>
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.office}</span>
-                </HoverRow>
-              ))}
-              {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived people</p></div>}
-            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { accessorKey: "roleId", header: "Role", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><RoleSelector roleId={row.original.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, roleId: v} : x))}/></span> },
+                { accessorKey: "departmentId", header: "Department", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeptSelector departmentId={row.original.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, departmentId: v} : x))}/></span> },
+                { accessorKey: "office", header: "Office", size: 140, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.office}</span> },
+              ]}
+              data={display}
+              onRowClick={(_: any, idx: number) => setSelectedPerson(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedPerson}
+              emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived people</p></div>}
+            />
           </>
         ) : (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
               <Tabs active="active" onChange={() => {}} tabs={[{ label: `${departments.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-                {["Name","Active people"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
-              </div>
-              {departments.map((d: any, i: any) => (
-                <HoverRow key={i} selected={selectedDept === i} onClick={() => setSelectedDept(i)}
-                  style={{ display: "grid", gridTemplateColumns: "2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
-                  <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                    <InlineEdit value={d.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background: "transparent" }}/>
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{deptPeopleCounts[i] ?? 0}</span>
-                </HoverRow>
-              ))}
-            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{deptPeopleCounts[departments.indexOf(row.original)] ?? 0}</span> },
+              ]}
+              data={departments}
+              onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedDept}
+            />
           </>
         )}
       </div>
@@ -1276,7 +1326,7 @@ function NotesPanel({ project, currentUser, onClose, onUpdate }: any) {
           <h2 style={{ fontSize:15, fontWeight:600, color:t.fg }}>Notes</h2>
           <p style={{ fontSize:12, color:t.mutedFg, marginTop:2 }}>{project.name}</p>
         </div>
-        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"16px 20px", display:"flex", flexDirection:"column", gap:16 }}>
         {notes.length === 0 && (
@@ -1378,11 +1428,11 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
           <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
-          <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
+          <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-          <button onClick={() => setShowModal(true)} style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
-          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+          <button onClick={() => setShowModal(true)} style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
@@ -1425,22 +1475,24 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
 
 function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients, filteredBusinessUnit, onFilterClear }: any) {
   const [tab, setTab] = useState("active")
-  const [selectedIdx, setSelectedIdx] = useState(null)
+  const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const isAll = selectedOffices.length === ALL_OFFICES.length
   let filtered = isAll ? projects : projects.filter((p: any) => selectedOffices.includes(p.office))
   if (filteredBusinessUnit) filtered = filtered.filter((p: any) => p.unit === filteredBusinessUnit)
   const display = tab === "archived" ? [] : filtered
 
-  const columns = []
-  columns.push({ label: "Project", flex: "2fr", key: "name" })
-  columns.push({ label: "Code", flex: "1fr", key: "code" })
-  if (visibleItems.has("Clients")) columns.push({ label: "Client", flex: "1fr", key: "client" })
-  columns.push({ label: "Office", flex: "1fr", key: "office" })
-  if (visibleItems.has("Business Units")) columns.push({ label: "Business Unit", flex: "1fr", key: "unit" })
-  columns.push({ label: "Owner", flex: "1fr", key: "owner" })
-  
-  const gridCols = columns.map(c => c.flex).join(" ")
+  const projColumns = useMemo(() => {
+    const cols: any[] = [
+      { accessorKey: "name", header: "Project", size: 260, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/></span> },
+      { accessorKey: "code", header: "Code", size: 100, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.secondaryFg }}>{row.original.code}</span> },
+    ]
+    if (visibleItems.has("Clients")) cols.push({ accessorKey: "clientId", header: "Client", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{clients[row.original.clientId]?.name}</span> })
+    cols.push({ accessorKey: "office", header: "Office", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.office}</span> })
+    if (visibleItems.has("Business Units")) cols.push({ accessorKey: "unit", header: "Business Unit", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.unit || "—"}</span> })
+    cols.push({ id: "owner", header: "Owner", size: 130, enableResizing: false, accessorFn: () => "", cell: ({ row }: any) => <span style={{ display: "flex", alignItems: "center" }}><div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>{people[row.original.ownerId]?.name.charAt(0) || "?"}</div></span> })
+    return cols
+  }, [visibleItems, projects, onProjectsChange, clients, people])
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
@@ -1455,41 +1507,19 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
               </HoverBtn>
             )}
           </div>
-          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
           <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-            {columns.map(col => (
-              <span key={col.key} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{col.label}</span>
-            ))}
-          </div>
-          {display.map((p: any, idx: any) => (
-            <HoverRow key={idx} selected={selectedIdx === projects.indexOf(p)} onClick={() => setSelectedIdx(projects.indexOf(p))}
-              style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
-              <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
-              </span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.secondaryFg }}>{p.code}</span>
-              {visibleItems.has("Clients") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{clients[p.clientId]?.name}</span>
-              )}
-              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.office}</span>
-              {visibleItems.has("Business Units") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.unit || "—"}</span>
-              )}
-              <span style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
-                  {people[p.ownerId]?.name.charAt(0) || "?"}
-                </div>
-              </span>
-            </HoverRow>
-          ))}
-          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived projects</p></div>}
-        </div>
+        <DataTable
+          columns={projColumns}
+          data={display}
+          onRowClick={(_: any, idx: number) => setSelectedIdx(idx)}
+          isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived projects</p></div>}
+        />
       </div>
       {selectedIdx !== null && projects[selectedIdx] && (
         <Sheet title={projects[selectedIdx].name} subtitle={visibleItems.has("Clients") ? `${clients[projects[selectedIdx].clientId]?.name} · ${projects[selectedIdx].office}` : projects[selectedIdx].office} onClose={() => setSelectedIdx(null)}>
@@ -1524,7 +1554,7 @@ function HealthDropdown({ value, onChange }: any) {
           style={{ display:"flex", alignItems:"center", gap:6, height:24, padding:"0 8px", borderRadius:12, background: current.color + "18", border:`1px solid ${current.color}40`, cursor:"pointer", fontSize:11, fontWeight:500, color: current.color }}>
           <span style={{ width:6, height:6, borderRadius:"50%", background: current.color, flexShrink:0 }}/>
           {current.label}
-          <ChevronDown size={10} strokeWidth={2}/>
+          <ChevronDown size={10} strokeWidth={1}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width:130 }}>
@@ -1534,7 +1564,7 @@ function HealthDropdown({ value, onChange }: any) {
               <span style={{ width:6, height:6, borderRadius:"50%", background:o.color, flexShrink:0 }}/>
               {o.label}
             </span>
-            {o.value === value && <Check size={11} strokeWidth={1.5}/>}
+            {o.value === value && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1550,13 +1580,13 @@ function CurrencySelector({ value, onChange }: any) {
       trigger={
         <HoverBtn onClick={() => setOpen(!open)}
           style={{ display:"flex", alignItems:"center", gap:4, height:28, padding:"0 8px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", color:t.secondaryFg, cursor:"pointer", fontSize:12, fontWeight:500 }}>
-          {value}<ChevronDown size={12} strokeWidth={1.5}/>
+          {value}<ChevronDown size={12} strokeWidth={1}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width:100 }}>
         {CURRENCIES.map(c => (
           <button key={c} onClick={() => { onChange(c); setOpen(false) }} style={s.dropdownItem(c===value)}>
-            {c}{c===value && <Check size={11} strokeWidth={1.5}/>}
+            {c}{c===value && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1581,17 +1611,17 @@ function OfficeSelectorRC({ value, onChange }: any) {
       trigger={
         <HoverBtn onClick={() => setOpen(!open)}
           style={{ display:"flex", alignItems:"center", gap:5, height:28, padding:"0 10px", borderRadius:20, border:`1px solid ${t.border}`, background:"transparent", color:t.secondaryFg, cursor:"pointer", fontSize:12 }}>
-          <Circle size={10} strokeWidth={1.5}/>{label}<ChevronDown size={11} strokeWidth={1.5}/>
+          <Circle size={10} strokeWidth={1}/>{label}<ChevronDown size={11} strokeWidth={1}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width:180 }}>
         <button onClick={() => { onChange("all"); setOpen(false) }} style={s.dropdownItem(isAll)}>
-          All offices{isAll && <Check size={11} strokeWidth={1.5}/>}
+          All offices{isAll && <Check size={11} strokeWidth={1}/>}
         </button>
         <div style={{ height:1, background:t.border, margin:"4px 0" }}/>
         {ALL_OFFICES.map(o => (
           <button key={o} onClick={() => toggle(o)} style={s.dropdownItem(isSelected(o))}>
-            {o}{isSelected(o) && !isAll && <Check size={11} strokeWidth={1.5}/>}
+            {o}{isSelected(o) && !isAll && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1607,7 +1637,7 @@ function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }: any) {
       trigger={
         <HoverBtn onClick={() => setOpen(!open)} disabled={available.length===0}
           style={{ display:"flex", alignItems:"center", gap:6, height:28, padding:"0 10px", borderRadius:6, border:`1px dashed ${t.border}`, background:"transparent", color:t.secondaryFg, cursor:"pointer", fontSize:12, opacity: available.length===0 ? 0.4 : 1 }}>
-          <Plus size={12} strokeWidth={1.5}/>Add roles
+          <Plus size={12} strokeWidth={1}/>Add roles
         </HoverBtn>
       }>
       {available.length > 0 && (
@@ -1649,7 +1679,7 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
     <div style={{ width:"50%", flexShrink:0, borderLeft:`1px solid ${t.border}`, background:t.bg, display:"flex", flexDirection:"column", height:"100%" }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:`1px solid ${t.border}`, padding:"16px 20px" }}>
         <h2 style={{ fontSize:15, fontWeight:600, color:t.fg }}>{rc.title}</h2>
-        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1.5}/></HoverBtn>
+        <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"16px 20px" }}>
         <div style={{ marginBottom:20 }}>
@@ -1677,7 +1707,7 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
           <div>
             <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Effective from</p>
             <HoverBtn style={{ display:"flex", alignItems:"center", gap:6, height:28, padding:"0 10px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", color:t.fg, cursor:"pointer", fontSize:13 }}>
-              <CalendarClock size={14} strokeWidth={1.5}/>{rc.effectiveFrom || "Select date"}
+              <CalendarClock size={14} strokeWidth={1}/>{rc.effectiveFrom || "Select date"}
             </HoverBtn>
           </div>
         </div>
@@ -1701,7 +1731,7 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
                   </div>
                   <HoverBtn onClick={() => update({...rc, linkedRoles: rc.linkedRoles.filter((_: any,j: any) => j!==i)})}
                     style={{ ...s.iconBtn, width:24, height:24, color:t.mutedFg }}>
-                    <X size={12} strokeWidth={1.5}/>
+                    <X size={12} strokeWidth={1}/>
                   </HoverBtn>
                 </div>
               ))}
@@ -1733,58 +1763,48 @@ function Clients({ roles }: any) {
           <>
             <SectionHeader count={clients.length} label="Clients" onAdd={() => {}}/>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
-              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All offices<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
-              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
               <Tabs active={tab} onChange={setTab} tabs={[{label:`${clients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                {["Client","Rate cards","Projects"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-              </div>
-              {(tab==="archived"?[]:clients).map((c: any,i: any) => (
-                <HoverRow key={i} selected={false} onClick={() => { setSelectedClient(i); setSelectedRC(null) }}
-                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                  <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
-                    <InlineEdit value={c.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
-                  </span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{c.rateCards.length}</span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{c.projects}</span>
-                </HoverRow>
-              ))}
-              {tab==="archived" && <div style={{ display:"flex", justifyContent:"center", padding:"64px 0" }}><p style={{ fontSize:13, color:t.mutedFg }}>No archived clients</p></div>}
-            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Client", size: 300, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
+                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.rateCards.length}</span> },
+                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.projects}</span> },
+              ]}
+              data={tab==="archived"?[]:clients}
+              onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
+            />
           </>
         ) : (
           <>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                 <HoverBtn onClick={() => { setSelectedClient(null); setSelectedRC(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
-                  <ChevronLeft size={18} strokeWidth={1.5}/>
+                  <ChevronLeft size={18} strokeWidth={1}/>
                 </HoverBtn>
                 <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{client.name}</h1>
               </div>
-              <button style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
+              <button style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
               <Tabs active={tab} onChange={setTab} tabs={[{label:`${client.rateCards.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                {["Rate Card","Currency","Offices","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-              </div>
-              {client.rateCards.map((rc: any, i: any) => (
-                <HoverRow key={i} selected={selectedRC===i} onClick={() => setSelectedRC(i)}
-                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                  <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{rc.title}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{rc.currency}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{rc.offices==="all"?"All":rc.offices.length}</span>
-                  <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{rc.linkedRoles.length}</span>
-                </HoverRow>
-              ))}
-            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
+                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
+                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
+                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
+              ]}
+              data={client.rateCards}
+              onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedRC}
+            />
           </>
         )}
       </div>
@@ -1811,41 +1831,34 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
           <>
             <SectionHeader count={units.length} label="Brands" onAdd={() => {}}/>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
-              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All regions<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
-              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
+              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All regions<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1.5} color={t.secondaryFg}/></HoverBtn>
+              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
               <Tabs active={tab} onChange={setTab} tabs={[{label:`${units.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                {["Business Unit","Employees","Projects","Departments"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-              </div>
-              {(tab==="archived"?[]:units).map((u: any,i: any) => (
-                <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setViewTab("departments"); setSelectedDept(null) }}
-                  style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                  <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
-                    <InlineEdit value={u.name} onChange={(v: any) => setUnits((ul: any) => ul.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
-                  </span>
-                  <span onClick={() => onEmployeesClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.employees}</span>
-                  <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
-                  <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{u.departments.length}</span>
-                </HoverRow>
-              ))}
-              {tab==="archived" && <div style={{ display:"flex", justifyContent:"center", padding:"64px 0" }}><p style={{ fontSize:13, color:t.mutedFg }}>No archived business units</p></div>}
-            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Business Unit", size: 260, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setUnits((ul: any) => ul.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
+                { id: "employees", header: "Employees", size: 130, accessorFn: (row: any) => row.employees, cell: ({ row }: any) => <span onClick={() => onEmployeesClick(row.original.name)} style={{ display:"flex", alignItems:"center", fontSize:14, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{row.original.employees}</span> },
+                { id: "projects", header: "Projects", size: 130, accessorFn: (row: any) => row.projectsList?.length || 0, cell: ({ row }: any) => <span onClick={() => onProjectsClick(row.original.name)} style={{ display:"flex", alignItems:"center", fontSize:14, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{row.original.projectsList?.length || 0}</span> },
+                { id: "departments", header: "Departments", size: 130, enableResizing: false, accessorFn: (row: any) => row.departments?.length ?? 0, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", fontSize:14, color:t.fg }}>{row.original.departments?.length ?? 0}</span> },
+              ]}
+              data={tab==="archived"?[]:units}
+              onRowClick={(_: any, idx: number) => { setSelectedUnit(idx); setViewTab("departments"); setSelectedDept(null) }}
+            />
           </>
         ) : (
           <>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                 <HoverBtn onClick={() => { setSelectedUnit(null); setSelectedDept(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
-                  <ChevronLeft size={18} strokeWidth={1.5}/>
+                  <ChevronLeft size={18} strokeWidth={1}/>
                 </HoverBtn>
                 <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{unit.name}</h1>
               </div>
-              <button style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
+              <button style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
               <Tabs active={viewTab} onChange={setViewTab} tabs={[
@@ -1853,39 +1866,31 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
                 {label:`${unit.departments.length} Departments`,value:"departments"}
               ]}/>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"0 24px" }}>
-              {viewTab === "projects" ? (
-                <>
-                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                    {["Project","Team Size","Budget","Status"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-                  </div>
-                  {unit.projectsList?.map((proj: any, i: any) => (
-                    <HoverRow key={i} selected={false} onClick={() => {}}
-                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{proj.title}</span>
-                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{proj.team}</span>
-                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${proj.budget.toLocaleString()}</span>
-                      <span style={{ fontSize:12, display:"flex", alignItems:"center", padding:"4px 8px", borderRadius:4, background: proj.status === "Active" ? "#d4edda" : proj.status === "In Progress" ? "#fff3cd" : "#e7e7e7", color: proj.status === "Active" ? "#155724" : proj.status === "In Progress" ? "#856404" : "#666" }}>{proj.status}</span>
-                    </HoverRow>
-                  ))}
-                </>
-              ) : (
-                <>
-                  <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
-                    {["Department","Budget","Spent","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-                  </div>
-                  {unit.departments.map((dept, i) => (
-                    <HoverRow key={i} selected={selectedDept===i} onClick={() => setSelectedDept(i)}
-                      style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
-                      <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{dept.title}</span>
-                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.budget.toLocaleString()}</span>
-                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>${dept.spent.toLocaleString()}</span>
-                      <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{dept.linkedRoles.length}</span>
-                    </HoverRow>
-                  ))}
-                </>
-              )}
-            </div>
+            {viewTab === "projects" ? (
+                  <DataTable
+                    columns={[
+                      { accessorKey: "title", header: "Project", size: 220, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
+                      { accessorKey: "team", header: "Team Size", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.team}</span> },
+                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.budget?.toLocaleString()}</span> },
+                      { accessorKey: "status", header: "Status", size: 110, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:12, display:"flex", alignItems:"center", padding:"4px 8px", borderRadius:4, background: row.original.status === "Active" ? "#d4edda" : row.original.status === "In Progress" ? "#fff3cd" : "#e7e7e7", color: row.original.status === "Active" ? "#155724" : row.original.status === "In Progress" ? "#856404" : "#666" }}>{row.original.status}</span> },
+                    ]}
+                    data={unit.projectsList ?? []}
+                    paddingX={24}
+                  />
+            ) : (
+                  <DataTable
+                    columns={[
+                      { accessorKey: "title", header: "Department", size: 220, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
+                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.budget.toLocaleString()}</span> },
+                      { accessorKey: "spent", header: "Spent", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.spent.toLocaleString()}</span> },
+                      { id: "roles", header: "Roles", size: 110, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.linkedRoles?.length ?? 0}</span> },
+                    ]}
+                    data={unit.departments}
+                    onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
+                    isRowSelected={(_: any, idx: number) => idx === selectedDept}
+                    paddingX={24}
+                  />
+            )}
           </>
         )}
       </div>
@@ -1899,11 +1904,11 @@ function ActivityLog() {
   const filtered = sourceFilter==="all" ? ACTIVITY_LOG_DATA : ACTIVITY_LOG_DATA.filter(e => e.source===sourceFilter)
   const sourceLabel: Record<string, string> = { all:"All sources", people:"People", roles:"Roles", departments:"Departments" }
   function typeIcon(type: any) {
-    if (type==="person_assigned"||type==="added") return <UserPlus size={13} strokeWidth={1.5}/>
-    if (type==="role_change"||type==="renamed") return <ArrowRightLeft size={13} strokeWidth={1.5}/>
-    if (type==="allocation") return <Briefcase size={13} strokeWidth={1.5}/>
-    if (type==="rate_change") return <DollarSign size={13} strokeWidth={1.5}/>
-    return <CalendarClock size={13} strokeWidth={1.5}/>
+    if (type==="person_assigned"||type==="added") return <UserPlus size={13} strokeWidth={1}/>
+    if (type==="role_change"||type==="renamed") return <ArrowRightLeft size={13} strokeWidth={1}/>
+    if (type==="allocation") return <Briefcase size={13} strokeWidth={1}/>
+    if (type==="rate_change") return <DollarSign size={13} strokeWidth={1}/>
+    return <CalendarClock size={13} strokeWidth={1}/>
   }
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden", background:t.bg }}>
@@ -1912,44 +1917,32 @@ function ActivityLog() {
         <DropdownWrapper open={filterOpen} setOpen={setFilterOpen}
           trigger={
             <HoverBtn onClick={() => setFilterOpen(!filterOpen)} style={s.pillBtn(sourceFilter!=="all")}>
-              {sourceLabel[sourceFilter]}<ChevronDown size={12} strokeWidth={1.5} style={{ transform:filterOpen?"rotate(180deg)":"none", transition:"transform 0.2s" }}/>
+              {sourceLabel[sourceFilter]}<ChevronDown size={12} strokeWidth={1} style={{ transform:filterOpen?"rotate(180deg)":"none", transition:"transform 0.2s" }}/>
             </HoverBtn>
           }>
           <div style={s.dropdown}>
             <button onClick={() => { setSourceFilter("all"); setFilterOpen(false) }} style={s.dropdownItem(sourceFilter==="all")}>
-              All sources {sourceFilter==="all" && <Check size={12} strokeWidth={1.5}/>}
+              All sources {sourceFilter==="all" && <Check size={12} strokeWidth={1}/>}
             </button>
             <div style={{ height:1, background:t.border, margin:"4px 0" }}/>
             {["people","roles","departments"].map(s2 => (
               <button key={s2} onClick={() => { setSourceFilter(s2); setFilterOpen(false) }} style={s.dropdownItem(sourceFilter===s2)}>
-                {sourceLabel[s2]} {sourceFilter===s2 && <Check size={12} strokeWidth={1.5}/>}
+                {sourceLabel[s2]} {sourceFilter===s2 && <Check size={12} strokeWidth={1}/>}
               </button>
             ))}
           </div>
         </DropdownWrapper>
       </div>
-      <div style={{ flex:1, overflowY:"auto" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"140px 90px 1fr 2fr 1.5fr", borderBottom:`1px solid ${t.border}`, padding:"8px 24px" }}>
-          {["Date","Source","Entity","Action","Details"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
-        </div>
-        {filtered.map((e, i) => (
-          <HoverRow key={i} selected={false} onClick={() => {}}
-            style={{ display:"grid", gridTemplateColumns:"140px 90px 1fr 2fr 1.5fr", borderBottom:`1px solid ${t.border}`, padding:"10px 24px", transition:"background 0.1s" }}>
-            <span style={{ fontSize:12, color:t.mutedFg, display:"flex", alignItems:"center" }}>{e.date}</span>
-            <span style={{ display:"flex", alignItems:"center" }}>
-              <span style={{ fontSize:11, fontWeight:500, color:t.mutedFg, background:t.muted, padding:"2px 8px", borderRadius:20 }}>{sourceLabel[e.source]}</span>
-            </span>
-            <span style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, fontWeight:500, color:t.fg }}>
-              <span style={{ display:"flex", alignItems:"center", justifyContent:"center", width:20, height:20, borderRadius:"50%", background:t.muted, color:t.mutedFg, flexShrink:0 }}>
-                {typeIcon(e.type)}
-              </span>
-              {e.entity}
-            </span>
-            <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{e.description}</span>
-            <span style={{ display:"flex", alignItems:"center", fontSize:12, color:t.mutedFg }}>{e.details||"—"}</span>
-          </HoverRow>
-        ))}
-      </div>
+      <DataTable
+        columns={[
+          { accessorKey: "date", header: "Date", size: 140, cell: ({ row }: any) => <span style={{ fontSize:12, color:t.mutedFg }}>{row.original.date}</span> },
+          { accessorKey: "source", header: "Source", size: 90, cell: ({ row }: any) => <span style={{ fontSize:11, fontWeight:500, color:t.mutedFg, background:t.muted, padding:"2px 8px", borderRadius:20 }}>{sourceLabel[row.original.source]}</span> },
+          { accessorKey: "entity", header: "Entity", size: 140, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, fontWeight:500, color:t.fg }}><span style={{ display:"flex", alignItems:"center", justifyContent:"center", width:20, height:20, borderRadius:"50%", background:t.muted, color:t.mutedFg, flexShrink:0 }}>{typeIcon(row.original.type)}</span>{row.original.entity}</span> },
+          { accessorKey: "description", header: "Action", size: 240, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.description}</span> },
+          { accessorKey: "details", header: "Details", size: 180, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.mutedFg }}>{row.original.details||"—"}</span> },
+        ]}
+        data={filtered}
+      />
     </div>
   )
 }
@@ -2146,13 +2139,13 @@ function VersionsToggle({ version, onChange }: any) {
         trigger={
           <HoverBtn onClick={() => setOpen(!open)}
             style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 14px", borderRadius:8, border:`1px solid ${t.border}`, background: open ? t.accent : t.bg, color:t.fg, cursor:"pointer", fontSize:13, fontWeight:500 }}>
-            <Layers size={14} strokeWidth={1.5}/>Versions
+            <Layers size={14} strokeWidth={1}/>Versions
           </HoverBtn>
         }>
         <div style={{ ...s.dropdown, bottom:"100%", top:"auto", marginBottom:8, width:200 }}>
           {[["multi","Multi office"],["single","Single office"]].map(([v,l]) => (
             <button key={v} onClick={() => { onChange(v); setOpen(false) }} style={s.dropdownItem(version===v)}>
-              {l} {version===v && <Check size={12} strokeWidth={1.5}/>}
+              {l} {version===v && <Check size={12} strokeWidth={1}/>}
             </button>
           ))}
         </div>
