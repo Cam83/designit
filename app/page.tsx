@@ -36,7 +36,7 @@ const lightTheme = {
   primary: "#1a1a1a", primaryFg: "#ffffff", secondary: "#f0f0f0",
   secondaryFg: "#1a1a1a", muted: "#f0f0f0", mutedFg: "#333333",
   accent: "#f0f0f0", accentFg: "#1a1a1a", border: "#e0e0e0",
-  sidebar: "#ffffff", sidebarFg: "#1a1a1a", sidebarBorder: "#f0f0f0",
+  sidebar: "#F8F7F9", sidebarFg: "#1a1a1a", sidebarBorder: "#f0f0f0",
   fgAlpha30: "rgba(26,26,26,0.3)", fgAlpha10: "rgba(26,26,26,0.1)", 
   fgAlpha06: "rgba(26,26,26,0.06)", fgAlpha03: "rgba(26,26,26,0.03)", 
   fgAlpha20: "rgba(26,26,26,0.2)", fgAlpha70: "rgba(26,26,26,0.7)",
@@ -47,12 +47,12 @@ const lightTheme = {
 let t = darkTheme
 
 const getStyles = (theme: any) => ({
-  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
+  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
   main: { flex: 1, display: "flex", flexDirection: "column" as const, background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
   primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
   pillBtn: (active: any) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? theme.fgAlpha30 : theme.border}`, background: active ? theme.fgAlpha10 : theme.bg, color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
-  outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 6, border: `1px solid ${theme.border}`, background: "transparent", color: theme.secondaryFg, cursor: "pointer", fontSize: 12 },
+  outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 8, border: `1px solid ${theme.border}`, background: "transparent", color: theme.secondaryFg, cursor: "pointer", fontSize: 12 },
   dropdown: { position: "absolute" as const, top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
   dropdownItem: (active: any) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" as const }),
 })
@@ -106,11 +106,11 @@ function InlineEdit({ value, onChange, style }: any) {
   if (editing) return (
     <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commit}
       onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false) } }}
-      style={{ fontSize: 13, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 4, padding: "2px 8px", outline: "none", fontFamily: "inherit", ...style }} />
+      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 8, padding: "2px 8px", outline: "none", fontFamily: "inherit", ...style }} />
   )
   return (
     <button onClick={() => { setDraft(value); setEditing(true) }}
-      style={{ fontSize: 13, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
+      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
       {value}
     </button>
   )
@@ -129,15 +129,15 @@ function InlineEditRate({ value, onChange }: any) {
   }
   if (editing) return (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <span style={{ fontSize: 13, color: t.mutedFg }}>$</span>
+      <span style={{ fontSize: 14, color: t.mutedFg }}>$</span>
       <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commit}
         onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(String(value)); setEditing(false) } }}
-        style={{ width: 60, fontSize: 13, color: t.fg, background: t.bg, border: `1px solid ${t.fgAlpha20}`, borderRadius: 4, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
+        style={{ width: 60, fontSize: 14, color: t.fg, background: t.bg, border: `1px solid ${t.fgAlpha20}`, borderRadius: 4, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
     </div>
   )
   return (
     <button onClick={() => { setDraft(String(value)); setEditing(true) }}
-      style={{ fontSize: 13, color: t.fg, background: "transparent", border: "none", cursor: "text", padding: "2px 4px", borderRadius: 4, fontFamily: "inherit" }}>
+      style={{ fontSize: 14, color: t.fg, background: "transparent", border: "none", cursor: "text", padding: "2px 4px", borderRadius: 4, fontFamily: "inherit" }}>
       ${value}
     </button>
   )
@@ -458,7 +458,7 @@ const dataHubItems = [
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
-  { name: "Business Units", icon: <Building2 size={16} strokeWidth={1}/> },
+  { name: "Brands", icon: <Building2 size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
@@ -536,7 +536,7 @@ function SectionHeader({ count, label, onAdd }: any) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{count} {label}</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 400, fontFamily: "Lexend", color: t.fg }}>{count} {label}</h1>
         <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
       </div>
       <button onClick={onAdd} style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
@@ -565,7 +565,7 @@ function DetailGrid({ items }: any) {
       {items.map((item: any, i: any) => (
         <div key={i}>
           <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>{item.label}</span>
-          <p style={{ fontSize: 13, color: t.fg, marginTop: 2 }}>{item.value}</p>
+          <p style={{ fontSize: 14, color: t.fg, marginTop: 2 }}>{item.value}</p>
         </div>
       ))}
     </div>
@@ -601,7 +601,7 @@ function ActivityTimeline({ entries }: any) {
               {getIcon(e.type)}
             </div>
             <div style={{ flex: 1, paddingTop: 2 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{e.description}</p>
+              <p style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{e.description}</p>
               {e.details && <p style={{ fontSize: 12, color: t.mutedFg, marginTop: 2 }}>{e.details}</p>}
               <p style={{ fontSize: 11, color: t.mutedFg, marginTop: 4 }}>{e.date}</p>
             </div>
@@ -637,19 +637,19 @@ function AddRoleModal({ onAdd, onClose }: any) {
           <input ref={nameRef} value={name} onChange={e => setName(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="e.g. Senior Developer"
-            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Cost rate ($/hr)</label>
           <input type="number" value={costRate} onChange={e => setCostRate(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="0"
-            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
             Add role
           </button>
         </div>
@@ -672,7 +672,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
     onAdd({ name: n, roleId, departmentId, office })
     onClose()
   }
-  const sel = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
+  const sel = { width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
   return (
     <div style={{ position: "fixed", inset: 0, background: t.overlayBg, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
@@ -687,7 +687,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
             <input ref={nameRef} value={name} onChange={e => setName(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
               placeholder="e.g. John Smith"
-              style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+              style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
           </div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Role</label>
             <select value={roleId} onChange={e => setRoleId(Number(e.target.value))} style={sel}>{roles.map((r: any,i: any) => <option key={i} value={i}>{r.name}</option>)}</select></div>
@@ -699,7 +699,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
             Add person
           </button>
         </div>
@@ -731,12 +731,12 @@ function AddDepartmentModal({ onAdd, onClose }: any) {
           <input ref={ref} value={name} onChange={e => setName(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="e.g. Strategy"
-            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
             Add
           </button>
         </div>
@@ -759,7 +759,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
   const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
   const officeOpts = ["New York", "London", "Sydney", "Melbourne"]
-  const inp = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
+  const inp = { width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
   function submit() {
     const n = name.trim()
     if (!n) return
@@ -792,7 +792,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
             Add project
           </button>
         </div>
@@ -834,7 +834,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const navItemStyle = (active: any) => ({
     display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "6px 8px",
     borderRadius: 6, border: "none", background: active ? t.accent : "transparent",
-    color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 13,
+    color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 14,
     fontWeight: active ? 500 : 400, textAlign: "left" as const,
   })
 
@@ -851,7 +851,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           }>
           <div style={{ ...s.dropdown, width: 200 }}>
             <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
               <Settings size={14} strokeWidth={1}/> Settings
             </HoverBtn>
           </div>
@@ -876,7 +876,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{loc.name}</span>
                 </div>
                 <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
               </HoverBtn>
@@ -899,7 +899,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                       <div key={child.name}>
                         <HoverBtn onClick={() => toggleChild(i, ci)}
                           style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px 6px 16px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                          <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{child.name}</span>
+                          <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{child.name}</span>
                           <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: child.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
                         </HoverBtn>
                         {child.items && (
@@ -926,7 +926,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
+              <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               {dataHubHover && (
@@ -942,7 +942,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
                 {dataHubItems.map(item => (
-                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 14, color: t.fg }}>
                     <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
                       const newSet = new Set(visibleDataHubItems)
                       if (e.target.checked) newSet.add(item.name)
@@ -978,12 +978,12 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           }>
           <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
             <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Light</span>
               <Check size={16} strokeWidth={2} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange(true); setAvatarOpen(false) }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={2} style={{ color: t.secondaryFg }}/>Dark</span>
               <Check size={16} strokeWidth={2} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
@@ -1023,7 +1023,7 @@ function DeptSelector({ departmentId, departments, onChange }: any) {
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
         <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }}>
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }}>
           {departments[departmentId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
         </HoverBtn>
       }>
@@ -1049,7 +1049,7 @@ function RolesAndRates({ roles, onRolesChange }: any) {
       {showModal && <AddRoleModal onAdd={(r: any) => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={roles.length} label="Roles" onAdd={() => setShowModal(true)}/>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All offices<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
         </div>
@@ -1065,16 +1065,16 @@ function RolesAndRates({ roles, onRolesChange }: any) {
             <HoverRow key={i} selected={selectedIdx === i} onClick={() => setSelectedIdx(i)}
               style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEdit value={role.name} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,name:v} : r))}/>
+                <InlineEdit value={role.name} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,name:v} : r))} style={{ background: "transparent" }}/>
               </span>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
                 <InlineEditRate value={role.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,costRate:v} : r))}/>
               </span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{role.activePeople}</span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{role.unassigned}</span>
+              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{role.activePeople}</span>
+              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{role.unassigned}</span>
             </HoverRow>
           ))}
-          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived roles</p></div>}
+          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived roles</p></div>}
         </div>
       </div>
       {selectedIdx !== null && roles[selectedIdx] && (
@@ -1085,7 +1085,7 @@ function RolesAndRates({ roles, onRolesChange }: any) {
             { label: "Unassigned", value: roles[selectedIdx].unassigned },
             { label: "Status", value: "Active" },
           ]}/>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
           <ActivityTimeline entries={(ROLE_ACTIVITY as any)[roles[selectedIdx].name] || []}/>
         </Sheet>
       )}
@@ -1118,15 +1118,10 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
       {showModal && view !== "departments" && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
       {showModal && view === "departments" && <AddDepartmentModal onAdd={(d: any) => onDepartmentsChange([...departments, d])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>
-              {filteredBusinessUnit ? `${filteredBusinessUnit} - ` : ""}{view === "departments" ? `${departments.length} Departments` : `${filtered.length} ${view === "employees" ? "Employees" : "Contractors"}`}
-            </h1>
-            <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1.5}/>Filter</HoverBtn>
-          </div>
-          <button onClick={() => setShowModal(true)} style={s.primaryBtn}><Plus size={16} strokeWidth={2}/></button>
-        </div>
+        <SectionHeader
+          count={view === "departments" ? departments.length : filtered.length}
+          label={`${view === "departments" ? "Departments" : view === "employees" ? "Employees" : "Contractors"}${filteredBusinessUnit ? ` - ${filteredBusinessUnit}` : ""}`}
+          onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
@@ -1171,10 +1166,10 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
                   <span style={{ display: "flex", alignItems: "center" }} onClick={e => e.stopPropagation()}>
                     <DeptSelector departmentId={p.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,departmentId:v} : x))}/>
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
+                  <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.office}</span>
                 </HoverRow>
               ))}
-              {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived people</p></div>}
+              {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived people</p></div>}
             </div>
           </>
         ) : (
@@ -1190,9 +1185,9 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
                 <HoverRow key={i} selected={selectedDept === i} onClick={() => setSelectedDept(i)}
                   style={{ display: "grid", gridTemplateColumns: "2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
                   <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                    <InlineEdit value={d.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any,j: any) => j===i ? {...x,name:v} : x))}/>
+                    <InlineEdit value={d.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background: "transparent" }}/>
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{deptPeopleCounts[i] ?? 0}</span>
+                  <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{deptPeopleCounts[i] ?? 0}</span>
                 </HoverRow>
               ))}
             </div>
@@ -1207,7 +1202,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             { label: "Role", value: roles[current[selectedPerson].roleId]?.name },
             { label: "Status", value: "Active" },
           ]}/>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
           <ActivityTimeline entries={(PERSON_ACTIVITY as any)[current[selectedPerson].name] || []}/>
         </Sheet>
       )}
@@ -1478,13 +1473,13 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
                 <InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
               </span>
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>{p.code}</span>
+              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.secondaryFg }}>{p.code}</span>
               {visibleItems.has("Clients") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{clients[p.clientId]?.name}</span>
+                <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{clients[p.clientId]?.name}</span>
               )}
-              <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
+              <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.office}</span>
               {visibleItems.has("Business Units") && (
-                <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.unit || "—"}</span>
+                <span style={{ display: "flex", alignItems: "center", fontSize: 14, color: t.fg }}>{p.unit || "—"}</span>
               )}
               <span style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
@@ -1493,7 +1488,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
               </span>
             </HoverRow>
           ))}
-          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived projects</p></div>}
+          {tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived projects</p></div>}
         </div>
       </div>
       {selectedIdx !== null && projects[selectedIdx] && (
@@ -1814,7 +1809,7 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
         {unit === null ? (
           <>
-            <SectionHeader count={units.length} label="Business Units" onAdd={() => {}}/>
+            <SectionHeader count={units.length} label="Brands" onAdd={() => {}}/>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
               <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1.5}/>All regions<ChevronDown size={11} strokeWidth={1.5}/></HoverBtn>
               <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1.5}/>Import/Export</HoverBtn>
@@ -1912,11 +1907,7 @@ function ActivityLog() {
   }
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden", background:t.bg }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{filtered.length} Events</h1>
-        </div>
-      </div>
+      <SectionHeader count={filtered.length} label="Events" onAdd={() => {}}/>
       <div style={{ display:"flex", alignItems:"center", gap:8, padding:"0 24px 12px", borderBottom:`1px solid ${t.border}` }}>
         <DropdownWrapper open={filterOpen} setOpen={setFilterOpen}
           trigger={
@@ -2180,7 +2171,7 @@ export default function App() {
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
   const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
   const [clients] = useState(INITIAL_CLIENTS_DATA)
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(name => name !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
@@ -2198,7 +2189,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
-    if (activeItem === "Business Units") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
+    if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
