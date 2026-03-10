@@ -8,7 +8,7 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical
 } from "lucide-react"
 
-const getGlobalStyles = (theme) => `
+const getGlobalStyles = (theme: any) => `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: ${theme.bg}; color: ${theme.fg}; font-family: Inter, sans-serif; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -46,20 +46,20 @@ const lightTheme = {
 
 let t = darkTheme
 
-const getStyles = (theme) => ({
-  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 },
-  main: { flex: 1, display: "flex", flexDirection: "column", background: theme.bg, overflow: "hidden", minWidth: 0 },
+const getStyles = (theme: any) => ({
+  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
+  main: { flex: 1, display: "flex", flexDirection: "column" as const, background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
   primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
-  pillBtn: (active) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? theme.fgAlpha30 : theme.border}`, background: active ? theme.fgAlpha10 : theme.bg, color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
+  pillBtn: (active: any) => ({ display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, border: `1px solid ${active ? theme.fgAlpha30 : theme.border}`, background: active ? theme.fgAlpha10 : theme.bg, color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400 }),
   outlineBtn: { display: "flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 6, border: `1px solid ${theme.border}`, background: "transparent", color: theme.secondaryFg, cursor: "pointer", fontSize: 12 },
-  dropdown: { position: "absolute", top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
-  dropdownItem: (active) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" }),
+  dropdown: { position: "absolute" as const, top: "100%", left: 0, marginTop: 4, background: theme.popover, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 4, boxShadow: `0 4px 16px ${theme.shadowDark}`, zIndex: 50, minWidth: 180 },
+  dropdownItem: (active: any) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 10px", borderRadius: 5, border: "none", background: "transparent", color: active ? theme.fg : theme.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active ? 500 : 400, textAlign: "left" as const }),
 })
 
 let s = getStyles(t)
 
-function HoverRow({ selected, children, onClick, style }) {
+function HoverRow({ selected, children, onClick, style }: any) {
   const [hov, setHov] = useState(false)
   return (
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
@@ -69,7 +69,7 @@ function HoverRow({ selected, children, onClick, style }) {
   )
 }
 
-function HoverBtn({ style, children, onClick, title, disabled }) {
+function HoverBtn({ style, children, onClick, title, disabled }: any) {
   const [hov, setHov] = useState(false)
   return (
     <button title={title} onClick={onClick} disabled={disabled}
@@ -80,21 +80,21 @@ function HoverBtn({ style, children, onClick, title, disabled }) {
   )
 }
 
-function DropdownWrapper({ trigger, children, open, setOpen }) {
-  const ref = useRef(null)
+function DropdownWrapper({ trigger, children, open, setOpen }: any) {
+  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
-    function h(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    function h(e: any) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener("mousedown", h)
     return () => document.removeEventListener("mousedown", h)
   }, [open, setOpen])
   return <div ref={ref} style={{ position: "relative" }}>{trigger}{open && children}</div>
 }
 
-function InlineEdit({ value, onChange, style }) {
+function InlineEdit({ value, onChange, style }: any) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value)
-  const ref = useRef(null)
+  const ref = useRef<HTMLInputElement>(null)
   useEffect(() => { if (editing && ref.current) { ref.current.focus(); ref.current.select() } }, [editing])
   useEffect(() => { setDraft(value) }, [value])
   function commit() {
@@ -116,10 +116,10 @@ function InlineEdit({ value, onChange, style }) {
   )
 }
 
-function InlineEditRate({ value, onChange }) {
+function InlineEditRate({ value, onChange }: any) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(String(value))
-  const ref = useRef(null)
+  const ref = useRef<HTMLInputElement>(null)
   useEffect(() => { if (editing && ref.current) { ref.current.focus(); ref.current.select() } }, [editing])
   function commit() {
     const n = parseFloat(draft)
@@ -143,9 +143,9 @@ function InlineEditRate({ value, onChange }) {
   )
 }
 
-function Collapsible({ expanded, children }) {
+function Collapsible({ expanded, children }: any) {
   const [h, setH] = useState(expanded ? "auto" : "0px")
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!ref.current) return
     if (expanded) {
@@ -153,7 +153,7 @@ function Collapsible({ expanded, children }) {
       const timer = setTimeout(() => setH("auto"), 210)
       return () => clearTimeout(timer)
     } else {
-      setH(ref.current.scrollHeight + "px")
+      setH((ref.current as HTMLDivElement).scrollHeight + "px")
       requestAnimationFrame(() => setH("0px"))
     }
   }, [expanded])
@@ -164,7 +164,7 @@ function Collapsible({ expanded, children }) {
   )
 }
 
-function NikeLogo({ isDarkMode }) {
+function NikeLogo({ isDarkMode }: any) {
   return (
     <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002_nike-logos-swoosh-white-0nPbb6zNJMvApD16nQ1CvQL4h5mmIp.png" alt="Nike" style={{ height: 24, width: "auto", filter: isDarkMode ? "none" : "brightness(0)" }} />
   )
@@ -225,7 +225,7 @@ const INITIAL_CONTRACTORS = [
   { name: "Luke Skywalker", roleId: 1, departmentId: 2, office: "Sydney" },
   { name: "Han Solo", roleId: 3, departmentId: 1, office: "Melbourne" },
 ]
-const INITIAL_PROJECTS = []
+const INITIAL_PROJECTS: any[] = []
 
 const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
@@ -404,9 +404,9 @@ const SAMPLE_NOTES_POOL = [
 ]
 
 function getBusinessUnitProjects() {
-  const stageMap = { "Active": "active", "In Progress": "active", "Planning": "planning" }
+  const stageMap: Record<string, string> = { "Active": "active", "In Progress": "active", "Planning": "planning" }
   const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
-  const allProjects = []
+  const allProjects: any[] = []
 
   BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
     if (unit.projectsList) {
@@ -417,7 +417,7 @@ function getBusinessUnitProjects() {
           : undefined
         allProjects.push({
           name: proj.title,
-          code: `${unit.name.split(" ").pop().toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
+          code: `${(unit.name.split(" ").pop() ?? unit.name).toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
           clientId: 0,
           stage: stageMap[proj.status] || "planning",
           margin: Math.floor(Math.random() * 15) + 20,
@@ -485,14 +485,14 @@ const LOCATIONS_INIT = [
 ]
 
 // ── Shared UI ──
-function OfficeFilter({ selected, onChange }) {
+function OfficeFilter({ selected, onChange }: any) {
   const [open, setOpen] = useState(false)
   const isAll = selected.length === ALL_OFFICES.length
   const label = isAll ? "All offices" : selected.length === 1 ? selected[0] : `${selected.length} offices`
-  function toggleOffice(o) {
-    onChange(prev => {
+  function toggleOffice(o: any) {
+    onChange((prev: any) => {
       if (prev.length === ALL_OFFICES.length) return [o]
-      if (prev.includes(o)) { const n = prev.filter(x => x !== o); return n.length === 0 ? [...ALL_OFFICES] : n }
+      if (prev.includes(o)) { const n = prev.filter((x: any) => x !== o); return n.length === 0 ? [...ALL_OFFICES] : n }
       const n = [...prev, o]; return n.length === ALL_OFFICES.length ? [...ALL_OFFICES] : n
     })
   }
@@ -519,10 +519,10 @@ function OfficeFilter({ selected, onChange }) {
   )
 }
 
-function Tabs({ tabs, active, onChange }) {
+function Tabs({ tabs, active, onChange }: any) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-      {tabs.map(tab => (
+      {tabs.map((tab: any) => (
         <HoverBtn key={tab.label} onClick={() => onChange(tab.value)}
           style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: active === tab.value ? t.accent : "transparent", color: active === tab.value ? t.fg : t.secondaryFg, cursor: "pointer", fontSize: 12, fontWeight: active === tab.value ? 500 : 400 }}>
           {tab.label}
@@ -532,7 +532,7 @@ function Tabs({ tabs, active, onChange }) {
   )
 }
 
-function SectionHeader({ count, label, onAdd }) {
+function SectionHeader({ count, label, onAdd }: any) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -544,7 +544,7 @@ function SectionHeader({ count, label, onAdd }) {
   )
 }
 
-function Sheet({ title, subtitle, onClose, children, width = 380 }) {
+function Sheet({ title, subtitle, onClose, children, width = 380 }: any) {
   return (
     <div style={{ width, flexShrink: 0, borderLeft: `1px solid ${t.border}`, background: t.bg, display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${t.border}`, padding: "16px 20px" }}>
@@ -559,10 +559,10 @@ function Sheet({ title, subtitle, onClose, children, width = 380 }) {
   )
 }
 
-function DetailGrid({ items }) {
+function DetailGrid({ items }: any) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16, paddingBottom: 16, borderBottom: `1px solid ${t.border}` }}>
-      {items.map((item, i) => (
+      {items.map((item: any, i: any) => (
         <div key={i}>
           <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>{item.label}</span>
           <p style={{ fontSize: 13, color: t.fg, marginTop: 2 }}>{item.value}</p>
@@ -572,7 +572,7 @@ function DetailGrid({ items }) {
   )
 }
 
-function ActivityTimeline({ entries }) {
+function ActivityTimeline({ entries }: any) {
   const iconColors = {
     added: { bg: "#052e16", fg: "#4ade80" }, allocation: { bg: "#451a03", fg: "#fb923c" },
     role_change: { bg: "#172554", fg: "#60a5fa" }, office_transfer: { bg: "#2e1065", fg: "#a78bfa" },
@@ -580,7 +580,7 @@ function ActivityTimeline({ entries }) {
     person_assigned: { bg: "#172554", fg: "#60a5fa" }, person_removed: { bg: "#450a0a", fg: "#f87171" },
     renamed: { bg: "#451a03", fg: "#fb923c" },
   }
-  function getIcon(type) {
+  function getIcon(type: any) {
     if (type === "added" || type === "person_assigned") return <UserPlus size={13} strokeWidth={1.5}/>
     if (type === "role_change" || type === "renamed") return <ArrowRightLeft size={13} strokeWidth={1.5}/>
     if (type === "allocation") return <CalendarClock size={13} strokeWidth={1.5}/>
@@ -593,8 +593,8 @@ function ActivityTimeline({ entries }) {
   return (
     <div style={{ position: "relative" }}>
       <div style={{ position: "absolute", left: 13, top: 12, bottom: 12, width: 1, background: t.border }}/>
-      {entries.map((e, i) => {
-        const col = iconColors[e.type] || { bg: t.muted, fg: t.mutedFg }
+      {entries.map((e: any, i: any) => {
+        const col = (iconColors as any)[e.type] || { bg: t.muted, fg: t.mutedFg }
         return (
           <div key={i} style={{ display: "flex", gap: 12, paddingBottom: 20 }}>
             <div style={{ width: 26, height: 26, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
@@ -613,10 +613,10 @@ function ActivityTimeline({ entries }) {
 }
 
 // ── Modals ──
-function AddRoleModal({ onAdd, onClose }) {
+function AddRoleModal({ onAdd, onClose }: any) {
   const [name, setName] = useState("")
   const [costRate, setCostRate] = useState("")
-  const nameRef = useRef(null)
+  const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
   function submit() {
     const n = name.trim()
@@ -658,12 +658,12 @@ function AddRoleModal({ onAdd, onClose }) {
   )
 }
 
-function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" }) {
+function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" }: any) {
   const [name, setName] = useState("")
   const [roleId, setRoleId] = useState(0)
   const [departmentId, setDepartmentId] = useState(0)
   const [office, setOffice] = useState("New York")
-  const nameRef = useRef(null)
+  const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
   const officeOpts = ["New York", "London", "Sydney", "Melbourne", "Austin", "Los Angeles", "San Francisco", "Chicago", "Tokyo", "Singapore", "Berlin", "Paris", "Madrid"]
   function submit() {
@@ -690,9 +690,9 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
               style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
           </div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Role</label>
-            <select value={roleId} onChange={e => setRoleId(Number(e.target.value))} style={sel}>{roles.map((r,i) => <option key={i} value={i}>{r.name}</option>)}</select></div>
+            <select value={roleId} onChange={e => setRoleId(Number(e.target.value))} style={sel}>{roles.map((r: any,i: any) => <option key={i} value={i}>{r.name}</option>)}</select></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Department</label>
-            <select value={departmentId} onChange={e => setDepartmentId(Number(e.target.value))} style={sel}>{departments.map((d,i) => <option key={i} value={i}>{d.name}</option>)}</select></div>
+            <select value={departmentId} onChange={e => setDepartmentId(Number(e.target.value))} style={sel}>{departments.map((d: any,i: any) => <option key={i} value={i}>{d.name}</option>)}</select></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Office</label>
             <select value={office} onChange={e => setOffice(e.target.value)} style={sel}>{officeOpts.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
         </div>
@@ -708,9 +708,9 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
   )
 }
 
-function AddDepartmentModal({ onAdd, onClose }) {
+function AddDepartmentModal({ onAdd, onClose }: any) {
   const [name, setName] = useState("")
-  const ref = useRef(null)
+  const ref = useRef<HTMLInputElement>(null)
   useEffect(() => { ref.current?.focus() }, [])
   function submit() {
     const n = name.trim()
@@ -745,7 +745,7 @@ function AddDepartmentModal({ onAdd, onClose }) {
   )
 }
 
-function AddProjectModal({ people, clients, onAdd, onClose }) {
+function AddProjectModal({ people, clients, onAdd, onClose }: any) {
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
   const [clientId, setClientId] = useState(0)
@@ -756,7 +756,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
   const [endDate, setEndDate] = useState("2026-12-31")
   const [ownerId, setOwnerId] = useState(0)
   const [office, setOffice] = useState("New York")
-  const nameRef = useRef(null)
+  const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
   const officeOpts = ["New York", "London", "Sydney", "Melbourne"]
   const inp = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
@@ -780,14 +780,14 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
             <input ref={nameRef} value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Q3 Campaign" style={inp}/>
           </div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Code</label><input value={code} onChange={e => setCode(e.target.value)} placeholder="e.g. CAM-001" style={inp}/></div>
-          <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Client</label><select value={clientId} onChange={e => setClientId(Number(e.target.value))} style={inp}>{clients.map((c,i) => <option key={i} value={i}>{c.name}</option>)}</select></div>
+          <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Client</label><select value={clientId} onChange={e => setClientId(Number(e.target.value))} style={inp}>{clients.map((c: any,i: any) => <option key={i} value={i}>{c.name}</option>)}</select></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Stage</label><select value={stage} onChange={e => setStage(e.target.value)} style={inp}>{["planning","active","on-hold","completed"].map(s2 => <option key={s2} value={s2}>{s2}</option>)}</select></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Office</label><select value={office} onChange={e => setOffice(e.target.value)} style={inp}>{officeOpts.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Margin (%)</label><input type="number" value={margin} onChange={e => setMargin(e.target.value)} placeholder="30" style={inp}/></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Budget ($)</label><input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="0" style={inp}/></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Start date</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ ...inp, colorScheme: "dark" }}/></div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>End date</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ ...inp, colorScheme: "dark" }}/></div>
-          <div style={{ gridColumn: "1/-1" }}><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Owner</label><select value={ownerId} onChange={e => setOwnerId(Number(e.target.value))} style={inp}>{people.map((p,i) => <option key={i} value={i}>{p.name}</option>)}</select></div>
+          <div style={{ gridColumn: "1/-1" }}><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Owner</label><select value={ownerId} onChange={e => setOwnerId(Number(e.target.value))} style={inp}>{people.map((p: any,i: any) => <option key={i} value={i}>{p.name}</option>)}</select></div>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
@@ -802,17 +802,17 @@ function AddProjectModal({ people, clients, onAdd, onClose }) {
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange }) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubHover, setDataHubHover] = useState(false)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
-  const dataHubSettingsRef = useRef(null)
+  const dataHubSettingsRef = useRef<HTMLDivElement>(null)
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (dataHubSettingsRef.current && !dataHubSettingsRef.current.contains(event.target)) {
         setDataHubSettingsOpen(false)
       }
@@ -823,19 +823,19 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     }
   }, [dataHubSettingsOpen])
 
-  function setActive(name, bc) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
-  function toggleLoc(i) {
-    setLocs(prev => prev.map((l, idx) => idx === i ? { ...l, expanded: !l.expanded } : { ...l, expanded: false, children: l.children?.map(c => ({ ...c, expanded: false })) }))
+  function setActive(name: any, bc: any) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
+  function toggleLoc(i: any) {
+    setLocs((prev: any) => prev.map((l: any, idx: any) => idx === i ? { ...l, expanded: !l.expanded } : { ...l, expanded: false, children: l.children?.map((c: any) => ({ ...c, expanded: false })) }))
   }
-  function toggleChild(pi, ci) {
-    setLocs(prev => prev.map((l, i) => i === pi && l.children ? { ...l, children: l.children.map((c, j) => j === ci ? { ...c, expanded: !c.expanded } : { ...c, expanded: false }) } : l))
+  function toggleChild(pi: any, ci: any) {
+    setLocs((prev: any) => prev.map((l: any, i: any) => i === pi && l.children ? { ...l, children: l.children.map((c: any, j: any) => j === ci ? { ...c, expanded: !c.expanded } : { ...c, expanded: false }) } : l))
   }
 
-  const navItemStyle = (active) => ({
+  const navItemStyle = (active: any) => ({
     display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "6px 8px",
     borderRadius: 6, border: "none", background: active ? t.accent : "transparent",
     color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 13,
-    fontWeight: active ? 500 : 400, textAlign: "left",
+    fontWeight: active ? 500 : 400, textAlign: "left" as const,
   })
 
   return (
@@ -850,7 +850,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </HoverBtn>
           }>
           <div style={{ ...s.dropdown, width: 200 }}>
-            <HoverBtn onClick={() => { setActive("Settings"); setOrgOpen(false) }}
+            <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <Settings size={14} strokeWidth={1}/> Settings
             </HoverBtn>
@@ -865,7 +865,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
         {version === "single" ? (
           officeItems.map(item => (
-            <HoverBtn key={item.name} onClick={() => setActive(item.name)} style={navItemStyle(activeItem === item.name)}>
+            <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
               {item.icon}{item.name}
             </HoverBtn>
           ))
@@ -996,19 +996,19 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
 }
 
 // ── Role selectors ──
-function RoleSelector({ roleId, roles, onChange }) {
+function RoleSelector({ roleId, roles, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
-        <HoverBtn onClick={e => { e.stopPropagation(); setOpen(!open) }}
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
           style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 28, padding: "0 8px", borderRadius: 6, border: `1px solid ${t.border}`, background: "transparent", color: t.fg, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
           {roles[roleId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width: 180 }}>
-        {roles.map((r, i) => (
-          <button key={i} onClick={e => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === roleId)}>
+        {roles.map((r: any, i: any) => (
+          <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === roleId)}>
             {r.name} {i === roleId && <Check size={11} strokeWidth={1.5}/>}
           </button>
         ))}
@@ -1017,19 +1017,19 @@ function RoleSelector({ roleId, roles, onChange }) {
   )
 }
 
-function DeptSelector({ departmentId, departments, onChange }) {
+function DeptSelector({ departmentId, departments, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
-        <HoverBtn onClick={e => { e.stopPropagation(); setOpen(!open) }}
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
           style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }}>
           {departments[departmentId]?.name || "Unknown"}<ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
         </HoverBtn>
       }>
       <div style={{ ...s.dropdown, width: 200 }}>
-        {departments.map((d, i) => (
-          <button key={i} onClick={e => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === departmentId)}>
+        {departments.map((d: any, i: any) => (
+          <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === departmentId)}>
             {d.name} {i === departmentId && <Check size={13} strokeWidth={1.5}/>}
           </button>
         ))}
@@ -1039,14 +1039,14 @@ function DeptSelector({ departmentId, departments, onChange }) {
 }
 
 // ── Pages ──
-function RolesAndRates({ roles, onRolesChange }) {
+function RolesAndRates({ roles, onRolesChange }: any) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const display = tab === "archived" ? [] : roles
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
-      {showModal && <AddRoleModal onAdd={r => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
+      {showModal && <AddRoleModal onAdd={(r: any) => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={roles.length} label="Roles" onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px", borderBottom: `1px solid ${t.border}` }}>
@@ -1061,14 +1061,14 @@ function RolesAndRates({ roles, onRolesChange }) {
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
             {["Role","Cost rate","Active people","Unassigned"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
           </div>
-          {display.map((role, i) => (
+          {display.map((role: any, i: any) => (
             <HoverRow key={i} selected={selectedIdx === i} onClick={() => setSelectedIdx(i)}
               style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEdit value={role.name} onChange={v => onRolesChange(roles.map((r,j) => j===i ? {...r,name:v} : r))}/>
+                <InlineEdit value={role.name} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,name:v} : r))}/>
               </span>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEditRate value={role.costRate} onChange={v => onRolesChange(roles.map((r,j) => j===i ? {...r,costRate:v} : r))}/>
+                <InlineEditRate value={role.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any,j: any) => j===i ? {...r,costRate:v} : r))}/>
               </span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{role.activePeople}</span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{role.unassigned}</span>
@@ -1086,14 +1086,14 @@ function RolesAndRates({ roles, onRolesChange }) {
             { label: "Status", value: "Active" },
           ]}/>
           <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
-          <ActivityTimeline entries={ROLE_ACTIVITY[roles[selectedIdx].name] || []}/>
+          <ActivityTimeline entries={(ROLE_ACTIVITY as any)[roles[selectedIdx].name] || []}/>
         </Sheet>
       )}
     </div>
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }) {
+function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }: any) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState(null)
@@ -1104,10 +1104,10 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   const current = view === "employees" ? people : view === "contractors" ? contractors : people
   const setCurrent = view === "employees" ? onPeopleChange : view === "contractors" ? onContractorsChange : onPeopleChange
   const isAll = selectedOffices.length === ALL_OFFICES.length
-  const filtered = isAll ? current : current.filter(p => selectedOffices.includes(p.office))
+  const filtered = isAll ? current : current.filter((p: any) => selectedOffices.includes(p.office))
   const display = tab === "archived" ? [] : filtered
 
-  function handleAdd(person) {
+  function handleAdd(person: any) {
     if (view === "employees") onPeopleChange([...people, person])
     else if (view === "contractors") onContractorsChange([...contractors, person])
     else onDepartmentsChange([...departments, person])
@@ -1116,7 +1116,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       {showModal && view !== "departments" && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
-      {showModal && view === "departments" && <AddDepartmentModal onAdd={d => onDepartmentsChange([...departments, d])} onClose={() => setShowModal(false)}/>}
+      {showModal && view === "departments" && <AddDepartmentModal onAdd={(d: any) => onDepartmentsChange([...departments, d])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1159,17 +1159,17 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
               <div style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
                 {["Name","Role","Department","Office"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
               </div>
-              {display.map((p, i) => (
+              {display.map((p: any, i: any) => (
                 <HoverRow key={i} selected={selectedPerson === i} onClick={() => setSelectedPerson(i)}
                   style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
                   <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                    <InlineEdit value={p.name} onChange={v => setCurrent(current.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background: "transparent" }}/>
+                    <InlineEdit value={p.name} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background: "transparent" }}/>
                   </span>
                   <span style={{ display: "flex", alignItems: "center" }} onClick={e => e.stopPropagation()}>
-                    <RoleSelector roleId={p.roleId} roles={roles} onChange={v => setCurrent(current.map((x,j) => j===i ? {...x,roleId:v} : x))}/>
+                    <RoleSelector roleId={p.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,roleId:v} : x))}/>
                   </span>
                   <span style={{ display: "flex", alignItems: "center" }} onClick={e => e.stopPropagation()}>
-                    <DeptSelector departmentId={p.departmentId} departments={departments} onChange={v => setCurrent(current.map((x,j) => j===i ? {...x,departmentId:v} : x))}/>
+                    <DeptSelector departmentId={p.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any,j: any) => j===i ? {...x,departmentId:v} : x))}/>
                   </span>
                   <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{p.office}</span>
                 </HoverRow>
@@ -1186,11 +1186,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
               <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
                 {["Name","Active people"].map(h => <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>)}
               </div>
-              {departments.map((d, i) => (
+              {departments.map((d: any, i: any) => (
                 <HoverRow key={i} selected={selectedDept === i} onClick={() => setSelectedDept(i)}
                   style={{ display: "grid", gridTemplateColumns: "2fr 1fr", borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
                   <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                    <InlineEdit value={d.name} onChange={v => onDepartmentsChange(departments.map((x,j) => j===i ? {...x,name:v} : x))}/>
+                    <InlineEdit value={d.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any,j: any) => j===i ? {...x,name:v} : x))}/>
                   </span>
                   <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.fg }}>{deptPeopleCounts[i] ?? 0}</span>
                 </HoverRow>
@@ -1208,7 +1208,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             { label: "Status", value: "Active" },
           ]}/>
           <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
-          <ActivityTimeline entries={PERSON_ACTIVITY[current[selectedPerson].name] || []}/>
+          <ActivityTimeline entries={(PERSON_ACTIVITY as any)[current[selectedPerson].name] || []}/>
         </Sheet>
       )}
       {view === "departments" && selectedDept !== null && departments[selectedDept] && (
@@ -1220,7 +1220,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   )
 }
 
-function relTime(ts) {
+function relTime(ts: any) {
   const m = Math.floor((Date.now() - ts) / 60000)
   if (m < 1) return "just now"
   if (m < 60) return `${m}m ago`
@@ -1229,7 +1229,7 @@ function relTime(ts) {
   return `${Math.floor(h / 24)}d ago`
 }
 
-function NotesCell({ notes, onClick }) {
+function NotesCell({ notes, onClick }: any) {
   const hasNotes = notes && notes.length > 0
   const last = hasNotes ? notes[notes.length - 1] : null
   return (
@@ -1256,10 +1256,10 @@ function NotesCell({ notes, onClick }) {
   )
 }
 
-function NotesPanel({ project, currentUser, onClose, onUpdate }) {
+function NotesPanel({ project, currentUser, onClose, onUpdate }: any) {
   const [draft, setDraft] = useState("")
   const notes = project.notes || []
-  const bottomRef = useRef(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [notes.length])
 
   function submit() {
@@ -1270,7 +1270,7 @@ function NotesPanel({ project, currentUser, onClose, onUpdate }) {
     setDraft("")
   }
 
-  function handleKey(e) {
+  function handleKey(e: any) {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
@@ -1287,7 +1287,7 @@ function NotesPanel({ project, currentUser, onClose, onUpdate }) {
         {notes.length === 0 && (
           <p style={{ fontSize:13, color:t.mutedFg, textAlign:"center", marginTop:32 }}>No notes yet. Add the first one below.</p>
         )}
-        {notes.map((n, i) => (
+        {notes.map((n: any, i: any) => (
           <div key={i} style={{ display:"flex", gap:10 }}>
             <div style={{ width:28, height:28, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:600, color:t.fg, flexShrink:0 }}>
               {n.author.charAt(0)}
@@ -1334,7 +1334,7 @@ const PT_COLS_CONFIG = [
   { key: "owner",     label: "Owner",   flex: "0.8fr" },
 ]
 
-function ProjectTracker({ projects, onProjectsChange, people, clients }) {
+function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
   const [showModal, setShowModal] = useState(false)
   const [colOrder, setColOrder] = useState(PT_COLS_CONFIG.map(c => c.key))
   const [dragKey, setDragKey] = useState(null)
@@ -1342,12 +1342,12 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   const [notesIdx, setNotesIdx] = useState(null)
   const currentUser = people[1]?.name || "Amy Santiago"
 
-  const cols = colOrder.map(k => PT_COLS_CONFIG.find(c => c.key === k))
+  const cols = colOrder.map((k: any) => PT_COLS_CONFIG.find(c => c.key === k)!)
   const gridCols = cols.map(c => c.flex).join(" ")
 
-  function onDragStart(key) { setDragKey(key) }
-  function onDragOver(e, key) { e.preventDefault(); setDropKey(key) }
-  function onDrop(key) {
+  function onDragStart(key: any) { setDragKey(key) }
+  function onDragOver(e: any, key: any) { e.preventDefault(); setDropKey(key) }
+  function onDrop(key: any) {
     if (!dragKey || dragKey === key) { setDragKey(null); setDropKey(null); return }
     const order = [...colOrder]
     const from = order.indexOf(dragKey)
@@ -1359,18 +1359,18 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
     setDropKey(null)
   }
 
-  function renderCell(col, p, i) {
+  function renderCell(col: any, p: any, i: any) {
     const k = col.key
     switch (k) {
-      case "name":      return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, fontWeight:500, color:t.fg }}><InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background:"transparent" }}/></span>
+      case "name":      return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, fontWeight:500, color:t.fg }}><InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background:"transparent" }}/></span>
       case "client":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{clients[p.clientId]?.name}</span>
-      case "stage":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:10, height:10, borderRadius:"50%", background:STAGE_COLORS[p.stage] }}/></span>
+      case "stage":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:10, height:10, borderRadius:"50%", background:(STAGE_COLORS as any)[p.stage] }}/></span>
       case "margin":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{p.margin}%</span>
       case "budget":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>${p.budget.toLocaleString()}</span>
       case "startDate": return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.startDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
       case "endDate":   return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.endDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
       case "owner":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg }}>{people[p.ownerId]?.name.charAt(0) || "?"}</div></span>
-      case "health":    return <span key={k} style={{ display:"flex", alignItems:"center" }}><HealthDropdown value={p.health || "on-track"} onChange={v => { const u=[...projects]; u[i].health=v; onProjectsChange(u) }}/></span>
+      case "health":    return <span key={k} style={{ display:"flex", alignItems:"center" }}><HealthDropdown value={p.health || "on-track"} onChange={(v: any) => { const u=[...projects]; u[i].health=v; onProjectsChange(u) }}/></span>
       case "notes":     return <span key={k} style={{ display:"flex", alignItems:"flex-start", paddingTop:4 }}><NotesCell notes={p.notes} onClick={() => setNotesIdx(i)}/></span>
       default:          return null
     }
@@ -1379,7 +1379,7 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
     <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
-      {showModal && <AddProjectModal people={people} clients={clients} onAdd={p => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
+      {showModal && <AddProjectModal people={people} clients={clients} onAdd={(p: any) => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
           <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
@@ -1404,7 +1404,7 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
             </span>
           ))}
         </div>
-        {projects.map((p, i) => (
+        {projects.map((p: any, i: any) => (
           <HoverRow key={i} selected={false} onClick={() => {}}
             style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "default", gap: 8, transition: "background 0.1s" }}>
             {cols.map(col => renderCell(col, p, i))}
@@ -1417,7 +1417,7 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
         project={projects[notesIdx]}
         currentUser={currentUser}
         onClose={() => setNotesIdx(null)}
-        onUpdate={updated => {
+        onUpdate={(updated: any) => {
           const u = [...projects]
           u[notesIdx] = { ...u[notesIdx], notes: updated }
           onProjectsChange(u)
@@ -1428,13 +1428,13 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }) {
   )
 }
 
-function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients, filteredBusinessUnit, onFilterClear }) {
+function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, clients, filteredBusinessUnit, onFilterClear }: any) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const isAll = selectedOffices.length === ALL_OFFICES.length
-  let filtered = isAll ? projects : projects.filter(p => selectedOffices.includes(p.office))
-  if (filteredBusinessUnit) filtered = filtered.filter(p => p.unit === filteredBusinessUnit)
+  let filtered = isAll ? projects : projects.filter((p: any) => selectedOffices.includes(p.office))
+  if (filteredBusinessUnit) filtered = filtered.filter((p: any) => p.unit === filteredBusinessUnit)
   const display = tab === "archived" ? [] : filtered
 
   const columns = []
@@ -1472,11 +1472,11 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
               <span key={col.key} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{col.label}</span>
             ))}
           </div>
-          {display.map((p, idx) => (
+          {display.map((p: any, idx: any) => (
             <HoverRow key={idx} selected={selectedIdx === projects.indexOf(p)} onClick={() => setSelectedIdx(projects.indexOf(p))}
               style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "pointer", transition: "background 0.1s" }}>
               <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
-                <InlineEdit value={p.name} onChange={v => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
+                <InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(p)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/>
               </span>
               <span style={{ display: "flex", alignItems: "center", fontSize: 13, color: t.secondaryFg }}>{p.code}</span>
               {visibleItems.has("Clients") && (
@@ -1519,13 +1519,13 @@ const HEALTH_OPTIONS = [
   { value: "off-track", label: "Off Track", color: "#ef4444" },
 ]
 
-function HealthDropdown({ value, onChange }) {
+function HealthDropdown({ value, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const current = HEALTH_OPTIONS.find(o => o.value === value) || HEALTH_OPTIONS[0]
+  const current = HEALTH_OPTIONS.find((o: any) => o.value === value) || HEALTH_OPTIONS[0]
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
-        <HoverBtn onClick={e => { e.stopPropagation(); setOpen(!open) }}
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
           style={{ display:"flex", alignItems:"center", gap:6, height:24, padding:"0 8px", borderRadius:12, background: current.color + "18", border:`1px solid ${current.color}40`, cursor:"pointer", fontSize:11, fontWeight:500, color: current.color }}>
           <span style={{ width:6, height:6, borderRadius:"50%", background: current.color, flexShrink:0 }}/>
           {current.label}
@@ -1534,7 +1534,7 @@ function HealthDropdown({ value, onChange }) {
       }>
       <div style={{ ...s.dropdown, width:130 }}>
         {HEALTH_OPTIONS.map(o => (
-          <button key={o.value} onClick={e => { e.stopPropagation(); onChange(o.value); setOpen(false) }} style={{ ...s.dropdownItem(o.value === value), display:"flex", alignItems:"center" }}>
+          <button key={o.value} onClick={(e: any) => { e.stopPropagation(); onChange(o.value); setOpen(false) }} style={{ ...s.dropdownItem(o.value === value), display:"flex", alignItems:"center" }}>
             <span style={{ display:"flex", alignItems:"center", gap:8, flex:1 }}>
               <span style={{ width:6, height:6, borderRadius:"50%", background:o.color, flexShrink:0 }}/>
               {o.label}
@@ -1548,7 +1548,7 @@ function HealthDropdown({ value, onChange }) {
 }
 
 // ── Clients ──
-function CurrencySelector({ value, onChange }) {
+function CurrencySelector({ value, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
@@ -1569,18 +1569,18 @@ function CurrencySelector({ value, onChange }) {
   )
 }
 
-function OfficeSelectorRC({ value, onChange }) {
+function OfficeSelectorRC({ value, onChange }: any) {
   const [open, setOpen] = useState(false)
   const isAll = value === "all"
   const selected = isAll ? [] : value
   const label = isAll ? "All offices" : selected.length === 0 ? "No offices" : selected.length === ALL_OFFICES.length ? "All offices" : selected.join(", ")
-  function toggle(o) {
+  function toggle(o: any) {
     if (isAll) { onChange(ALL_OFFICES.filter(x => x !== o)); return }
     const cur = [...selected]
     if (cur.includes(o)) { const n = cur.filter(x => x !== o); onChange(n.length === 0 ? "all" : n) }
     else { const n = [...cur, o]; onChange(n.length === ALL_OFFICES.length ? "all" : n) }
   }
-  function isSelected(o) { return isAll || selected.includes(o) }
+  function isSelected(o: any) { return isAll || selected.includes(o) }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1604,9 +1604,9 @@ function OfficeSelectorRC({ value, onChange }) {
   )
 }
 
-function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }) {
+function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }: any) {
   const [open, setOpen] = useState(false)
-  const available = roles.map((r,i) => ({...r,i})).filter(r => !linkedIds.has(r.i))
+  const available = roles.map((r: any,i: any) => ({...r,i})).filter((r: any) => !linkedIds.has(r.i))
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1618,13 +1618,13 @@ function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }) {
       {available.length > 0 && (
         <div style={{ ...s.dropdown, width:240, maxHeight:320, overflowY:"auto" }}>
           {available.length > 1 && <>
-            <button onClick={() => { onAddAll(available.map(r=>r.i)); setOpen(false) }}
+            <button onClick={() => { onAddAll(available.map((r: any)=>r.i)); setOpen(false) }}
               style={{ display:"flex", width:"100%", alignItems:"center", padding:"8px 10px", borderRadius:5, border:"none", background:"transparent", color:t.fg, cursor:"pointer", fontSize:13, fontWeight:500 }}>
               Add all roles
             </button>
             <div style={{ height:1, background:t.border, margin:"4px 0" }}/>
           </>}
-          {available.map(r => (
+          {available.map((r: any) => (
             <button key={r.i} onClick={() => { onAdd(r.i) }}
               style={{ display:"flex", width:"100%", alignItems:"center", gap:8, padding:"8px 10px", borderRadius:5, border:"none", background:"transparent", color:t.secondaryFg, cursor:"pointer", fontSize:13 }}>
               <div style={{ width:14, height:14, borderRadius:3, border:`1px solid ${t.border}` }}/>
@@ -1637,17 +1637,17 @@ function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }) {
   )
 }
 
-function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClose }) {
+function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClose }: any) {
   const rc = client.rateCards[rcIdx]
-  function update(updated) {
-    onUpdateClients(clientIdx, { ...client, rateCards: client.rateCards.map((r,i) => i===rcIdx ? updated : r) })
+  function update(updated: any) {
+    onUpdateClients(clientIdx, { ...client, rateCards: client.rateCards.map((r: any,i: any) => i===rcIdx ? updated : r) })
   }
-  function currSymbol(cur) {
+  function currSymbol(cur: any) {
     if (cur==="GBP") return "£"; if (cur==="EUR") return "€"; if (cur==="JPY") return "¥"; return "$"
   }
   const [editingNotes, setEditingNotes] = useState(false)
   const [notesDraft, setNotesDraft] = useState(rc.notes || "Initial Standard rates")
-  const notesRef = useRef(null)
+  const notesRef = useRef<HTMLInputElement>(null)
   useEffect(() => { if (editingNotes && notesRef.current) { notesRef.current.focus(); notesRef.current.select() } }, [editingNotes])
 
   return (
@@ -1673,11 +1673,11 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
         <div style={{ display:"flex", gap:16, marginBottom:24, flexWrap:"wrap" }}>
           <div>
             <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Currency</p>
-            <CurrencySelector value={rc.currency} onChange={v => update({...rc,currency:v})}/>
+            <CurrencySelector value={rc.currency} onChange={(v: any) => update({...rc,currency:v})}/>
           </div>
           <div>
             <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Offices</p>
-            <OfficeSelectorRC value={rc.offices} onChange={v => update({...rc,offices:v})}/>
+            <OfficeSelectorRC value={rc.offices} onChange={(v: any) => update({...rc,offices:v})}/>
           </div>
           <div>
             <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Effective from</p>
@@ -1695,16 +1695,16 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
                 <span style={{ fontSize:11, fontWeight:500, color:t.mutedFg }}>Bill rate</span>
                 <span/>
               </div>
-              {rc.linkedRoles.map((lr, i) => (
+              {rc.linkedRoles.map((lr: any, i: any) => (
                 <div key={lr.roleId} style={{ display:"grid", gridTemplateColumns:"1fr 100px 28px", gap:8, alignItems:"center", borderTop:`1px solid ${t.border}`, padding:"8px 0" }}>
                   <span style={{ fontSize:13, color:t.fg }}>{roles[lr.roleId]?.name ?? "Unknown"}</span>
                   <div style={{ display:"flex", alignItems:"center" }}>
                     <span style={{ fontSize:12, color:t.mutedFg, paddingRight:2 }}>{currSymbol(rc.currency)}</span>
                     <input type="number" value={lr.billRate}
-                      onChange={e => update({...rc, linkedRoles: rc.linkedRoles.map((r,j) => j===i ? {...r,billRate:Number(e.target.value)||0} : r)})}
+                      onChange={(e: any) => update({...rc, linkedRoles: rc.linkedRoles.map((r: any,j: any) => j===i ? {...r,billRate:Number(e.target.value)||0} : r)})}
                       style={{ width:"100%", fontSize:13, color:t.fg, background:"transparent", border:"none", outline:"none", fontFamily:"inherit" }}/>
                   </div>
-                  <HoverBtn onClick={() => update({...rc, linkedRoles: rc.linkedRoles.filter((_,j) => j!==i)})}
+                  <HoverBtn onClick={() => update({...rc, linkedRoles: rc.linkedRoles.filter((_: any,j: any) => j!==i)})}
                     style={{ ...s.iconBtn, width:24, height:24, color:t.mutedFg }}>
                     <X size={12} strokeWidth={1.5}/>
                   </HoverBtn>
@@ -1713,9 +1713,9 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
             </>
           )}
           <div style={{ paddingTop:12 }}>
-            <AddRolesBtn roles={roles} linkedIds={new Set(rc.linkedRoles.map(r=>r.roleId))}
-              onAdd={idx => update({...rc, linkedRoles:[...rc.linkedRoles,{roleId:idx,billRate:roles[idx]?.costRate??0}]})}
-              onAddAll={idxs => update({...rc, linkedRoles:[...rc.linkedRoles,...idxs.map(i=>({roleId:i,billRate:roles[i]?.costRate??0}))]})}/>
+            <AddRolesBtn roles={roles} linkedIds={new Set(rc.linkedRoles.map((r: any)=>r.roleId))}
+              onAdd={(idx: any) => update({...rc, linkedRoles:[...rc.linkedRoles,{roleId:idx,billRate:roles[idx]?.costRate??0}]})}
+              onAddAll={(idxs: any) => update({...rc, linkedRoles:[...rc.linkedRoles,...idxs.map((i: any)=>({roleId:i,billRate:roles[i]?.costRate??0}))]})}/>
           </div>
         </div>
       </div>
@@ -1723,12 +1723,12 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
   )
 }
 
-function Clients({ roles }) {
+function Clients({ roles }: any) {
   const [tab, setTab] = useState("active")
   const [clients, setClients] = useState(CLIENTS_FULL)
-  const [selectedClient, setSelectedClient] = useState(null)
-  const [selectedRC, setSelectedRC] = useState(null)
-  function updateClient(idx, updated) { setClients(prev => prev.map((c,i) => i===idx ? updated : c)) }
+  const [selectedClient, setSelectedClient] = useState<number|null>(null)
+  const [selectedRC, setSelectedRC] = useState<number|null>(null)
+  function updateClient(idx: any, updated: any) { setClients((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
   const client = selectedClient !== null ? clients[selectedClient] : null
 
   return (
@@ -1749,11 +1749,11 @@ function Clients({ roles }) {
               <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
                 {["Client","Rate cards","Projects"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
               </div>
-              {(tab==="archived"?[]:clients).map((c,i) => (
+              {(tab==="archived"?[]:clients).map((c: any,i: any) => (
                 <HoverRow key={i} selected={false} onClick={() => { setSelectedClient(i); setSelectedRC(null) }}
                   style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
                   <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
-                    <InlineEdit value={c.name} onChange={v => setClients(cl => cl.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
+                    <InlineEdit value={c.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{c.rateCards.length}</span>
                   <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{c.projects}</span>
@@ -1780,7 +1780,7 @@ function Clients({ roles }) {
               <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
                 {["Rate Card","Currency","Offices","Roles"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
               </div>
-              {client.rateCards.map((rc, i) => (
+              {client.rateCards.map((rc: any, i: any) => (
                 <HoverRow key={i} selected={selectedRC===i} onClick={() => setSelectedRC(i)}
                   style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
                   <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{rc.title}</span>
@@ -1800,13 +1800,13 @@ function Clients({ roles }) {
   )
 }
 
-function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
+function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
   const [tab, setTab] = useState("active")
   const [units, setUnits] = useState(BUSINESS_UNITS_FULL)
-  const [selectedUnit, setSelectedUnit] = useState(null)
+  const [selectedUnit, setSelectedUnit] = useState<number|null>(null)
   const [viewTab, setViewTab] = useState("departments")
-  const [selectedDept, setSelectedDept] = useState(null)
-  function updateUnit(idx, updated) { setUnits(prev => prev.map((u,i) => i===idx ? updated : u)) }
+  const [selectedDept, setSelectedDept] = useState<number|null>(null)
+  function updateUnit(idx: any, updated: any) { setUnits((prev: any) => prev.map((u: any,i: any) => i===idx ? updated : u)) }
   const unit = selectedUnit !== null ? units[selectedUnit] : null
 
   return (
@@ -1827,11 +1827,11 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
               <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
                 {["Business Unit","Employees","Projects","Departments"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
               </div>
-              {(tab==="archived"?[]:units).map((u,i) => (
+              {(tab==="archived"?[]:units).map((u: any,i: any) => (
                 <HoverRow key={i} selected={false} onClick={() => { setSelectedUnit(i); setViewTab("departments"); setSelectedDept(null) }}
                   style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
                   <span style={{ display:"flex", alignItems:"center" }} onClick={e => e.stopPropagation()}>
-                    <InlineEdit value={u.name} onChange={v => setUnits(ul => ul.map((x,j) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
+                    <InlineEdit value={u.name} onChange={(v: any) => setUnits((ul: any) => ul.map((x: any,j: any) => j===i ? {...x,name:v} : x))} style={{ background:"transparent" }}/>
                   </span>
                   <span onClick={() => onEmployeesClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.employees}</span>
                   <span onClick={() => onProjectsClick(u.name)} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{u.projectsList?.length || 0}</span>
@@ -1864,8 +1864,8 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }) {
                   <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"8px 0" }}>
                     {["Project","Team Size","Budget","Status"].map(h => <span key={h} style={{ fontSize:12, fontWeight:500, color:t.mutedFg }}>{h}</span>)}
                   </div>
-                  {unit.projectsList?.map((proj, i) => (
-                    <HoverRow key={i} selected={false}
+                  {unit.projectsList?.map((proj: any, i: any) => (
+                    <HoverRow key={i} selected={false} onClick={() => {}}
                       style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", borderBottom:`1px solid ${t.border}`, padding:"10px 0", cursor:"pointer", transition:"background 0.1s" }}>
                       <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{proj.title}</span>
                       <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{proj.team}</span>
@@ -1902,8 +1902,8 @@ function ActivityLog() {
   const [sourceFilter, setSourceFilter] = useState("all")
   const [filterOpen, setFilterOpen] = useState(false)
   const filtered = sourceFilter==="all" ? ACTIVITY_LOG_DATA : ACTIVITY_LOG_DATA.filter(e => e.source===sourceFilter)
-  const sourceLabel = { all:"All sources", people:"People", roles:"Roles", departments:"Departments" }
-  function typeIcon(type) {
+  const sourceLabel: Record<string, string> = { all:"All sources", people:"People", roles:"Roles", departments:"Departments" }
+  function typeIcon(type: any) {
     if (type==="person_assigned"||type==="added") return <UserPlus size={13} strokeWidth={1.5}/>
     if (type==="role_change"||type==="renamed") return <ArrowRightLeft size={13} strokeWidth={1.5}/>
     if (type==="allocation") return <Briefcase size={13} strokeWidth={1.5}/>
@@ -1977,7 +1977,7 @@ function GridBg() {
   )
 }
 
-function ViewWrapper({ breadcrumb, children }) {
+function ViewWrapper({ breadcrumb, children }: any) {
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column", background:t.bg }}>
       <div style={{ padding:"20px 24px 16px" }}>
@@ -1989,7 +1989,7 @@ function ViewWrapper({ breadcrumb, children }) {
   )
 }
 
-function DashboardView({ breadcrumb }) {
+function DashboardView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2011,7 +2011,7 @@ function DashboardView({ breadcrumb }) {
   )
 }
 
-function ScheduleView({ breadcrumb }) {
+function ScheduleView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2032,7 +2032,7 @@ function ScheduleView({ breadcrumb }) {
   )
 }
 
-function ProjectPlanView({ breadcrumb }) {
+function ProjectPlanView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2056,7 +2056,7 @@ function ProjectPlanView({ breadcrumb }) {
   )
 }
 
-function ReportView({ breadcrumb }) {
+function ReportView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2095,7 +2095,7 @@ function ReportView({ breadcrumb }) {
   )
 }
 
-function MyTimeView({ breadcrumb }) {
+function MyTimeView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2110,7 +2110,7 @@ function MyTimeView({ breadcrumb }) {
   )
 }
 
-function LogTeamView({ breadcrumb }) {
+function LogTeamView({ breadcrumb }: any) {
   return (
     <ViewWrapper breadcrumb={breadcrumb}>
       <svg width="467" height="284" viewBox="0 0 467 284" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2131,7 +2131,7 @@ function LogTeamView({ breadcrumb }) {
   )
 }
 
-function PlaceholderView({ title, breadcrumb }) {
+function PlaceholderView({ title, breadcrumb }: any) {
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column" }}>
       <div style={{ padding:"20px 24px 16px" }}>
@@ -2147,7 +2147,7 @@ function PlaceholderView({ title, breadcrumb }) {
   )
 }
 
-function VersionsToggle({ version, onChange }) {
+function VersionsToggle({ version, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ position:"absolute", bottom:16, right:16 }}>
@@ -2181,12 +2181,12 @@ export default function App() {
   const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
   const [clients] = useState(INITIAL_CLIENTS_DATA)
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(name => name !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
 
-  const deptPeopleCounts = {}
-  people.forEach(p => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
+  const deptPeopleCounts: Record<number, number> = {}
+  people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
 
   // Update theme based on mode
   t = isDarkMode ? darkTheme : lightTheme
@@ -2198,7 +2198,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles}/>
-    if (activeItem === "Business Units") return <BusinessUnits roles={roles} onProjectsClick={(unitName) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
+    if (activeItem === "Business Units") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
@@ -2212,7 +2212,7 @@ export default function App() {
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems}/>
-      <main style={{ ...s.main, position:"relative" }}>
+      <main style={{ ...s.main, position:"relative" as const }}>
         <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px", background:t.card, color:t.fg }}>
           {breadcrumb.map((seg, i) => (
             <span key={i} style={{ display:"flex", alignItems:"center", gap:4 }}>
