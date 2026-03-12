@@ -299,8 +299,14 @@ export default function ComponentsPage() {
 
           {/* Tag */}
           <Section title="Tag">
-            <Tag label="Acquisition" />
-            <Tag label="Retention" />
+            <div className="flex items-center gap-2">
+              <Tag label="Acquisition" />
+              <Tag label="Retention" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag label={12} onClick={() => {}} />
+              <Tag label={4} onClick={() => {}} />
+            </div>
           </Section>
 
           {/* Breadcrumb */}
