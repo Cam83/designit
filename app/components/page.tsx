@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Label } from "@/components/ui/label"
 import { Tag } from "@/components/ui/tag"
-import { Info, AlertTriangle, CheckCircle, Terminal, Bold, Italic, Underline } from "lucide-react"
+import { Info, AlertTriangle, CheckCircle, Terminal, Bold, Italic, Underline, Sun, Moon } from "lucide-react"
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -45,15 +45,26 @@ export default function ComponentsPage() {
   const [checked, setChecked] = useState(true)
   const [switched, setSwitched] = useState(true)
   const [toggled, setToggled] = useState(false)
+  const [dark, setDark] = useState(false)
 
   return (
     <TooltipProvider>
+      <div className={dark ? "dark" : ""}>
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-5xl mx-auto px-8 py-12">
 
-          <div className="mb-10">
-            <h1 className="text-2xl font-semibold mb-1">Components</h1>
-            <p className="text-sm text-muted-foreground">Float UI components</p>
+          <div className="mb-10 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold mb-1">Components</h1>
+              <p className="text-sm text-muted-foreground">Float UI components</p>
+            </div>
+            <button
+              onClick={() => setDark(d => !d)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              {dark ? <Sun size={14}/> : <Moon size={14}/>}
+              {dark ? "Light" : "Dark"}
+            </button>
           </div>
 
           {/* Buttons */}
@@ -323,6 +334,7 @@ export default function ComponentsPage() {
           </Section>
 
         </div>
+      </div>
       </div>
     </TooltipProvider>
   )

@@ -25,7 +25,7 @@ function Tag({ label, overflow, onClick, className, style }: TagProps) {
         padding: '2px 6px',
         borderRadius: 4,
         border: '1px solid rgba(0,0,0,0.01)',
-        background: hovered ? '#E9E8EC' : '#F3F2F5',
+        background: hovered ? 'var(--tag-bg-hover, #E9E8EC)' : 'var(--tag-bg, #F3F2F5)',
         fontSize: 11,
         fontWeight: 500,
         whiteSpace: 'nowrap',
