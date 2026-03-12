@@ -19,6 +19,7 @@ const getGlobalStyles = (theme: any) => `
   ::-webkit-scrollbar-thumb { background: ${theme.scrollAlpha40}; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: ${theme.scrollAlpha70}; }
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  :root { --tag-bg: ${theme.muted}; --tag-bg-hover: ${theme.fgAlpha10}; }
 `
 
 const darkTheme = {
@@ -348,7 +349,7 @@ const INITIAL_CONTRACTORS = [
 ]
 const INITIAL_PROJECTS: any[] = []
 
-const INITIAL_CLIENTS_DATA = [{ name: "Nike" }, { name: "Reebok" }, { name: "Adidas" }]
+const INITIAL_CLIENTS_DATA = [{ name: "Agency rack rate" }, { name: "Reebok" }, { name: "Adidas" }]
 const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
 const CURRENCIES = ["USD","AUD","GBP","EUR","CAD","NZD","SGD","JPY"]
@@ -390,29 +391,24 @@ const PERSON_ACTIVITY = {
 }
 
 const CLIENTS_FULL = [
-  { name: "Nike", projects: 5, contact: { name: "Jordan Lee", email: "jordan.lee@nike.com" }, owner: "Amy Santiago", access: "", crmUrl: "", rateCards: [
-    { title: "Standard Rate Card", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:150},{roleId:1,billRate:195},{roleId:2,billRate:180},{roleId:3,billRate:200},{roleId:4,billRate:185},{roleId:5,billRate:165}] },
-    { title: "Premium Rate Card", currency: "USD", offices: ["Sydney"], notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:220},{roleId:2,billRate:205},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
-    { title: "Discount rate", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:130},{roleId:1,billRate:180},{roleId:2,billRate:160},{roleId:3,billRate:185},{roleId:4,billRate:170},{roleId:5,billRate:150}] },
+  { name: "Google", rateCardName: "Base premium rates, 2026", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "", crmUrl: "", rateCards: [
+    { title: "Base ecomm rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
+    { title: "Ecomm rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
   ]},
-  { name: "Google", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "", crmUrl: "", rateCards: [
-    { title: "Google Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
-    { title: "Discount rate", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
+  { name: "Verizon", rateCardName: "Base ecomm rates, 2026", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "", crmUrl: "", rateCards: [
+    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
   ]},
-  { name: "Verizon", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "", crmUrl: "", rateCards: [
-    { title: "Standard Rate Card", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
+  { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "", crmUrl: "", rateCards: [
+    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
   ]},
-  { name: "Samsung", projects: 9, contact: { name: "Mia Choi", email: "mia.choi@samsung.com" }, owner: "", access: "", crmUrl: "", rateCards: [
-    { title: "Samsung Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:195},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
+  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "LinkedIn", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "", crmUrl: "", rateCards: [
-    { title: "LinkedIn Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
+  { name: "Toyota", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "Toyota", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
-    { title: "Toyota Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
-  ]},
-  { name: "Patagonia", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
-    { title: "Patagonia Rates", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
+  { name: "Patagonia", rateCardName: "Nike Q1 2026", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
+    { title: "Agency specific", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
   ]},
 ]
 
@@ -654,12 +650,20 @@ function Tabs({ tabs, active, onChange }: any) {
   )
 }
 
-function SectionHeader({ count, label, onAdd }: any) {
+function SectionHeader({ count, label, onAdd, filterField, filterValue, onClearFilter }: any) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 18, fontWeight: 400, fontFamily: "Lexend", color: t.fg }}>{count} {label}</h1>
-        <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+        {filterField && filterValue
+          ? <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+              <Tag label={filterField}/>
+              <Tag label="is"/>
+              <Tag label={Array.isArray(filterValue) ? filterValue.join(", ") : filterValue}/>
+              <button onClick={onClearFilter} style={{ display:"flex", alignItems:"center", background:"none", border:"none", cursor:"pointer", padding:2, color:t.mutedFg }}><X size={12} strokeWidth={1.5}/></button>
+            </div>
+          : <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+        }
       </div>
       <button onClick={onAdd} style={{ ...s.primaryBtn, background: "rgba(46, 95, 232, 1)" }}><Plus size={16} strokeWidth={1}/></button>
     </div>
@@ -668,7 +672,7 @@ function SectionHeader({ count, label, onAdd }: any) {
 
 function Sheet({ title, subtitle, onClose, children, width = 380 }: any) {
   return (
-    <div style={{ width, flexShrink: 0, borderLeft: `1px solid ${t.border}`, background: t.bg, display: "flex", flexDirection: "column", height: "100%" }}>
+    <div style={{ width, flexShrink: 0, borderLeft: `1px solid ${t.sidebarBorder}`, background: t.bg, display: "flex", flexDirection: "column", height: "100%", borderRadius: "8px 0 0 0", overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${t.border}`, padding: "16px 20px" }}>
         <div>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: t.fg }}>{title}</h2>
@@ -1900,7 +1904,7 @@ function AddRolesBtn({ roles, linkedIds, onAdd, onAddAll }: any) {
   )
 }
 
-function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClose }: any) {
+function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClose, titleOverride, allClients }: any) {
   const rc = client.rateCards[rcIdx]
   function update(updated: any) {
     onUpdateClients(clientIdx, { ...client, rateCards: client.rateCards.map((r: any,i: any) => i===rcIdx ? updated : r) })
@@ -1911,43 +1915,74 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
   const [editingNotes, setEditingNotes] = useState(false)
   const [notesDraft, setNotesDraft] = useState(rc.notes || "Initial Standard rates")
   const notesRef = useRef<HTMLInputElement>(null)
+  const [clientsOpen, setClientsOpen] = useState(false)
+  const linkedClients: string[] = rc.linkedClients || []
   useEffect(() => { if (editingNotes && notesRef.current) { notesRef.current.focus(); notesRef.current.select() } }, [editingNotes])
 
   return (
-    <div style={{ width:"50%", flexShrink:0, borderLeft:`1px solid ${t.border}`, background:t.bg, display:"flex", flexDirection:"column", height:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:`1px solid ${t.border}`, padding:"16px 20px" }}>
-        <h2 style={{ fontSize:15, fontWeight:600, color:t.fg }}>{rc.title}</h2>
+    <div style={{ width:"50%", flexShrink:0, background:t.bg, display:"flex", flexDirection:"column", height:"100%", borderRadius:"8px 0 0 0", borderLeft:`1px solid ${t.sidebarBorder}`, overflow:"hidden" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"16px 20px" }}>
+        <h2 style={{ fontFamily:"lexend", fontSize:18, fontWeight:400, color:t.fg }}>{titleOverride ?? rc.title}</h2>
         <HoverBtn onClick={onClose} style={{ ...s.iconBtn, color:t.mutedFg }}><X size={16} strokeWidth={1}/></HoverBtn>
       </div>
-      <div style={{ flex:1, overflowY:"auto", padding:"16px 20px" }}>
+      <div style={{ flex:1, overflowY:"auto", padding:"8px 20px 16px" }}>
         <div style={{ marginBottom:20 }}>
           <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Notes</p>
           {editingNotes
             ? <input ref={notesRef} value={notesDraft} onChange={e => setNotesDraft(e.target.value)}
                 onBlur={() => { update({...rc, notes:notesDraft}); setEditingNotes(false) }}
                 onKeyDown={e => { if (e.key==="Enter"||e.key==="Escape") { update({...rc,notes:notesDraft}); setEditingNotes(false) } }}
-                style={{ fontSize:13, color:t.fg, background:"transparent", border:"none", outline:"none", borderBottom:`1px solid ${t.fgAlpha20}`, width:"100%", paddingBottom:2, fontFamily:"inherit" }}/>
+                style={{ fontSize:13, fontWeight:500, color:t.fg, background:t.accent, border:`1px solid ${t.fgAlpha20}`, borderRadius:8, padding:"2px 8px 2px 0", outline:"none", width:"100%", fontFamily:"inherit" }}/>
             : <button onClick={() => { setNotesDraft(rc.notes||"Initial Standard rates"); setEditingNotes(true) }}
-                style={{ fontSize:13, color:t.fg, background:"transparent", border:"none", cursor:"text", padding:0, fontFamily:"inherit" }}>
+                style={{ fontSize:13, fontWeight:500, color:t.fg, background:"transparent", borderRadius:4, padding:"2px 8px 2px 0", border:"none", cursor:"text", fontFamily:"inherit" }}>
                 {rc.notes || "Initial Standard rates"}
               </button>
           }
         </div>
         <div style={{ display:"flex", gap:16, marginBottom:24, flexWrap:"wrap" }}>
           <div>
-            <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Currency</p>
-            <CurrencySelector value={rc.currency} onChange={(v: any) => update({...rc,currency:v})}/>
-          </div>
-          <div>
             <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Offices</p>
             <OfficeSelectorRC value={rc.offices} onChange={(v: any) => update({...rc,offices:v})}/>
           </div>
           <div>
-            <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Effective from</p>
-            <HoverBtn style={{ display:"flex", alignItems:"center", gap:6, height:28, padding:"0 10px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", color:t.fg, cursor:"pointer", fontSize:13 }}>
-              <CalendarClock size={14} strokeWidth={1}/>{rc.effectiveFrom || "Select date"}
-            </HoverBtn>
+            <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Currency</p>
+            <CurrencySelector value={rc.currency} onChange={(v: any) => update({...rc,currency:v})}/>
           </div>
+          {allClients && (
+            <div>
+              <p style={{ fontSize:12, fontWeight:500, color:t.mutedFg, marginBottom:6 }}>Clients</p>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
+                {linkedClients.map((name: string) => (
+                  <span key={name} style={{ display:"inline-flex", alignItems:"center", gap:4, background:t.muted, borderRadius:4, padding:"2px 6px 2px 8px", fontSize:12, color:t.fg }}>
+                    {name}
+                    <button onClick={() => update({...rc, linkedClients: linkedClients.filter((n: string) => n !== name)})}
+                      style={{ background:"none", border:"none", cursor:"pointer", padding:0, display:"flex", alignItems:"center", color:t.mutedFg }}>
+                      <X size={11} strokeWidth={1.5}/>
+                    </button>
+                  </span>
+                ))}
+                <div style={{ position:"relative" }}>
+                  <HoverBtn onClick={() => setClientsOpen(o => !o)}
+                    style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:5, height:28, padding: linkedClients.length > 0 ? "0 8px" : "0 10px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", color:t.secondaryFg, cursor:"pointer", fontSize:12 }}>
+                    <Plus size={12} strokeWidth={1.5}/>{linkedClients.length === 0 && "Add client"}
+                  </HoverBtn>
+                  {clientsOpen && (
+                    <div style={{ position:"absolute", top:"100%", left:0, marginTop:4, background:t.popover, border:`1px solid ${t.border}`, borderRadius:8, padding:4, boxShadow:`0 4px 16px ${t.shadowDark}`, zIndex:200, minWidth:200, maxHeight:200, overflowY:"auto" }}>
+                      {(allClients as any[]).filter((c: any) => !linkedClients.includes(c.name)).map((c: any) => (
+                        <button key={c.name} onClick={() => { update({...rc, linkedClients:[...linkedClients, c.name]}); setClientsOpen(false) }}
+                          style={{ display:"block", width:"100%", padding:"6px 10px", borderRadius:5, border:"none", background:"transparent", color:t.fg, cursor:"pointer", fontSize:13, textAlign:"left" as const }}>
+                          {c.name}
+                        </button>
+                      ))}
+                      {(allClients as any[]).filter((c: any) => !linkedClients.includes(c.name)).length === 0 && (
+                        <p style={{ fontSize:12, color:t.mutedFg, padding:"6px 10px" }}>All clients linked</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <h3 style={{ fontSize:13, fontWeight:600, color:t.fg, marginBottom:12 }}>Linked Roles</h3>
@@ -1986,175 +2021,110 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
   )
 }
 
-function Clients({ roles, people, clients, onClientsChange }: any) {
+function Clients({ roles, people, clients, onClientsChange, onNavigateToRateCards, filterClients, onClearClientsFilter }: any) {
+  const setClients = onClientsChange
+  const [tab, setTab] = useState("active")
+  const displayClients = filterClients ? clients.filter((c: any) => filterClients.includes(c.name)) : clients
+
+  return (
+    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
+      <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
+        <SectionHeader count={displayClients.length} label="Clients" onAdd={() => {}} filterField={filterClients ? "Client" : undefined} filterValue={filterClients} onClearFilter={onClearClientsFilter}/>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
+          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+          <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+          <Tabs active={tab} onChange={setTab} tabs={[{label:`${clients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+        </div>
+        <DataTable
+          columns={[
+            { accessorKey: "name", header: "Client", size: 220, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
+            { id: "contact", header: "Client contact", size: 240, cell: ({ row }: any) => {
+              const c = row.original.contact
+              if (!c) return null
+              const initials = c.name.split(" ").map((w: string) => w[0]).join("").slice(0,2).toUpperCase()
+              return (
+                <span style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg, flexShrink:0 }}>{initials}</span>
+                  <span style={{ color:t.secondaryFg, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{c.email}</span>
+                </span>
+              )
+            }},
+            { id: "owner", header: "Client owner", size: 160, cell: ({ row }: any) => (
+              <select
+                value={row.original.owner || ""}
+                onClick={e => e.stopPropagation()}
+                onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, owner: e.target.value} : x)) }}
+                style={{ fontSize:13, color: row.original.owner ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+              >
+                <option value="">Unassigned</option>
+                {(people || []).map((p: any) => <option key={p.name} value={p.name}>{p.name}</option>)}
+              </select>
+            )},
+            { id: "access", header: "Access", size: 160, cell: ({ row }: any) => (
+              <select
+                value={row.original.access}
+                onClick={e => e.stopPropagation()}
+                onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, access: e.target.value} : x)) }}
+                style={{ fontSize:13, color: row.original.access ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+              >
+                <option value="">Select access</option>
+                <option value="view">View only</option>
+                <option value="edit">Can edit</option>
+                <option value="admin">Admin</option>
+              </select>
+            )},
+            { id: "crm", header: "CRM", size: 180, cell: ({ row }: any) => {
+              const url = row.original.crmUrl
+              if (url) return <a href={url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color:t.secondaryFg, textDecoration:"underline", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"100%", display:"block" }}>{url}</a>
+              return <span onClick={e => { e.stopPropagation(); const v = prompt("Enter CRM URL"); if (v) setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, crmUrl: v} : x)) }} style={{ color:t.mutedFg, cursor:"pointer" }}>Add link</span>
+            }},
+            { id: "rateCards", header: "Rate cards", size: 110, cell: ({ row }: any) => { const name = row.original.name; const count = clients.reduce((acc: number, c: any) => acc + c.rateCards.filter((rc: any) => (rc.linkedClients||[]).includes(name)).length, 0); return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToRateCards(name)}/></span> : <span style={{ color:t.mutedFg }}>—</span> } },
+            { accessorKey: "projects", header: "Projects", size: 100, enableResizing: false, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.projects}</span> },
+          ]}
+          data={tab==="archived"?[]:displayClients}
+        />
+      </div>
+    </div>
+  )
+}
+
+function RateCards({ roles, clients, onClientsChange, filterClient, onClearFilter, onNavigateToClients }: any) {
   const setClients = onClientsChange
   const [tab, setTab] = useState("active")
   const [selectedClient, setSelectedClient] = useState<number|null>(null)
   const [selectedRC, setSelectedRC] = useState<number|null>(null)
   function updateClient(idx: any, updated: any) { onClientsChange((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
   const client = selectedClient !== null ? clients[selectedClient] : null
+  const displayClients = filterClient ? clients.filter((c: any) => (c.rateCards[0]?.linkedClients || []).includes(filterClient)) : clients
 
   return (
     <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
-        {client === null ? (
-          <>
-            <SectionHeader count={clients.length} label="Clients" onAdd={() => {}}/>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
-              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
-              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active={tab} onChange={setTab} tabs={[{label:`${clients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Client", size: 220, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
-                { id: "contact", header: "Client contact", size: 240, cell: ({ row }: any) => {
-                  const c = row.original.contact
-                  if (!c) return null
-                  const initials = c.name.split(" ").map((w: string) => w[0]).join("").slice(0,2).toUpperCase()
-                  return (
-                    <span style={{ display:"flex", alignItems:"center", gap:8 }}>
-                      <span style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg, flexShrink:0 }}>{initials}</span>
-                      <span style={{ color:t.secondaryFg, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{c.email}</span>
-                    </span>
-                  )
-                }},
-                { id: "owner", header: "Client owner", size: 160, cell: ({ row }: any) => (
-                  <select
-                    value={row.original.owner || ""}
-                    onClick={e => e.stopPropagation()}
-                    onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, owner: e.target.value} : x)) }}
-                    style={{ fontSize:13, color: row.original.owner ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
-                  >
-                    <option value="">Unassigned</option>
-                    {(people || []).map((p: any) => <option key={p.name} value={p.name}>{p.name}</option>)}
-                  </select>
-                )},
-                { id: "access", header: "Access", size: 160, cell: ({ row }: any) => (
-                  <select
-                    value={row.original.access}
-                    onClick={e => e.stopPropagation()}
-                    onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, access: e.target.value} : x)) }}
-                    style={{ fontSize:13, color: row.original.access ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
-                  >
-                    <option value="">Select access</option>
-                    <option value="view">View only</option>
-                    <option value="edit">Can edit</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                )},
-                { id: "crm", header: "CRM", size: 180, cell: ({ row }: any) => {
-                  const url = row.original.crmUrl
-                  if (url) return <a href={url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color:t.secondaryFg, textDecoration:"underline", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"100%", display:"block" }}>{url}</a>
-                  return <span onClick={e => { e.stopPropagation(); const v = prompt("Enter CRM URL"); if (v) setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, crmUrl: v} : x)) }} style={{ color:t.mutedFg, cursor:"pointer" }}>Add link</span>
-                }},
-                { id: "rateCards", header: "Rate cards", size: 110, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.rateCards.length}</span> },
-                { accessorKey: "projects", header: "Projects", size: 100, enableResizing: false, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.projects}</span> },
-              ]}
-              data={tab==="archived"?[]:clients}
-              onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
-            />
-          </>
-        ) : (
-          <>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
-              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <HoverBtn onClick={() => { setSelectedClient(null); setSelectedRC(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
-                  <ChevronLeft size={18} strokeWidth={1}/>
-                </HoverBtn>
-                <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{client.name}</h1>
-              </div>
-              <button style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <Tabs active={tab} onChange={setTab} tabs={[{label:`${client.rateCards.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
-                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
-                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
-                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
-              ]}
-              data={client.rateCards}
-              onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedRC}
-            />
-          </>
-        )}
+        <SectionHeader count={displayClients.length} label="Rate cards" onAdd={() => {}} filterField={filterClient ? "Client" : undefined} filterValue={filterClient} onClearFilter={onClearFilter}/>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
+          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
+          <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+          <Tabs active={tab} onChange={setTab} tabs={[{label:`${displayClients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
+        </div>
+        <DataTable
+          columns={[
+            { accessorKey: "rateCardName", header: "Rate card", size: 300, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", fontWeight:500, color:t.fg }}>{row.original.rateCardName || row.original.name}</span> },
+            { id: "client", header: "Clients", size: 160, cell: ({ row }: any) => { const linked = row.original.rateCards[0]?.linkedClients || []; return linked.length > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={linked.length} onClick={() => onNavigateToClients(linked)}/></span> : <span style={{ color:t.mutedFg }}>—</span> } },
+            { accessorKey: "projects", header: "Projects", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.projects}</span> },
+          ]}
+          data={tab==="archived"?[]:displayClients}
+          onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(0) }}
+          isRowSelected={(_: any, idx: number) => idx === selectedClient}
+        />
       </div>
-      {client !== null && selectedRC !== null && (
-        <RateCardSheet client={client} clientIdx={selectedClient} rcIdx={selectedRC} roles={roles} onUpdateClients={updateClient} onClose={() => setSelectedRC(null)}/>
-      )}
-    </div>
-  )
-}
-
-function RateCards({ roles }: any) {
-  const [tab, setTab] = useState("active")
-  const [clients, setClients] = useState(CLIENTS_FULL)
-  const [selectedClient, setSelectedClient] = useState<number|null>(null)
-  const [selectedRC, setSelectedRC] = useState<number|null>(null)
-  function updateClient(idx: any, updated: any) { setClients((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
-  const client = selectedClient !== null ? clients[selectedClient] : null
-
-  return (
-    <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
-      <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
-        {client === null ? (
-          <>
-            <SectionHeader count={clients.length} label="Rate cards" onAdd={() => {}}/>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
-              <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
-              <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width:24, height:24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active={tab} onChange={setTab} tabs={[{label:`${clients.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Client", size: 300, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
-                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.rateCards.length}</span> },
-                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.projects}</span> },
-              ]}
-              data={tab==="archived"?[]:clients}
-              onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
-            />
-          </>
-        ) : (
-          <>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"20px 24px 16px", borderBottom:`1px solid ${t.border}` }}>
-              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <HoverBtn onClick={() => { setSelectedClient(null); setSelectedRC(null) }} style={{ ...s.iconBtn, color:t.secondaryFg }}>
-                  <ChevronLeft size={18} strokeWidth={1}/>
-                </HoverBtn>
-                <h1 style={{ fontSize:18, fontWeight:600, color:t.fg }}>{client.name}</h1>
-              </div>
-              <button style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
-              <Tabs active={tab} onChange={setTab} tabs={[{label:`${client.rateCards.length} Active`,value:"active"},{label:"0 Archived",value:"archived"},{label:"All",value:"all"}]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
-                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
-                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
-                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
-              ]}
-              data={client.rateCards}
-              onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedRC}
-            />
-          </>
-        )}
-      </div>
-      {client !== null && selectedRC !== null && (
-        <RateCardSheet client={client} clientIdx={selectedClient} rcIdx={selectedRC} roles={roles} onUpdateClients={updateClient} onClose={() => setSelectedRC(null)}/>
+      {selectedClient !== null && selectedRC !== null && displayClients[selectedClient] && (
+        <RateCardSheet client={displayClients[selectedClient]} clientIdx={clients.indexOf(displayClients[selectedClient])} rcIdx={selectedRC} roles={roles} onUpdateClients={updateClient} onClose={() => { setSelectedClient(null); setSelectedRC(null) }} titleOverride={displayClients[selectedClient].rateCardName} allClients={clients}/>
       )}
     </div>
   )
@@ -2509,7 +2479,9 @@ export default function App() {
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
   const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
   const [clients] = useState(INITIAL_CLIENTS_DATA)
-  const [clientsFull, setClientsFull] = useState(CLIENTS_FULL)
+  const [clientsFull, setClientsFull] = useState(() => CLIENTS_FULL)
+  const [rateCardFilter, setRateCardFilter] = useState<string|null>(null)
+  const [clientsFilter, setClientsFilter] = useState<string[]|null>(null)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
@@ -2527,8 +2499,8 @@ export default function App() {
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
-    if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull}/>
-    if (activeItem === "Rate cards") return <RateCards roles={roles}/>
+    if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)}/>
+    if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
@@ -2544,14 +2516,7 @@ export default function App() {
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems}/>
       <main style={{ ...s.main, position:"relative" as const }}>
-        <nav style={{ display:"flex", alignItems:"center", gap:4, borderBottom:`1px solid ${t.border}`, padding:"12px 24px", background:t.card, color:t.fg }}>
-          {breadcrumb.map((seg, i) => (
-            <span key={i} style={{ display:"flex", alignItems:"center", gap:4 }}>
-              {i > 0 && <span style={{ fontSize:13, color:t.secondaryFg }}>/</span>}
-              <span style={{ fontSize:13, color: i===breadcrumb.length-1 ? t.fg : t.secondaryFg, fontWeight: i===breadcrumb.length-1 ? 500 : 400 }}>{seg}</span>
-            </span>
-          ))}
-        </nav>
+        {/* breadcrumb nav hidden — may restore later */}
         <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
           {renderMain()}
         </div>

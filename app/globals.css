@@ -37,6 +37,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --tag-bg: #F3F2F5;
+  --tag-bg-hover: #E9E8EC;
 }
 
 .dark {
@@ -72,6 +74,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+  --tag-bg: oklch(0.269 0 0);
+  --tag-bg-hover: oklch(0.32 0 0);
 }
 
 @theme inline {
