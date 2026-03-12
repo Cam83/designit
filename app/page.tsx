@@ -8,6 +8,8 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Tag } from "@/components/ui/tag"
 
 const getGlobalStyles = (theme: any) => `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,16 +74,11 @@ function HoverRow({ selected, children, onClick, style }: any) {
 
 function RowCheckbox({ checked, indeterminate, onClick }: any) {
   return (
-    <div
-      onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClick?.() }}
-      style={{ width: 12, height: 12, border: `1px solid ${checked || indeterminate ? t.primary : t.fgAlpha30}`, borderRadius: 3, background: checked ? t.primary : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "border-color 0.1s, background 0.1s" }}>
-      {checked && (
-        <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-          <path d="M1 3L3 5L7 1" stroke={t.primaryFg} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )}
-      {indeterminate && !checked && <div style={{ width: 6, height: 1, background: t.primary, borderRadius: 1 }}/>}
-    </div>
+    <Checkbox
+      checked={indeterminate ? "indeterminate" : checked}
+      onCheckedChange={() => onClick?.()}
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+    />
   )
 }
 
@@ -137,8 +134,8 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
         </div>
-        {hg?.headers.map((header: any) => (
-          <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center" }}>
+        {hg?.headers.map((header: any, i: number) => (
+          <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center", paddingLeft: i === 0 ? 16 : 0 }}>
             {flexRender(header.column.columnDef.header, header.getContext())}
             {header.column.getCanResize() && <ColResizeHandle header={header}/>}
           </div>
@@ -153,8 +150,8 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
           </div>
-          {row.getVisibleCells().map((cell: any) => (
-            <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", overflow: "hidden" }}>
+          {row.getVisibleCells().map((cell: any, i: number) => (
+            <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", paddingLeft: i === 0 ? 16 : 0, overflow: "hidden", fontSize: 13 }}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </div>
           ))}
@@ -225,11 +222,11 @@ function InlineEdit({ value, onChange, style }: any) {
   if (editing) return (
     <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commit}
       onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false) } }}
-      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 8, padding: "2px 8px 2px 0", outline: "none", fontFamily: "inherit", ...style }} />
+      style={{ fontSize: 13, fontWeight: 500, color: t.fg, background: t.accent, border: `1px solid ${t.fgAlpha20}`, borderRadius: 8, padding: "2px 8px 2px 0", outline: "none", fontFamily: "inherit", ...style }} />
   )
   return (
     <button onClick={() => { setDraft(value); setEditing(true) }}
-      style={{ fontSize: 14, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px 2px 0", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
+      style={{ fontSize: 13, fontWeight: 500, color: t.fg, background: t.accent, borderRadius: 4, padding: "2px 8px 2px 0", border: "none", cursor: "text", fontFamily: "inherit", ...style }}>
       {value}
     </button>
   )
@@ -248,15 +245,15 @@ function InlineEditRate({ value, onChange }: any) {
   }
   if (editing) return (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <span style={{ fontSize: 14, color: t.mutedFg }}>$</span>
+      <span style={{ fontSize: 13, color: t.mutedFg }}>$</span>
       <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commit}
         onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(String(value)); setEditing(false) } }}
-        style={{ width: 60, fontSize: 14, color: t.fg, background: t.bg, border: `1px solid ${t.fgAlpha20}`, borderRadius: 4, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
+        style={{ width: 60, fontSize: 13, color: t.fg, background: t.bg, border: `1px solid ${t.fgAlpha20}`, borderRadius: 4, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
     </div>
   )
   return (
     <button onClick={() => { setDraft(String(value)); setEditing(true) }}
-      style={{ fontSize: 14, color: t.fg, background: "transparent", border: "none", cursor: "text", padding: "2px 4px", borderRadius: 4, fontFamily: "inherit" }}>
+      style={{ fontSize: 13, color: t.fg, background: "transparent", border: "none", cursor: "text", padding: "2px 4px", borderRadius: 4, fontFamily: "inherit" }}>
       ${value}
     </button>
   )
@@ -318,22 +315,24 @@ const INITIAL_ROLES = [
   { name: "Social Media Manager", costRate: 105, activePeople: 4, unassigned: 0 },
 ]
 const INITIAL_DEPARTMENTS = [{ name: "Design" }, { name: "Engineering" }, { name: "Operations" }, { name: "Marketing" }]
+const INITIAL_DELIVERY_TEAMS = [{ name: "Acquisition" }, { name: "Retention" }, { name: "Core" }, { name: "Creative studio" }]
+const INITIAL_GROUPS = [{ name: "Leadership" }, { name: "AI working group" }, { name: "Hiring committee" }]
 const INITIAL_PEOPLE = [
-  { name: "Jake Peralta", roleId: 0, departmentId: 0, office: "New York" },
-  { name: "Amy Santiago", roleId: 1, departmentId: 0, office: "New York" },
-  { name: "Rosa Diaz", roleId: 2, departmentId: 1, office: "Melbourne" },
-  { name: "Terry Jeffords", roleId: 3, departmentId: 2, office: "Sydney" },
-  { name: "Charles Boyle", roleId: 1, departmentId: 0, office: "New York" },
-  { name: "Michael Hitchcock", roleId: 0, departmentId: 1, office: "London" },
-  { name: "Norm Scully", roleId: 2, departmentId: 2, office: "New York" },
-  { name: "Rachel Green", roleId: 0, departmentId: 0, office: "Sydney" },
-  { name: "Monica Geller", roleId: 1, departmentId: 1, office: "London" },
-  { name: "Phoebe Buffay", roleId: 2, departmentId: 2, office: "New York" },
-  { name: "Joey Tribbiani", roleId: 3, departmentId: 0, office: "Melbourne" },
-  { name: "Chandler Bing", roleId: 0, departmentId: 1, office: "Sydney" },
-  { name: "Ross Geller", roleId: 1, departmentId: 2, office: "London" },
-  { name: "Gunther", roleId: 2, departmentId: 1, office: "New York" },
-  { name: "Janice Litman", roleId: 3, departmentId: 2, office: "Melbourne" },
+  { name: "Jake Peralta", roleId: 0, departmentId: 0, office: "New York", deliveryTeamIds: [0], groupIds: [0, 2] },
+  { name: "Amy Santiago", roleId: 1, departmentId: 0, office: "New York", deliveryTeamIds: [1], groupIds: [0] },
+  { name: "Rosa Diaz", roleId: 2, departmentId: 1, office: "Melbourne", deliveryTeamIds: [2], groupIds: [1] },
+  { name: "Terry Jeffords", roleId: 3, departmentId: 2, office: "Sydney", deliveryTeamIds: [0], groupIds: [0, 1] },
+  { name: "Charles Boyle", roleId: 1, departmentId: 0, office: "New York", deliveryTeamIds: [1], groupIds: [] },
+  { name: "Michael Hitchcock", roleId: 0, departmentId: 1, office: "London", deliveryTeamIds: [3], groupIds: [2] },
+  { name: "Norm Scully", roleId: 2, departmentId: 2, office: "New York", deliveryTeamIds: [3], groupIds: [] },
+  { name: "Rachel Green", roleId: 0, departmentId: 0, office: "Sydney", deliveryTeamIds: [2], groupIds: [1, 2] },
+  { name: "Monica Geller", roleId: 1, departmentId: 1, office: "London", deliveryTeamIds: [0], groupIds: [0] },
+  { name: "Phoebe Buffay", roleId: 2, departmentId: 2, office: "New York", deliveryTeamIds: [], groupIds: [1] },
+  { name: "Joey Tribbiani", roleId: 3, departmentId: 0, office: "Melbourne", deliveryTeamIds: [1], groupIds: [] },
+  { name: "Chandler Bing", roleId: 0, departmentId: 1, office: "Sydney", deliveryTeamIds: [2], groupIds: [0, 1] },
+  { name: "Ross Geller", roleId: 1, departmentId: 2, office: "London", deliveryTeamIds: [3], groupIds: [2] },
+  { name: "Gunther", roleId: 2, departmentId: 1, office: "New York", deliveryTeamIds: [], groupIds: [0] },
+  { name: "Janice Litman", roleId: 3, departmentId: 2, office: "Melbourne", deliveryTeamIds: [1], groupIds: [1, 2] },
 ]
 const INITIAL_CONTRACTORS = [
   { name: "Raymond Holt", roleId: 3, departmentId: 2, office: "London" },
@@ -391,28 +390,28 @@ const PERSON_ACTIVITY = {
 }
 
 const CLIENTS_FULL = [
-  { name: "Nike", projects: 5, rateCards: [
+  { name: "Nike", projects: 5, contact: { name: "Jordan Lee", email: "jordan.lee@nike.com" }, owner: "Amy Santiago", access: "", crmUrl: "", rateCards: [
     { title: "Standard Rate Card", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:150},{roleId:1,billRate:195},{roleId:2,billRate:180},{roleId:3,billRate:200},{roleId:4,billRate:185},{roleId:5,billRate:165}] },
     { title: "Premium Rate Card", currency: "USD", offices: ["Sydney"], notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:220},{roleId:2,billRate:205},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
     { title: "Discount rate", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:130},{roleId:1,billRate:180},{roleId:2,billRate:160},{roleId:3,billRate:185},{roleId:4,billRate:170},{roleId:5,billRate:150}] },
   ]},
-  { name: "Google", projects: 12, rateCards: [
+  { name: "Google", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "", crmUrl: "", rateCards: [
     { title: "Google Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
     { title: "Discount rate", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
   ]},
-  { name: "Verizon", projects: 6, rateCards: [
+  { name: "Verizon", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "", crmUrl: "", rateCards: [
     { title: "Standard Rate Card", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
   ]},
-  { name: "Samsung", projects: 9, rateCards: [
+  { name: "Samsung", projects: 9, contact: { name: "Mia Choi", email: "mia.choi@samsung.com" }, owner: "", access: "", crmUrl: "", rateCards: [
     { title: "Samsung Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:195},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "LinkedIn", projects: 8, rateCards: [
+  { name: "LinkedIn", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "", crmUrl: "", rateCards: [
     { title: "LinkedIn Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
   ]},
-  { name: "Toyota", projects: 10, rateCards: [
+  { name: "Toyota", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
     { title: "Toyota Standard", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "Patagonia", projects: 6, rateCards: [
+  { name: "Patagonia", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
     { title: "Patagonia Rates", currency: "USD", offices: "all", notes: "Initial Standard rates", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
   ]},
 ]
@@ -688,7 +687,7 @@ function DetailGrid({ items }: any) {
       {items.map((item: any, i: any) => (
         <div key={i}>
           <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>{item.label}</span>
-          <p style={{ fontSize: 14, color: t.fg, marginTop: 2 }}>{item.value}</p>
+          <p style={{ fontSize: 13, color: t.fg, marginTop: 2 }}>{item.value}</p>
         </div>
       ))}
     </div>
@@ -724,7 +723,7 @@ function ActivityTimeline({ entries }: any) {
               {getIcon(e.type)}
             </div>
             <div style={{ flex: 1, paddingTop: 2 }}>
-              <p style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{e.description}</p>
+              <p style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{e.description}</p>
               {e.details && <p style={{ fontSize: 12, color: t.mutedFg, marginTop: 2 }}>{e.details}</p>}
               <p style={{ fontSize: 11, color: t.mutedFg, marginTop: 4 }}>{e.date}</p>
             </div>
@@ -760,19 +759,19 @@ function AddRoleModal({ onAdd, onClose }: any) {
           <input ref={nameRef} value={name} onChange={e => setName(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="e.g. Senior Developer"
-            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Cost rate ($/hr)</label>
           <input type="number" value={costRate} onChange={e => setCostRate(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="0"
-            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
             Add role
           </button>
         </div>
@@ -795,7 +794,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
     onAdd({ name: n, roleId, departmentId, office })
     onClose()
   }
-  const sel = { width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
+  const sel = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
   return (
     <div style={{ position: "fixed", inset: 0, background: t.overlayBg, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
@@ -810,7 +809,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
             <input ref={nameRef} value={name} onChange={e => setName(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
               placeholder="e.g. John Smith"
-              style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+              style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
           </div>
           <div><label style={{ display: "block", fontSize: 12, fontWeight: 500, color: t.mutedFg, marginBottom: 6 }}>Role</label>
             <select value={roleId} onChange={e => setRoleId(Number(e.target.value))} style={sel}>{roles.map((r: any,i: any) => <option key={i} value={i}>{r.name}</option>)}</select></div>
@@ -822,7 +821,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
             Add person
           </button>
         </div>
@@ -854,12 +853,12 @@ function AddDepartmentModal({ onAdd, onClose }: any) {
           <input ref={ref} value={name} onChange={e => setName(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") onClose() }}
             placeholder="e.g. Strategy"
-            style={{ width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
+            style={{ width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }}/>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
             Add
           </button>
         </div>
@@ -882,7 +881,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
   const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
   const officeOpts = ["New York", "London", "Sydney", "Melbourne"]
-  const inp = { width: "100%", fontSize: 14, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
+  const inp = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
   function submit() {
     const n = name.trim()
     if (!n) return
@@ -915,7 +914,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <HoverBtn onClick={onClose} style={{ ...s.outlineBtn, padding: "6px 16px", borderRadius: 6 }}>Cancel</HoverBtn>
           <button onClick={submit} disabled={!name.trim()}
-            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 500 }}>
+            style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: name.trim() ? t.fg : t.muted, color: name.trim() ? t.bg : t.mutedFg, cursor: name.trim() ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 500 }}>
             Add project
           </button>
         </div>
@@ -957,7 +956,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const navItemStyle = (active: any) => ({
     display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "6px 8px",
     borderRadius: 6, border: "none", background: active ? t.accent : "transparent",
-    color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 14,
+    color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 13,
     fontWeight: active ? 500 : 400, textAlign: "left" as const,
   })
 
@@ -974,14 +973,14 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           }>
           <div style={{ ...s.dropdown, width: 200 }}>
             <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <Settings size={14} strokeWidth={1}/> Settings
             </HoverBtn>
           </div>
         </DropdownWrapper>
-        <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer" }}>
+        <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer", fontSize: 14 }}>
           <Bell size={14} strokeWidth={1} color={t.mutedFg}/>
-          <span style={{ fontSize: 13, fontWeight: 600, color: t.fg }}>23</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>23</span>
         </HoverBtn>
       </div>
 
@@ -999,7 +998,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{loc.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
                 </div>
                 <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
               </HoverBtn>
@@ -1022,7 +1021,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                       <div key={child.name}>
                         <HoverBtn onClick={() => toggleChild(i, ci)}
                           style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px 6px 16px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                          <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>{child.name}</span>
+                          <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{child.name}</span>
                           <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: child.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
                         </HoverBtn>
                         {child.items && (
@@ -1049,7 +1048,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
-              <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>Data hub</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               {dataHubHover && (
@@ -1065,7 +1064,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
                 {dataHubItems.map(item => (
-                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 14, color: t.fg }}>
+                  <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
                     <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
                       const newSet = new Set(visibleDataHubItems)
                       if (e.target.checked) newSet.add(item.name)
@@ -1101,12 +1100,12 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           }>
           <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
             <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Light</span>
               <Check size={16} strokeWidth={1} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange(true); setAvatarOpen(false) }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 14, textAlign: "left" }}>
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Dark</span>
               <Check size={16} strokeWidth={1} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
@@ -1121,7 +1120,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
 // ── Role selectors ──
 function RoleSelector({ roleId, roles, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1142,7 +1141,7 @@ function RoleSelector({ roleId, roles, onChange }: any) {
 
 function DeptSelector({ departmentId, departments, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 14, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1161,6 +1160,122 @@ function DeptSelector({ departmentId, departments, onChange }: any) {
   )
 }
 
+function TeamSettingsModal({ type, mode, onSave, onClose }: any) {
+  const [selected, setSelected] = useState(mode)
+  const noun = type === "delivery-teams" ? "team" : "group"
+  return (
+    <div style={{ position: "fixed", inset: 0, background: t.overlayBg, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }} onClick={onClose}>
+      <div style={{ background: t.popover, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, width: 380, boxShadow: `0 8px 32px ${t.shadowDarker}` }} onClick={(e: any) => e.stopPropagation()}>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: t.fg, marginBottom: 6 }}>Membership settings</h2>
+        <p style={{ fontSize: 13, color: t.secondaryFg, marginBottom: 20 }}>Allow people to belong to a single {noun} or multiple.</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+          {(["single", "multiple"] as const).map(opt => (
+            <label key={opt} onClick={() => setSelected(opt)} style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer", padding: "12px 14px", borderRadius: 8, border: `1px solid ${selected === opt ? t.fgAlpha30 : t.border}`, background: selected === opt ? t.fgAlpha03 : "transparent" }}>
+              <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${selected === opt ? t.fg : t.fgAlpha30}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {selected === opt && <div style={{ width: 7, height: 7, borderRadius: "50%", background: t.fg }}/>}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: t.fg, textTransform: "capitalize" as const }}>{opt}</div>
+                <div style={{ fontSize: 12, color: t.secondaryFg, marginTop: 2 }}>{opt === "single" ? `Each person belongs to one ${noun}` : `Each person can belong to multiple ${noun}s`}</div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <HoverBtn onClick={onClose} style={{ ...s.outlineBtn }}>Cancel</HoverBtn>
+          <button onClick={() => { onSave(selected); onClose() }} style={{ background: t.fg, color: t.bg, border: "none", borderRadius: 6, padding: "6px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Save</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TagPill({ label, overflow }: { label: string; overflow?: boolean }) {
+  return (
+    <Tag
+      label={label}
+      overflow={overflow}
+    />
+  )
+}
+
+function TagList({ ids, items, noun }: { ids: number[]; items: any[]; noun: string }) {
+  if (ids.length === 0) return <span style={{ color: t.mutedFg, fontSize: 14 }}>—</span>
+  if (ids.length === 1) return <span style={{ fontSize: 13, color: t.fg }}>{items[ids[0]]?.name || "—"}</span>
+  const visible = ids.slice(0, 2)
+  const overflow = ids.length - visible.length
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, flexWrap: "nowrap" as const }}>
+      {visible.map((id: number) => <TagPill key={id} label={items[id]?.name || String(id)} />)}
+      {overflow > 0 && <TagPill label={`+${overflow}`} overflow />}
+    </span>
+  )
+}
+
+function DeliveryTeamSelector({ teamIds, teams, mode, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const ids: number[] = teamIds || []
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={trig}>
+          <TagList ids={ids} items={teams} noun="teams" /><ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width: 200 }}>
+        <button onClick={(e: any) => { e.stopPropagation(); onChange([]); if (mode === "single") setOpen(false) }} style={s.dropdownItem(ids.length === 0)}>
+          — {ids.length === 0 && <Check size={11} strokeWidth={1}/>}
+        </button>
+        {teams.map((team: any, i: number) => {
+          const sel = ids.includes(i)
+          return (
+            <button key={i} onClick={(e: any) => {
+              e.stopPropagation()
+              if (mode === "single") { onChange([i]); setOpen(false) }
+              else onChange(sel ? ids.filter((x: number) => x !== i) : [...ids, i])
+            }} style={s.dropdownItem(sel)}>
+              {team.name} {sel && <Check size={11} strokeWidth={1}/>}
+            </button>
+          )
+        })}
+      </div>
+    </DropdownWrapper>
+  )
+}
+
+function GroupSelector({ groupIds, groups, mode, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const ids: number[] = groupIds || []
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={trig}>
+          <TagList ids={ids} items={groups} noun="groups" /><ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width: 200 }}>
+        <button onClick={(e: any) => { e.stopPropagation(); onChange([]); if (mode === "single") setOpen(false) }} style={s.dropdownItem(ids.length === 0)}>
+          — {ids.length === 0 && <Check size={11} strokeWidth={1}/>}
+        </button>
+        {groups.map((group: any, i: number) => {
+          const sel = ids.includes(i)
+          return (
+            <button key={i} onClick={(e: any) => {
+              e.stopPropagation()
+              if (mode === "single") { onChange([i]); setOpen(false) }
+              else onChange(sel ? ids.filter((x: number) => x !== i) : [...ids, i])
+            }} style={s.dropdownItem(sel)}>
+              {group.name} {sel && <Check size={11} strokeWidth={1}/>}
+            </button>
+          )
+        })}
+      </div>
+    </DropdownWrapper>
+  )
+}
+
 // ── Pages ──
 function RolesAndRates({ roles, onRolesChange }: any) {
   const [tab, setTab] = useState("active")
@@ -1170,8 +1285,8 @@ function RolesAndRates({ roles, onRolesChange }: any) {
   const rolesColumns = useMemo(() => [
     { accessorKey: "name", header: "Role", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, name: v} : r))} style={{ background: "transparent" }}/></span> },
     { accessorKey: "costRate", header: "Cost rate", size: 140, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEditRate value={row.original.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, costRate: v} : r))}/></span> },
-    { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.activePeople}</span> },
-    { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.unassigned}</span> },
+    { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.activePeople}</span> },
+    { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unassigned}</span> },
   ], [roles, onRolesChange])
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
@@ -1191,7 +1306,7 @@ function RolesAndRates({ roles, onRolesChange }: any) {
           data={display}
           onRowClick={(_: any, idx: number) => setSelectedIdx(idx)}
           isRowSelected={(_: any, idx: number) => idx === selectedIdx}
-          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived roles</p></div>}
+          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived roles</p></div>}
         />
       </div>
       {selectedIdx !== null && roles[selectedIdx] && (
@@ -1202,7 +1317,7 @@ function RolesAndRates({ roles, onRolesChange }: any) {
             { label: "Unassigned", value: roles[selectedIdx].unassigned },
             { label: "Status", value: "Active" },
           ]}/>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
           <ActivityTimeline entries={(ROLE_ACTIVITY as any)[roles[selectedIdx].name] || []}/>
         </Sheet>
       )}
@@ -1215,9 +1330,18 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState<number|null>(null)
   const [selectedDept, setSelectedDept] = useState<number|null>(null)
+  const [selectedDeliveryTeam, setSelectedDeliveryTeam] = useState<number|null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<number|null>(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   const [showModal, setShowModal] = useState(false)
+  const [deliveryTeams, setDeliveryTeams] = useState(INITIAL_DELIVERY_TEAMS)
+  const [groups, setGroups] = useState(INITIAL_GROUPS)
+  const [deliveryTeamMode, setDeliveryTeamMode] = useState<"single"|"multiple">("single")
+  const [groupMode, setGroupMode] = useState<"single"|"multiple">("single")
+  const [teamSettingsOpen, setTeamSettingsOpen] = useState(false)
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
 
+  const isGroupView = view === "departments" || view === "delivery-teams" || view === "groups"
   const current = view === "employees" ? people : view === "contractors" ? contractors : people
   const setCurrent = view === "employees" ? onPeopleChange : view === "contractors" ? onContractorsChange : onPeopleChange
   const isAll = selectedOffices.length === ALL_OFFICES.length
@@ -1227,17 +1351,25 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   function handleAdd(person: any) {
     if (view === "employees") onPeopleChange([...people, person])
     else if (view === "contractors") onContractorsChange([...contractors, person])
+    else if (view === "delivery-teams") setDeliveryTeams((prev: any) => [...prev, person])
+    else if (view === "groups") setGroups((prev: any) => [...prev, person])
     else onDepartmentsChange([...departments, person])
   }
 
+  const allPeople = [...people, ...contractors]
+  const deliveryTeamCounts = deliveryTeams.map((_: any, i: number) => allPeople.filter((p: any) => (p.deliveryTeamIds || []).includes(i)).length)
+  const groupCounts = groups.map((_: any, i: number) => allPeople.filter((p: any) => (p.groupIds || []).includes(i)).length)
+
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
-      {showModal && view !== "departments" && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
-      {showModal && view === "departments" && <AddDepartmentModal onAdd={(d: any) => onDepartmentsChange([...departments, d])} onClose={() => setShowModal(false)}/>}
+      {showModal && !isGroupView && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
+      {showModal && isGroupView && <AddDepartmentModal onAdd={handleAdd} onClose={() => setShowModal(false)}/>}
+      {teamSettingsOpen && <TeamSettingsModal type="delivery-teams" mode={deliveryTeamMode} onSave={(m: any) => setDeliveryTeamMode(m)} onClose={() => setTeamSettingsOpen(false)}/>}
+      {groupSettingsOpen && <TeamSettingsModal type="groups" mode={groupMode} onSave={(m: any) => setGroupMode(m)} onClose={() => setGroupSettingsOpen(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader
-          count={view === "departments" ? departments.length : filtered.length}
-          label={`${view === "departments" ? "Departments" : view === "employees" ? "Employees" : "Contractors"}${filteredBusinessUnit ? ` - ${filteredBusinessUnit}` : ""}`}
+          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : filtered.length}
+          label={`${view === "departments" ? "Departments" : view === "delivery-teams" ? "Delivery teams" : view === "groups" ? "Groups" : view === "employees" ? "Employees" : "Contractors"}${filteredBusinessUnit ? ` - ${filteredBusinessUnit}` : ""}`}
           onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1257,11 +1389,17 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             <HoverBtn onClick={() => { setView("departments"); setSelectedPerson(null) }} style={s.pillBtn(view === "departments")}>
               <Circle size={10} strokeWidth={1} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
             </HoverBtn>
+            <HoverBtn onClick={() => { setView("delivery-teams"); setSelectedPerson(null) }} style={s.pillBtn(view === "delivery-teams")}>
+              <Circle size={10} strokeWidth={1} style={{ fill: view === "delivery-teams" ? t.fg : "none" }}/>Delivery teams
+            </HoverBtn>
+            <HoverBtn onClick={() => { setView("groups"); setSelectedPerson(null) }} style={s.pillBtn(view === "groups")}>
+              <Circle size={10} strokeWidth={1} style={{ fill: view === "groups" ? t.fg : "none" }}/>Groups
+            </HoverBtn>
           </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
 
-        {view !== "departments" ? (
+        {!isGroupView ? (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
               <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
@@ -1272,27 +1410,64 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
                 { accessorKey: "name", header: "Name", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
                 { accessorKey: "roleId", header: "Role", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><RoleSelector roleId={row.original.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, roleId: v} : x))}/></span> },
                 { accessorKey: "departmentId", header: "Department", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeptSelector departmentId={row.original.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, departmentId: v} : x))}/></span> },
-                { accessorKey: "office", header: "Office", size: 140, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.office}</span> },
+                { accessorKey: "deliveryTeamIds", header: "Delivery team", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeliveryTeamSelector teamIds={row.original.deliveryTeamIds || []} teams={deliveryTeams} mode={deliveryTeamMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, deliveryTeamIds: v} : x))}/></span> },
+                { accessorKey: "groupIds", header: "Group", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><GroupSelector groupIds={row.original.groupIds || []} groups={groups} mode={groupMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, groupIds: v} : x))}/></span> },
+                { accessorKey: "office", header: "Office", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.office}</span> },
               ]}
               data={display}
               onRowClick={(_: any, idx: number) => setSelectedPerson(idx)}
               isRowSelected={(_: any, idx: number) => idx === selectedPerson}
-              emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived people</p></div>}
+              emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived people</p></div>}
             />
           </>
-        ) : (
+        ) : view === "departments" ? (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
               <Tabs active="active" onChange={() => {}} tabs={[{ label: `${departments.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
             </div>
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{deptPeopleCounts[departments.indexOf(row.original)] ?? 0}</span> },
+                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{deptPeopleCounts[departments.indexOf(row.original)] ?? 0}</span> },
               ]}
               data={departments}
               onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
               isRowSelected={(_: any, idx: number) => idx === selectedDept}
+            />
+          </>
+        ) : view === "delivery-teams" ? (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${deliveryTeams.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setTeamSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setDeliveryTeams(deliveryTeams.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => deliveryTeamCounts[i] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{deliveryTeamCounts[deliveryTeams.indexOf(row.original)] ?? 0}</span> },
+              ]}
+              data={deliveryTeams}
+              onRowClick={(_: any, idx: number) => setSelectedDeliveryTeam(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedDeliveryTeam}
+            />
+          </>
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${groups.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setGroupSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setGroups(groups.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => groupCounts[i] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{groupCounts[groups.indexOf(row.original)] ?? 0}</span> },
+              ]}
+              data={groups}
+              onRowClick={(_: any, idx: number) => setSelectedGroup(idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedGroup}
             />
           </>
         )}
@@ -1305,13 +1480,23 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             { label: "Role", value: roles[current[selectedPerson].roleId]?.name },
             { label: "Status", value: "Active" },
           ]}/>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
           <ActivityTimeline entries={(PERSON_ACTIVITY as any)[current[selectedPerson].name] || []}/>
         </Sheet>
       )}
       {view === "departments" && selectedDept !== null && departments[selectedDept] && (
         <Sheet title={departments[selectedDept].name} subtitle={`${deptPeopleCounts[selectedDept] ?? 0} active people`} onClose={() => setSelectedDept(null)}>
           <DetailGrid items={[{ label: "Active people", value: deptPeopleCounts[selectedDept] ?? 0 }, { label: "Status", value: "Active" }]}/>
+        </Sheet>
+      )}
+      {view === "delivery-teams" && selectedDeliveryTeam !== null && deliveryTeams[selectedDeliveryTeam] && (
+        <Sheet title={deliveryTeams[selectedDeliveryTeam].name} subtitle={`${deliveryTeamCounts[selectedDeliveryTeam] ?? 0} members`} onClose={() => setSelectedDeliveryTeam(null)}>
+          <DetailGrid items={[{ label: "Members", value: deliveryTeamCounts[selectedDeliveryTeam] ?? 0 }, { label: "Status", value: "Active" }]}/>
+        </Sheet>
+      )}
+      {view === "groups" && selectedGroup !== null && groups[selectedGroup] && (
+        <Sheet title={groups[selectedGroup].name} subtitle={`${groupCounts[selectedGroup] ?? 0} members`} onClose={() => setSelectedGroup(null)}>
+          <DetailGrid items={[{ label: "Members", value: groupCounts[selectedGroup] ?? 0 }, { label: "Status", value: "Active" }]}/>
         </Sheet>
       )}
     </div>
@@ -1538,11 +1723,11 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
   const projColumns = useMemo(() => {
     const cols: any[] = [
       { accessorKey: "name", header: "Project", size: 260, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].name=v; onProjectsChange(u) }} style={{ background: "transparent" }}/></span> },
-      { accessorKey: "code", header: "Code", size: 100, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.secondaryFg }}>{row.original.code}</span> },
+      { accessorKey: "code", header: "Code", size: 100, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.secondaryFg }}>{row.original.code}</span> },
     ]
-    if (visibleItems.has("Clients")) cols.push({ accessorKey: "clientId", header: "Client", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{clients[row.original.clientId]?.name}</span> })
-    cols.push({ accessorKey: "office", header: "Office", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.office}</span> })
-    if (visibleItems.has("Business Units")) cols.push({ accessorKey: "unit", header: "Business Unit", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 14, color: t.fg }}>{row.original.unit || "—"}</span> })
+    if (visibleItems.has("Clients")) cols.push({ accessorKey: "clientId", header: "Client", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{clients[row.original.clientId]?.name}</span> })
+    cols.push({ accessorKey: "office", header: "Office", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.office}</span> })
+    if (visibleItems.has("Business Units")) cols.push({ accessorKey: "unit", header: "Business Unit", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unit || "—"}</span> })
     cols.push({ id: "owner", header: "Owner", size: 130, enableResizing: false, accessorFn: () => "", cell: ({ row }: any) => <span style={{ display: "flex", alignItems: "center" }}><div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>{people[row.original.ownerId]?.name.charAt(0) || "?"}</div></span> })
     return cols
   }, [visibleItems, projects, onProjectsChange, clients, people])
@@ -1571,7 +1756,7 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
           data={display}
           onRowClick={(_: any, idx: number) => setSelectedIdx(idx)}
           isRowSelected={(_: any, idx: number) => idx === selectedIdx}
-          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 14, color: t.mutedFg }}>No archived projects</p></div>}
+          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived projects</p></div>}
         />
       </div>
       {selectedIdx !== null && projects[selectedIdx] && (
@@ -1801,12 +1986,12 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
   )
 }
 
-function Clients({ roles }: any) {
+function Clients({ roles, people, clients, onClientsChange }: any) {
+  const setClients = onClientsChange
   const [tab, setTab] = useState("active")
-  const [clients, setClients] = useState(CLIENTS_FULL)
   const [selectedClient, setSelectedClient] = useState<number|null>(null)
   const [selectedRC, setSelectedRC] = useState<number|null>(null)
-  function updateClient(idx: any, updated: any) { setClients((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
+  function updateClient(idx: any, updated: any) { onClientsChange((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
   const client = selectedClient !== null ? clients[selectedClient] : null
 
   return (
@@ -1825,9 +2010,49 @@ function Clients({ roles }: any) {
             </div>
             <DataTable
               columns={[
-                { accessorKey: "name", header: "Client", size: 300, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
-                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.rateCards.length}</span> },
-                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.projects}</span> },
+                { accessorKey: "name", header: "Client", size: 220, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
+                { id: "contact", header: "Client contact", size: 240, cell: ({ row }: any) => {
+                  const c = row.original.contact
+                  if (!c) return null
+                  const initials = c.name.split(" ").map((w: string) => w[0]).join("").slice(0,2).toUpperCase()
+                  return (
+                    <span style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <span style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg, flexShrink:0 }}>{initials}</span>
+                      <span style={{ color:t.secondaryFg, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{c.email}</span>
+                    </span>
+                  )
+                }},
+                { id: "owner", header: "Client owner", size: 160, cell: ({ row }: any) => (
+                  <select
+                    value={row.original.owner || ""}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, owner: e.target.value} : x)) }}
+                    style={{ fontSize:13, color: row.original.owner ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+                  >
+                    <option value="">Unassigned</option>
+                    {(people || []).map((p: any) => <option key={p.name} value={p.name}>{p.name}</option>)}
+                  </select>
+                )},
+                { id: "access", header: "Access", size: 160, cell: ({ row }: any) => (
+                  <select
+                    value={row.original.access}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, access: e.target.value} : x)) }}
+                    style={{ fontSize:13, color: row.original.access ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+                  >
+                    <option value="">Select access</option>
+                    <option value="view">View only</option>
+                    <option value="edit">Can edit</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                )},
+                { id: "crm", header: "CRM", size: 180, cell: ({ row }: any) => {
+                  const url = row.original.crmUrl
+                  if (url) return <a href={url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color:t.secondaryFg, textDecoration:"underline", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"100%", display:"block" }}>{url}</a>
+                  return <span onClick={e => { e.stopPropagation(); const v = prompt("Enter CRM URL"); if (v) setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, crmUrl: v} : x)) }} style={{ color:t.mutedFg, cursor:"pointer" }}>Add link</span>
+                }},
+                { id: "rateCards", header: "Rate cards", size: 110, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.rateCards.length}</span> },
+                { accessorKey: "projects", header: "Projects", size: 100, enableResizing: false, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.projects}</span> },
               ]}
               data={tab==="archived"?[]:clients}
               onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
@@ -1849,10 +2074,10 @@ function Clients({ roles }: any) {
             </div>
             <DataTable
               columns={[
-                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
-                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
-                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
-                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
+                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
+                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
+                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
+                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
               ]}
               data={client.rateCards}
               onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
@@ -1893,8 +2118,8 @@ function RateCards({ roles }: any) {
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Client", size: 300, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
-                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.rateCards.length}</span> },
-                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.projects}</span> },
+                { id: "rateCards", header: "Rate cards", size: 150, accessorFn: (row: any) => row.rateCards.length, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.rateCards.length}</span> },
+                { accessorKey: "projects", header: "Projects", size: 150, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.projects}</span> },
               ]}
               data={tab==="archived"?[]:clients}
               onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(null) }}
@@ -1916,10 +2141,10 @@ function RateCards({ roles }: any) {
             </div>
             <DataTable
               columns={[
-                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
-                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
-                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
-                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
+                { accessorKey: "title", header: "Rate Card", size: 260, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.title}</span> },
+                { accessorKey: "currency", header: "Currency", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.currency}</span> },
+                { accessorKey: "offices", header: "Offices", size: 130, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.offices==="all"?"All":row.original.offices.length}</span> },
+                { id: "roles", header: "Roles", size: 100, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg, display:"flex", alignItems:"center" }}>{row.original.linkedRoles?.length ?? 0}</span> },
               ]}
               data={client.rateCards}
               onRowClick={(_: any, idx: number) => setSelectedRC(idx)}
@@ -1961,9 +2186,9 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Business Unit", size: 260, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setUnits((ul: any) => ul.map((x: any) => x === row.original ? {...x,name:v} : x))} style={{ background:"transparent" }}/></span> },
-                { id: "employees", header: "Employees", size: 130, accessorFn: (row: any) => row.employees, cell: ({ row }: any) => <span onClick={() => onEmployeesClick(row.original.name)} style={{ display:"flex", alignItems:"center", fontSize:14, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{row.original.employees}</span> },
-                { id: "projects", header: "Projects", size: 130, accessorFn: (row: any) => row.projectsList?.length || 0, cell: ({ row }: any) => <span onClick={() => onProjectsClick(row.original.name)} style={{ display:"flex", alignItems:"center", fontSize:14, color:t.secondaryFg, cursor:"pointer", textDecoration:"underline" }}>{row.original.projectsList?.length || 0}</span> },
-                { id: "departments", header: "Departments", size: 130, enableResizing: false, accessorFn: (row: any) => row.departments?.length ?? 0, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", fontSize:14, color:t.fg }}>{row.original.departments?.length ?? 0}</span> },
+                { id: "employees", header: "Employees", size: 130, accessorFn: (row: any) => row.employees, cell: ({ row }: any) => <Tag label={row.original.employees} onClick={() => onEmployeesClick(row.original.name)} /> },
+                { id: "projects", header: "Projects", size: 130, accessorFn: (row: any) => row.projectsList?.length || 0, cell: ({ row }: any) => <Tag label={row.original.projectsList?.length || 0} onClick={() => onProjectsClick(row.original.name)} /> },
+                { id: "departments", header: "Departments", size: 130, enableResizing: false, accessorFn: (row: any) => row.departments?.length ?? 0, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{row.original.departments?.length ?? 0}</span> },
               ]}
               data={tab==="archived"?[]:units}
               onRowClick={(_: any, idx: number) => { setSelectedUnit(idx); setViewTab("departments"); setSelectedDept(null) }}
@@ -1989,9 +2214,9 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
             {viewTab === "projects" ? (
                   <DataTable
                     columns={[
-                      { accessorKey: "title", header: "Project", size: 220, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
-                      { accessorKey: "team", header: "Team Size", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.team}</span> },
-                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.budget?.toLocaleString()}</span> },
+                      { accessorKey: "title", header: "Project", size: 220, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
+                      { accessorKey: "team", header: "Team Size", size: 110, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.team}</span> },
+                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>${row.original.budget?.toLocaleString()}</span> },
                       { accessorKey: "status", header: "Status", size: 110, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize:12, display:"flex", alignItems:"center", padding:"4px 8px", borderRadius:4, background: row.original.status === "Active" ? "#d4edda" : row.original.status === "In Progress" ? "#fff3cd" : "#e7e7e7", color: row.original.status === "Active" ? "#155724" : row.original.status === "In Progress" ? "#856404" : "#666" }}>{row.original.status}</span> },
                     ]}
                     data={unit.projectsList ?? []}
@@ -2000,10 +2225,10 @@ function BusinessUnits({ roles, onProjectsClick, onEmployeesClick }: any) {
             ) : (
                   <DataTable
                     columns={[
-                      { accessorKey: "title", header: "Department", size: 220, cell: ({ row }: any) => <span style={{ fontSize:14, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
-                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.budget.toLocaleString()}</span> },
-                      { accessorKey: "spent", header: "Spent", size: 110, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>${row.original.spent.toLocaleString()}</span> },
-                      { id: "roles", header: "Roles", size: 110, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:14, color:t.fg }}>{row.original.linkedRoles?.length ?? 0}</span> },
+                      { accessorKey: "title", header: "Department", size: 220, cell: ({ row }: any) => <span style={{ fontSize:13, fontWeight:500, color:t.fg }}>{row.original.title}</span> },
+                      { accessorKey: "budget", header: "Budget", size: 110, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>${row.original.budget.toLocaleString()}</span> },
+                      { accessorKey: "spent", header: "Spent", size: 110, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>${row.original.spent.toLocaleString()}</span> },
+                      { id: "roles", header: "Roles", size: 110, enableResizing: false, accessorFn: (row: any) => row.linkedRoles?.length ?? 0, cell: ({ row }: any) => <span style={{ fontSize:13, color:t.fg }}>{row.original.linkedRoles?.length ?? 0}</span> },
                     ]}
                     data={unit.departments}
                     onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
@@ -2284,8 +2509,9 @@ export default function App() {
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
   const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
   const [clients] = useState(INITIAL_CLIENTS_DATA)
+  const [clientsFull, setClientsFull] = useState(CLIENTS_FULL)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(name => name !== "Clients")))
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
 
@@ -2301,7 +2527,7 @@ export default function App() {
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clients} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)}/>
-    if (activeItem === "Clients") return <Clients roles={roles}/>
+    if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull}/>
     if (activeItem === "Rate cards") return <RateCards roles={roles}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>

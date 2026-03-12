@@ -28,6 +28,7 @@ import {
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Label } from "@/components/ui/label"
+import { Tag } from "@/components/ui/tag"
 import { Info, AlertTriangle, CheckCircle, Terminal, Bold, Italic, Underline } from "lucide-react"
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -51,8 +52,8 @@ export default function ComponentsPage() {
         <div className="max-w-5xl mx-auto px-8 py-12">
 
           <div className="mb-10">
-            <h1 className="text-2xl font-semibold mb-1">Component Gallery</h1>
-            <p className="text-sm text-muted-foreground">All available UI components at a glance.</p>
+            <h1 className="text-2xl font-semibold mb-1">Components</h1>
+            <p className="text-sm text-muted-foreground">Float UI components</p>
           </div>
 
           {/* Buttons */}
@@ -79,7 +80,7 @@ export default function ComponentsPage() {
           {/* Avatar */}
           <Section title="Avatar">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
+              <AvatarImage src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CR-avatar-Bz4EbF5HeVDJiGS7f3cWgRW6XtjgTN.jpeg" alt="CR Avatar" />
               <AvatarFallback>SC</AvatarFallback>
             </Avatar>
             <Avatar>
@@ -253,6 +254,17 @@ export default function ComponentsPage() {
             </Tooltip>
           </Section>
 
+          {/* Sidebar */}
+          <Section title="Sidebar">
+            <div className="rounded-xl overflow-hidden border" style={{ width: 260, height: 600, flexShrink: 0 }}>
+              <iframe
+                src="/"
+                style={{ width: 1440, height: 600, border: "none", pointerEvents: "none" }}
+                scrolling="no"
+              />
+            </div>
+          </Section>
+
           {/* Table */}
           <Section title="Table">
             <div className="w-full max-w-lg border rounded-md overflow-hidden">
@@ -282,6 +294,18 @@ export default function ComponentsPage() {
                   </TableRow>
                 </TableBody>
               </Table>
+            </div>
+          </Section>
+
+          {/* Tag */}
+          <Section title="Tag">
+            <div className="flex items-center gap-2">
+              <Tag label="Acquisition" />
+              <Tag label="Retention" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag label={12} onClick={() => {}} />
+              <Tag label={4} onClick={() => {}} />
             </div>
           </Section>
 

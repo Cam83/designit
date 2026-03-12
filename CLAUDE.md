@@ -44,3 +44,11 @@ pnpm lint      # run ESLint
 - Keep theme-sensitive styles tied to the theme objects; never hardcode colors
 - The app is a single-page client component (`"use client"`) — no server components in `page.tsx`
 - shadcn/ui components live in `components/ui/` and use Tailwind + CSS variables
+
+## Component Sync Rule
+
+Whenever a component in `components/ui/` is created or edited, it must be reflected in **both**:
+1. `app/page.tsx` — where it is used in the live app
+2. `app/components/page.tsx` — where it is showcased in the component gallery
+
+Always verify both usages are consistent after any component change.
