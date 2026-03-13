@@ -2509,8 +2509,8 @@ export default function App() {
   const [rateCardFilter, setRateCardFilter] = useState<string|null>(null)
   const [clientsFilter, setClientsFilter] = useState<string[]|null>(null)
   const [projectsClientFilter, setProjectsClientFilter] = useState<string|null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name)))
+  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
 
