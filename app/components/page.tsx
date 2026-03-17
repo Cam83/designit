@@ -29,7 +29,46 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Label } from "@/components/ui/label"
 import { Tag } from "@/components/ui/tag"
-import { Info, AlertTriangle, CheckCircle, Terminal, Bold, Italic, Underline, Sun, Moon } from "lucide-react"
+import {
+  Info, AlertTriangle, CheckCircle, Terminal, Bold, Italic, Underline,
+  Sun, Moon, Layers, ChevronDown, Check,
+  Gauge, BarChart3, Clock, Users, Database, FolderOpen, Building2, ChefHat,
+  HelpCircle, Bell, Settings, Plus, RefreshCw, Settings2, X, Circle,
+  UserPlus, ArrowRightLeft, CalendarClock, Briefcase, DollarSign,
+  ChevronLeft, ListFilter, MoreVertical, Pyramid
+} from "lucide-react"
+
+function RoleSelectorDemo() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(0)
+  const roles = ["Designer", "Developer", "Product Manager", "QA Engineer"]
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-1 text-sm text-foreground bg-transparent border-none cursor-pointer py-1 px-2 rounded hover:bg-accent transition-colors"
+      >
+        {roles[selected]}<ChevronDown size={11} strokeWidth={1} className="text-muted-foreground" />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-1 z-50 bg-popover border border-border rounded-lg shadow-lg p-1 min-w-[160px]">
+            {roles.map((r, i) => (
+              <button
+                key={i}
+                onClick={() => { setSelected(i); setOpen(false) }}
+                className="flex items-center justify-between w-full px-2.5 py-1.5 text-sm rounded-md hover:bg-accent text-left cursor-pointer border-none bg-transparent text-foreground"
+              >
+                {r}{i === selected && <Check size={11} strokeWidth={1} />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -45,12 +84,12 @@ export default function ComponentsPage() {
   const [checked, setChecked] = useState(true)
   const [switched, setSwitched] = useState(true)
   const [toggled, setToggled] = useState(false)
-  const [dark, setDark] = useState(false)
+  const [theme, setTheme] = useState<"light" | "dark" | "float-dark">("light")
 
   return (
     <TooltipProvider>
-      <div className={dark ? "dark" : ""}>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className={theme !== "light" ? "dark" : ""} style={theme === "float-dark" ? { colorScheme: "dark", background: "#141414", color: "#f0f0f0" } : {}}>
+      <div className="min-h-screen bg-background text-foreground" style={theme === "float-dark" ? { background: "#141414" } : {}}>
         <div className="max-w-5xl mx-auto px-8 py-12">
 
           <div className="mb-10 flex items-center justify-between">
@@ -58,13 +97,20 @@ export default function ComponentsPage() {
               <h1 className="text-2xl font-semibold mb-1">Components</h1>
               <p className="text-sm text-muted-foreground">Float UI components</p>
             </div>
-            <button
-              onClick={() => setDark(d => !d)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              {dark ? <Sun size={14}/> : <Moon size={14}/>}
-              {dark ? "Light" : "Dark"}
-            </button>
+            <div className="flex items-center gap-1 p-1 rounded-lg border border-border bg-muted">
+              {(["light", "dark", "float-dark"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setTheme(m)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-colors ${theme === m ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  {m === "light" && <Sun size={12}/>}
+                  {m === "dark" && <Moon size={12}/>}
+                  {m === "float-dark" && <Layers size={12}/>}
+                  {m === "light" ? "Light" : m === "dark" ? "Dark" : "Float dark"}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Buttons */}
@@ -308,6 +354,23 @@ export default function ComponentsPage() {
             </div>
           </Section>
 
+          {/* Role Selector */}
+          <Section title="Role Selector">
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-muted-foreground mb-1">Inline table cell</p>
+                <RoleSelectorDemo />
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-muted-foreground mb-1">Multiple instances</p>
+                <div className="flex flex-col gap-1">
+                  <RoleSelectorDemo />
+                  <RoleSelectorDemo />
+                </div>
+              </div>
+            </div>
+          </Section>
+
           {/* Tag */}
           <Section title="Tag">
             <div className="flex items-center gap-2">
@@ -331,6 +394,78 @@ export default function ComponentsPage() {
                 <BreadcrumbItem><BreadcrumbPage>People</BreadcrumbPage></BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+          </Section>
+
+          {/* Icons */}
+          <Section title="Icons">
+            {[
+              { icon: <ChevronDown size={16} strokeWidth={1}/>, name: "ChevronDown" },
+              { icon: <ChevronLeft size={16} strokeWidth={1}/>, name: "ChevronLeft" },
+              { icon: <Gauge size={16} strokeWidth={1}/>, name: "Gauge" },
+              { icon: <BarChart3 size={16} strokeWidth={1}/>, name: "BarChart3" },
+              { icon: <Clock size={16} strokeWidth={1}/>, name: "Clock" },
+              { icon: <Users size={16} strokeWidth={1}/>, name: "Users" },
+              { icon: <Database size={16} strokeWidth={1}/>, name: "Database" },
+              { icon: <FolderOpen size={16} strokeWidth={1}/>, name: "FolderOpen" },
+              { icon: <Building2 size={16} strokeWidth={1}/>, name: "Building2" },
+              { icon: <ChefHat size={16} strokeWidth={1}/>, name: "ChefHat" },
+              { icon: <HelpCircle size={16} strokeWidth={1}/>, name: "HelpCircle" },
+              { icon: <Bell size={16} strokeWidth={1}/>, name: "Bell" },
+              { icon: <Settings size={16} strokeWidth={1}/>, name: "Settings" },
+              { icon: <Settings2 size={16} strokeWidth={1}/>, name: "Settings2" },
+              { icon: <Layers size={16} strokeWidth={1}/>, name: "Layers" },
+              { icon: <Plus size={16} strokeWidth={1}/>, name: "Plus" },
+              { icon: <RefreshCw size={16} strokeWidth={1}/>, name: "RefreshCw" },
+              { icon: <Check size={16} strokeWidth={1}/>, name: "Check" },
+              { icon: <X size={16} strokeWidth={1}/>, name: "X" },
+              { icon: <Circle size={16} strokeWidth={1}/>, name: "Circle" },
+              { icon: <UserPlus size={16} strokeWidth={1}/>, name: "UserPlus" },
+              { icon: <ArrowRightLeft size={16} strokeWidth={1}/>, name: "ArrowRightLeft" },
+              { icon: <CalendarClock size={16} strokeWidth={1}/>, name: "CalendarClock" },
+              { icon: <Briefcase size={16} strokeWidth={1}/>, name: "Briefcase" },
+              { icon: <DollarSign size={16} strokeWidth={1}/>, name: "DollarSign" },
+              { icon: <ListFilter size={16} strokeWidth={1}/>, name: "ListFilter" },
+              { icon: <Sun size={16} strokeWidth={1}/>, name: "Sun" },
+              { icon: <Moon size={16} strokeWidth={1}/>, name: "Moon" },
+              { icon: <MoreVertical size={16} strokeWidth={1}/>, name: "MoreVertical" },
+              { icon: <Pyramid size={16} strokeWidth={1}/>, name: "Pyramid" },
+              { icon: <Info size={16} strokeWidth={1}/>, name: "Info" },
+              { icon: <AlertTriangle size={16} strokeWidth={1}/>, name: "AlertTriangle" },
+              { icon: <CheckCircle size={16} strokeWidth={1}/>, name: "CheckCircle" },
+              { icon: <Terminal size={16} strokeWidth={1}/>, name: "Terminal" },
+              { icon: <Bold size={16} strokeWidth={1}/>, name: "Bold" },
+              { icon: <Italic size={16} strokeWidth={1}/>, name: "Italic" },
+              { icon: <Underline size={16} strokeWidth={1}/>, name: "Underline" },
+            ].map(({ icon, name }) => (
+              <div key={name} className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-border w-[88px]">
+                <span className="text-foreground">{icon}</span>
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">{name}</span>
+              </div>
+            ))}
+          </Section>
+
+          {/* Type Ramp */}
+          <Section title="Type ramp">
+            <div className="flex flex-col gap-5 w-full">
+              {[
+                { size: "18px", weight: 400, label: "18 / 400", sample: "Campaign Q3 — Nike Global", note: "Page title (Lexend)" },
+                { size: "16px", weight: 600, label: "16 / 600", sample: "Membership settings", note: "Panel heading" },
+                { size: "15px", weight: 600, label: "15 / 600", sample: "Add role", note: "Modal heading" },
+                { size: "14px", weight: 400, label: "14 / 400", sample: "View all projects", note: "Nav action" },
+                { size: "13px", weight: 500, label: "13 / 500", sample: "Beaverton HQ", note: "Sidebar label, table body" },
+                { size: "13px", weight: 400, label: "13 / 400", sample: "Each person belongs to one department", note: "Body text" },
+                { size: "12px", weight: 500, label: "12 / 500", sample: "ROLE NAME", note: "Column header, form label" },
+                { size: "12px", weight: 400, label: "12 / 400", sample: "No archived roles", note: "Secondary / empty state" },
+                { size: "11px", weight: 500, label: "11 / 500", sample: "COST RATE", note: "Micro label" },
+                { size: "10px", weight: 600, label: "10 / 600", sample: "CR", note: "Avatar initials" },
+              ].map(({ size, weight, label, sample, note }) => (
+                <div key={label} className="flex items-baseline gap-6">
+                  <span className="text-[11px] text-muted-foreground w-16 shrink-0 tabular-nums">{label}</span>
+                  <span style={{ fontSize: size, fontWeight: weight, lineHeight: 1.3 }}>{sample}</span>
+                  <span className="text-[11px] text-muted-foreground">{note}</span>
+                </div>
+              ))}
+            </div>
           </Section>
 
         </div>

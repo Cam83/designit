@@ -48,6 +48,19 @@ const lightTheme = {
   scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)"
 }
 
+const floatDarkTheme = {
+  bg: "#141414", fg: "#f0f0f0", card: "#1a1a1a", popover: "#202020",
+  primary: "#f0f0f0", primaryFg: "#141414", secondary: "#242424",
+  secondaryFg: "#909090", muted: "#242424", mutedFg: "#686868",
+  accent: "#2a2a2a", accentFg: "#f0f0f0", border: "#282828",
+  sidebar: "#1a1a1a", sidebarFg: "#909090", sidebarBorder: "#242424",
+  fgAlpha30: "rgba(240,240,240,0.3)", fgAlpha10: "rgba(240,240,240,0.1)",
+  fgAlpha06: "rgba(240,240,240,0.06)", fgAlpha03: "rgba(240,240,240,0.03)",
+  fgAlpha20: "rgba(240,240,240,0.2)", fgAlpha70: "rgba(240,240,240,0.7)",
+  borderAlpha25: "rgba(168,168,168,0.2)", scrollAlpha40: "rgba(120,120,120,0.4)",
+  scrollAlpha70: "rgba(120,120,120,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
+}
+
 let t = darkTheme
 
 const getStyles = (theme: any) => ({
@@ -177,7 +190,7 @@ function HoverBtn({ style, children, onClick, title, disabled }: any) {
 function DropdownWrapper({ trigger, children, open, setOpen }: any) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const dropRef = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{top:number,left:number}|null>(null)
+  const [pos, setPos] = useState<{top:number,left:number,transform?:string}|null>(null)
   useLayoutEffect(() => {
     if (!open) { setPos(null); return }
     if (wrapRef.current) {
@@ -281,9 +294,9 @@ function Collapsible({ expanded, children }: any) {
   )
 }
 
-function NikeLogo({ isDarkMode }: any) {
+function NikeLogo({ themeMode }: any) {
   return (
-    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002_nike-logos-swoosh-white-0nPbb6zNJMvApD16nQ1CvQL4h5mmIp.png" alt="Nike" style={{ height: 24, width: "auto", filter: isDarkMode ? "none" : "brightness(0)" }} />
+    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002_nike-logos-swoosh-white-0nPbb6zNJMvApD16nQ1CvQL4h5mmIp.png" alt="Nike" style={{ height: 24, width: "auto", filter: themeMode === "light" ? "brightness(0)" : "none" }} />
   )
 }
 
@@ -350,7 +363,7 @@ const INITIAL_CONTRACTORS = [
 const INITIAL_PROJECTS: any[] = []
 
 const INITIAL_CLIENTS_DATA = [{ name: "Agency rack rate" }, { name: "Reebok" }, { name: "Adidas" }]
-const ALL_OFFICES = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
+const ALL_OFFICES = ["Global", "Beaverton HQ", "Hilversum", "Shanghai", "New York", "London", "Sydney"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
 const CURRENCIES = ["USD","AUD","GBP","EUR","CAD","NZD","SGD","JPY"]
 
@@ -522,7 +535,7 @@ const SAMPLE_NOTES_POOL = [
 
 function getBusinessUnitProjects() {
   const stageMap: Record<string, string> = { "Active": "active", "In Progress": "active", "Planning": "planning" }
-  const offices = ["Global", "New York", "London", "Sydney", "Americas", "Europe", "Asia"]
+  const offices = ["Global", "Beaverton HQ", "Hilversum", "Shanghai", "New York", "London", "Sydney"]
   const allProjects: any[] = []
 
   BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
@@ -581,25 +594,12 @@ const dataHubItems = [
 ]
 const LOCATIONS_INIT = [
   { name: "Global", icon: <OfficeIcon/>, expanded: true, items: globalSidebarItems },
+  { name: "Beaverton HQ", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Hilversum", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Shanghai", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "New York", icon: <OfficeIcon/>, expanded: false, items: officeItemsMyTime },
   { name: "London", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Sydney", icon: <OfficeIcon/>, expanded: false, items: officeItems },
-  { name: "Americas", icon: <Layers size={16} strokeWidth={1}/>, expanded: false, children: [
-    { name: "Austin", expanded: false, items: officeItems },
-    { name: "Los Angeles", expanded: false, items: officeItems },
-    { name: "San Francisco", expanded: false, items: officeItems },
-    { name: "Chicago", expanded: false, items: officeItems },
-  ]},
-  { name: "APAC", icon: <Layers size={16} strokeWidth={1}/>, expanded: false, children: [
-    { name: "Tokyo", expanded: false, items: officeItems },
-    { name: "Singapore", expanded: false, items: officeItems },
-    { name: "Melbourne", expanded: false, items: officeItems },
-  ]},
-  { name: "EMEA", icon: <Layers size={16} strokeWidth={1}/>, expanded: false, children: [
-    { name: "Berlin", expanded: false, items: officeItems },
-    { name: "Paris", expanded: false, items: officeItems },
-    { name: "Madrid", expanded: false, items: officeItems },
-  ]},
 ]
 
 // ── Shared UI ──
@@ -928,10 +928,9 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, isDarkMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
-  const [dataHubHover, setDataHubHover] = useState(false)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
   const dataHubSettingsRef = useRef<HTMLDivElement>(null)
   const [orgOpen, setOrgOpen] = useState(false)
@@ -949,64 +948,89 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     }
   }, [dataHubSettingsOpen])
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.shiftKey && e.key === "K") {
+        e.preventDefault()
+        setDataHubSettingsOpen(o => !o)
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
   function setActive(name: any, bc: any) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
   function toggleLoc(i: any) {
     setLocs((prev: any) => prev.map((l: any, idx: any) => idx === i ? { ...l, expanded: !l.expanded } : { ...l, expanded: false, children: l.children?.map((c: any) => ({ ...c, expanded: false })) }))
   }
-  function toggleChild(pi: any, ci: any) {
-    setLocs((prev: any) => prev.map((l: any, i: any) => i === pi && l.children ? { ...l, children: l.children.map((c: any, j: any) => j === ci ? { ...c, expanded: !c.expanded } : { ...c, expanded: false }) } : l))
-  }
 
-  const navItemStyle = (active: any) => ({
-    display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "6px 8px",
+  const navItemStyle = (active: any, forceCollapsed = collapsed) => ({
+    display: "flex", alignItems: "center", justifyContent: forceCollapsed ? "center" : "flex-start",
+    gap: 8, width: "100%", padding: forceCollapsed ? "7px 0" : "6px 8px",
     borderRadius: 6, border: "none", background: active ? t.accent : "transparent",
     color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 13,
     fontWeight: active ? 500 : 400, textAlign: "left" as const,
   })
 
   return (
-    <aside style={s.sidebar}>
+    <aside style={{ ...s.sidebar, width: collapsed ? 52 : 260, transition: "width 0.2s ease", overflow: "hidden" }}>
       <style>{getGlobalStyles(t)}</style>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 12px 4px" }}>
-        <DropdownWrapper open={orgOpen} setOpen={setOrgOpen}
-          trigger={
-            <HoverBtn onClick={() => setOrgOpen(!orgOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 6px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", color: t.fg }}>
-              <NikeLogo isDarkMode={isDarkMode}/>
-              <ChevronDown size={12} strokeWidth={1} color={t.secondaryFg} style={{ transform: orgOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", padding: "12px 12px 4px", minWidth: collapsed ? 52 : 260 }}>
+        {!collapsed && (
+          <DropdownWrapper open={orgOpen} setOpen={setOrgOpen}
+            trigger={
+              <HoverBtn onClick={() => setOrgOpen(!orgOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 6px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", color: t.fg }}>
+                <NikeLogo themeMode={themeMode}/>
+                <ChevronDown size={12} strokeWidth={1} color={t.secondaryFg} style={{ transform: orgOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
+              </HoverBtn>
+            }>
+            <div style={{ ...s.dropdown, width: 200 }}>
+              <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
+                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+                <Settings size={14} strokeWidth={1}/> Settings
+              </HoverBtn>
+            </div>
+          </DropdownWrapper>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {!collapsed && (
+            <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer", fontSize: 14 }}>
+              <Bell size={14} strokeWidth={1} color={t.mutedFg}/>
+              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>23</span>
             </HoverBtn>
-          }>
-          <div style={{ ...s.dropdown, width: 200 }}>
-            <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
-              <Settings size={14} strokeWidth={1}/> Settings
-            </HoverBtn>
-          </div>
-        </DropdownWrapper>
-        <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer", fontSize: 14 }}>
-          <Bell size={14} strokeWidth={1} color={t.mutedFg}/>
-          <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>23</span>
-        </HoverBtn>
+          )}
+          <HoverBtn onClick={onToggleCollapsed} style={{ ...s.iconBtn, color: t.mutedFg }}>
+            <ChevronLeft size={15} strokeWidth={1} style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
+          </HoverBtn>
+        </div>
       </div>
 
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
         {version === "single" ? (
           officeItems.map(item => (
             <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
-              {item.icon}{item.name}
+              {item.icon}{!collapsed && item.name}
             </HoverBtn>
           ))
         ) : (
           locs.map((loc, i) => (
             <div key={loc.name} style={{ marginTop: i > 0 ? 2 : 0 }}>
-              <HoverBtn onClick={() => toggleLoc(i)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {collapsed ? (
+                <HoverBtn onClick={() => { toggleLoc(i) }}
+                  style={{ ...navItemStyle(false), justifyContent: "center" }}>
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
-                </div>
-                <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
-              </HoverBtn>
-              {loc.items && (
+                </HoverBtn>
+              ) : (
+                <HoverBtn onClick={() => toggleLoc(i)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
+                  </div>
+                  <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+                </HoverBtn>
+              )}
+              {!collapsed && loc.items && (
                 <Collapsible expanded={loc.expanded}>
                   <div style={{ marginTop: 2 }}>
                     {loc.items.map(item => (
@@ -1018,52 +1042,26 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                   </div>
                 </Collapsible>
               )}
-              {loc.children && (
-                <Collapsible expanded={loc.expanded}>
-                  <div style={{ marginLeft: 18, borderLeft: `1px solid ${t.borderAlpha25}`, marginTop: 2 }}>
-                    {loc.children.map((child, ci) => (
-                      <div key={child.name}>
-                        <HoverBtn onClick={() => toggleChild(i, ci)}
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px 6px 16px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                          <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{child.name}</span>
-                          <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: child.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
-                        </HoverBtn>
-                        {child.items && (
-                          <Collapsible expanded={child.expanded}>
-                            {child.items.map(item => (
-                              <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, child.name, item.name])}
-                                style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 46 }}>
-                                {item.icon}{item.name}
-                              </HoverBtn>
-                            ))}
-                          </Collapsible>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </Collapsible>
-              )}
             </div>
           ))
         )}
 
-        <div style={{ marginTop: 16 }} onMouseEnter={() => setDataHubHover(true)} onMouseLeave={() => setDataHubHover(false)}>
-          <HoverBtn onClick={() => setDataHubExp(!dataHubExp)}
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ marginTop: 16 }}>
+          {collapsed ? (
+            <HoverBtn style={{ ...navItemStyle(false), justifyContent: "center" }}>
               <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              {dataHubHover && (
-                <div onClick={(e) => { e.stopPropagation(); setDataHubSettingsOpen(!dataHubSettingsOpen) }} style={{ ...s.iconBtn, width: 20, height: 20, color: t.secondaryFg, cursor: "pointer" }}>
-                  <MoreVertical size={14} strokeWidth={1}/>
-                </div>
-              )}
+            </HoverBtn>
+          ) : (
+            <HoverBtn onClick={() => setDataHubExp(!dataHubExp)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
+              </div>
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
-            </div>
-          </HoverBtn>
-          {dataHubSettingsOpen && (
+            </HoverBtn>
+          )}
+          {!collapsed && dataHubSettingsOpen && (
             <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
@@ -1081,7 +1079,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               </div>
             </div>
           )}
-          <Collapsible expanded={dataHubExp}>
+          <Collapsible expanded={!collapsed && dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
@@ -1094,7 +1092,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         </div>
       </nav>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
         <DropdownWrapper open={avatarOpen} setOpen={setAvatarOpen}
           trigger={
             <HoverBtn onClick={() => setAvatarOpen(!avatarOpen)} 
@@ -1103,19 +1101,24 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </HoverBtn>
           }>
           <div style={{ ...s.dropdown, width: 180, left: 0, right: "auto", top: "auto", bottom: "calc(100% + 4px)", marginTop: 0, marginBottom: 0, padding: "4px 0" }}>
-            <button onClick={() => { onThemeChange(false); setAvatarOpen(false) }}
+            <button onClick={() => { onThemeChange("light"); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sun size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Light</span>
-              <Check size={16} strokeWidth={1} style={{ visibility: !isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
+              <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "light" ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
-            <button onClick={() => { onThemeChange(true); setAvatarOpen(false) }}
+            <button onClick={() => { onThemeChange("dark"); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Dark</span>
-              <Check size={16} strokeWidth={1} style={{ visibility: isDarkMode ? "visible" : "hidden", color: t.secondaryFg }}/>
+              <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "dark" ? "visible" : "hidden", color: t.secondaryFg }}/>
+            </button>
+            <button onClick={() => { onThemeChange("float-dark"); setAvatarOpen(false) }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Layers size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Float dark</span>
+              <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "float-dark" ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
           </div>
         </DropdownWrapper>
-        <HoverBtn style={{ ...s.iconBtn, color: t.mutedFg }}><HelpCircle size={16} strokeWidth={1}/></HoverBtn>
+        {!collapsed && <HoverBtn style={{ ...s.iconBtn, color: t.mutedFg }}><HelpCircle size={16} strokeWidth={1}/></HoverBtn>}
       </div>
     </aside>
   )
@@ -1124,7 +1127,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
 // ── Role selectors ──
 function RoleSelector({ roleId, roles, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1145,7 +1148,7 @@ function RoleSelector({ roleId, roles, onChange }: any) {
 
 function ClientSelector({ clientId, clients, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1166,7 +1169,7 @@ function ClientSelector({ clientId, clients, onChange }: any) {
 
 function DeptSelector({ departmentId, departments, onChange }: any) {
   const [open, setOpen] = useState(false)
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1240,7 +1243,7 @@ function TagList({ ids, items, noun }: { ids: number[]; items: any[]; noun: stri
 function DeliveryTeamSelector({ teamIds, teams, mode, onChange }: any) {
   const [open, setOpen] = useState(false)
   const ids: number[] = teamIds || []
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -1272,7 +1275,7 @@ function DeliveryTeamSelector({ teamIds, teams, mode, onChange }: any) {
 function GroupSelector({ groupIds, groups, mode, onChange }: any) {
   const [open, setOpen] = useState(false)
   const ids: number[] = groupIds || []
-  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 0", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
   return (
     <DropdownWrapper open={open} setOpen={setOpen}
       trigger={
@@ -2509,7 +2512,8 @@ export default function App() {
   const [rateCardFilter, setRateCardFilter] = useState<string|null>(null)
   const [clientsFilter, setClientsFilter] = useState<string[]|null>(null)
   const [projectsClientFilter, setProjectsClientFilter] = useState<string|null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "float-dark">("float-dark")
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
@@ -2518,7 +2522,7 @@ export default function App() {
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
 
   // Update theme based on mode
-  t = isDarkMode ? darkTheme : lightTheme
+  t = themeMode === "light" ? lightTheme : themeMode === "float-dark" ? floatDarkTheme : darkTheme
   s = getStyles(t)
 
   function renderMain() {
@@ -2541,7 +2545,7 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} isDarkMode={isDarkMode} onThemeChange={setIsDarkMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems}/>
+      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)}/>
       <main style={{ ...s.main, position:"relative" as const }}>
         {/* breadcrumb nav hidden — may restore later */}
         <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
