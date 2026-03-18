@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -20,6 +20,10 @@ const getGlobalStyles = (theme: any) => `
   ::-webkit-scrollbar-thumb:hover { background: ${theme.scrollAlpha70}; }
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   :root { --tag-bg: ${theme.muted}; --tag-bg-hover: ${theme.fgAlpha10}; }
+  @keyframes notifSlideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
 `
 
 const darkTheme = {
@@ -927,14 +931,80 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
   )
 }
 
+// ── Notifications data ──
+const NOTIFICATIONS_DATA = [
+  { id: 1, initials: "JA", color: "#7c5cbf", action: "approved", bold: "Shay Ho", detail: "on Time off (All Day) from Mar 27 2026 - Mar 30 2026", time: "7d", badge: null },
+  { id: 2, initials: "JA", color: "#7c5cbf", action: "requested", bold: "themselves", detail: "on Learning and Development (8h) on Mar 18 2026", time: "12d", badge: null },
+  { id: 3, initials: "JA", color: "#7c5cbf", action: "requested", bold: "themselves", detail: "on Time off (8h) from Mar 13 2026 - Mar 16 2026", time: "12d", badge: null },
+  { id: 4, initials: "JA", color: "#7c5cbf", action: "requested", bold: "themselves", detail: "on Time off (8h) on May 08 2026", time: "12d", badge: "Pending" },
+  { id: 5, initials: "JA", color: "#7c5cbf", action: "requested", bold: "themselves", detail: "on Time off (8h) from Apr 02 2026 - Apr 06 2026", time: "12d", badge: null },
+  { id: 6, initials: "JA", color: "#7c5cbf", action: "approved", bold: "Shay Ho", detail: "on Time off (All Day) from Apr 22 2026 - Apr 25 2026", time: "15d", badge: null },
+  { id: 7, initials: "JA", color: "#7c5cbf", action: "requested", bold: "themselves", detail: "on Sick leave (8h) on Apr 10 2026", time: "18d", badge: null },
+  { id: 8, initials: "JA", color: "#7c5cbf", action: "declined", bold: "Shay Ho", detail: "on Time off (8h) on Mar 05 2026", time: "21d", badge: null },
+]
+
+function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () => void, floating: boolean, navHoverOpen: boolean }) {
+  const [tab, setTab] = useState<"all" | "requests">("all")
+  const tabBtn = (active: boolean) => ({
+    background: "none", border: "none", cursor: "pointer", padding: "2px 0",
+    fontSize: 13, fontWeight: active ? 600 : 400,
+    color: active ? t.fg : t.mutedFg, borderBottom: active ? `2px solid ${t.fg}` : "2px solid transparent",
+  })
+  return (
+    <div style={{
+      position: "fixed",
+      left: floating ? (navHoverOpen ? 264 : 8) : 252,
+      animation: "notifSlideIn 0.18s ease",
+      top: floating ? 8 : 0,
+      width: 340,
+      height: floating ? "calc(100vh - 16px)" : "100vh",
+      zIndex: 95,
+      background: t.sidebar,
+      borderRadius: floating ? 10 : 0,
+      border: `1px solid ${t.border}`,
+      borderLeft: `1px solid ${t.sidebarBorder}`,
+      boxShadow: floating ? "0 2px 12px rgba(0,0,0,0.25)" : "none",
+      transition: "left 0.2s ease",
+      display: "flex", flexDirection: "column", overflow: "hidden",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px 10px", borderBottom: `1px solid ${t.border}` }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: t.fg, flex: 1 }}>Notifications</span>
+        <button onClick={() => setTab("all")} style={tabBtn(tab === "all")}>All</button>
+        <button onClick={() => setTab("requests")} style={tabBtn(tab === "requests")}>Requests</button>
+        <HoverBtn onClick={onClose} style={{ ...{display:"flex",alignItems:"center",justifyContent:"center",width:24,height:24,borderRadius:4,border:"none",background:"transparent",cursor:"pointer"}, color: t.mutedFg }}><X size={14} strokeWidth={1}/></HoverBtn>
+      </div>
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {NOTIFICATIONS_DATA.map(n => (
+          <div key={n.id} style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${t.border}`, cursor: "pointer" }}>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: n.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: "#fff", flexShrink: 0 }}>{n.initials}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, color: t.fg, lineHeight: 1.45, margin: 0 }}>
+                <span style={{ fontWeight: 500 }}>Jill Avis</span> {n.action} <span style={{ fontWeight: 600 }}>{n.bold}</span> {n.detail}
+              </p>
+              {n.badge && <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 500, color: "#c97a1a", background: "rgba(201,122,26,0.15)", borderRadius: 4, padding: "2px 6px" }}>{n.badge}</span>}
+            </div>
+            <span style={{ fontSize: 11, color: t.mutedFg, whiteSpace: "nowrap", paddingTop: 1 }}>{n.time}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
   const dataHubSettingsRef = useRef<HTMLDivElement>(null)
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
+  const [hoverOpen, setHoverOpen] = useState(false)
+
+  useEffect(() => { if (!collapsed) setHoverOpen(false) }, [collapsed])
+  useEffect(() => { onHoverChange?.(hoverOpen) }, [hoverOpen])
+
+  const showFullNav = !collapsed || hoverOpen
 
   useEffect(() => {
     function handleClickOutside(event: any) {
@@ -964,19 +1034,42 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     setLocs((prev: any) => prev.map((l: any, idx: any) => idx === i ? { ...l, expanded: !l.expanded } : { ...l, expanded: false, children: l.children?.map((c: any) => ({ ...c, expanded: false })) }))
   }
 
-  const navItemStyle = (active: any, forceCollapsed = collapsed) => ({
-    display: "flex", alignItems: "center", justifyContent: forceCollapsed ? "center" : "flex-start",
-    gap: 8, width: "100%", padding: forceCollapsed ? "7px 0" : "6px 8px",
+  const navItemStyle = (active: any) => ({
+    display: "flex", alignItems: "center", justifyContent: showFullNav ? "flex-start" : "center",
+    gap: 8, width: "100%", padding: showFullNav ? "6px 8px" : "7px 0",
     borderRadius: 6, border: "none", background: active ? t.accent : "transparent",
     color: active ? t.fg : t.sidebarFg, cursor: "pointer", fontSize: 13,
     fontWeight: active ? 500 : 400, textAlign: "left" as const,
   })
 
   return (
-    <aside style={{ ...s.sidebar, width: collapsed ? 52 : 260, transition: "width 0.2s ease", overflow: "hidden" }}>
+    <>
+    {/* Spacer: keeps layout when nav is pinned open */}
+    <div style={{ width: collapsed ? 0 : 252, flexShrink: 0, transition: "width 0.2s ease" }} />
+    {/* Hover trigger strip — invisible, catches mouse entry near left edge when nav is closed */}
+    {collapsed && (
+      <div style={{ position: "fixed", left: 0, top: 0, width: 16, height: "100vh", zIndex: 99 }}
+        onMouseEnter={() => setHoverOpen(true)} />
+    )}
+    <aside
+      onMouseLeave={collapsed ? () => setHoverOpen(false) : undefined}
+      style={{
+        ...s.sidebar,
+        position: "fixed",
+        left: collapsed ? (hoverOpen ? 8 : -260) : 0,
+        top: collapsed ? 8 : 0,
+        height: collapsed ? "calc(100vh - 16px)" : "100vh",
+        width: 252,
+        zIndex: 100,
+        transition: "left 0.2s ease, top 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease",
+        overflow: "hidden",
+        borderRadius: collapsed ? 10 : 0,
+        border: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        boxShadow: collapsed && hoverOpen ? `0 2px 12px rgba(0,0,0,0.25)` : "none",
+      }}>
       <style>{getGlobalStyles(t)}</style>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", padding: "12px 12px 4px", minWidth: collapsed ? 52 : 260 }}>
-        {!collapsed && (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: showFullNav ? "space-between" : "center", padding: "12px 12px 4px", minWidth: 260 }}>
+        {showFullNav && (
           <DropdownWrapper open={orgOpen} setOpen={setOrgOpen}
             trigger={
               <HoverBtn onClick={() => setOrgOpen(!orgOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 6px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", color: t.fg }}>
@@ -993,14 +1086,14 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           </DropdownWrapper>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {!collapsed && (
-            <HoverBtn style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: t.accent, cursor: "pointer", fontSize: 14 }}>
+          {showFullNav && (
+            <HoverBtn onClick={onNotificationsToggle} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, border: "none", background: notificationsOpen ? t.border : t.accent, cursor: "pointer", fontSize: 14 }}>
               <Bell size={14} strokeWidth={1} color={t.mutedFg}/>
               <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>23</span>
             </HoverBtn>
           )}
           <HoverBtn onClick={onToggleCollapsed} style={{ ...s.iconBtn, color: t.mutedFg }}>
-            <ChevronLeft size={15} strokeWidth={1} style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}/>
+            {collapsed ? <PanelLeftOpen size={15} strokeWidth={1}/> : <PanelLeftClose size={15} strokeWidth={1}/>}
           </HoverBtn>
         </div>
       </div>
@@ -1009,13 +1102,13 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         {version === "single" ? (
           officeItems.map(item => (
             <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
-              {item.icon}{!collapsed && item.name}
+              {item.icon}{showFullNav && item.name}
             </HoverBtn>
           ))
         ) : (
           locs.map((loc, i) => (
             <div key={loc.name} style={{ marginTop: i > 0 ? 2 : 0 }}>
-              {collapsed ? (
+              {!showFullNav ? (
                 <HoverBtn onClick={() => { toggleLoc(i) }}
                   style={{ ...navItemStyle(false), justifyContent: "center" }}>
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
@@ -1030,7 +1123,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                   <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
                 </HoverBtn>
               )}
-              {!collapsed && loc.items && (
+              {showFullNav && loc.items && (
                 <Collapsible expanded={loc.expanded}>
                   <div style={{ marginTop: 2 }}>
                     {loc.items.map(item => (
@@ -1047,7 +1140,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         )}
 
         <div style={{ marginTop: 16 }}>
-          {collapsed ? (
+          {!showFullNav ? (
             <HoverBtn style={{ ...navItemStyle(false), justifyContent: "center" }}>
               <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
             </HoverBtn>
@@ -1061,7 +1154,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
             </HoverBtn>
           )}
-          {!collapsed && dataHubSettingsOpen && (
+          {showFullNav && dataHubSettingsOpen && (
             <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
@@ -1079,7 +1172,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               </div>
             </div>
           )}
-          <Collapsible expanded={!collapsed && dataHubExp}>
+          <Collapsible expanded={showFullNav && dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
@@ -1092,7 +1185,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         </div>
       </nav>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: showFullNav ? "space-between" : "center", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
         <DropdownWrapper open={avatarOpen} setOpen={setAvatarOpen}
           trigger={
             <HoverBtn onClick={() => setAvatarOpen(!avatarOpen)} 
@@ -1113,14 +1206,15 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </button>
             <button onClick={() => { onThemeChange("float-dark"); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Layers size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Float dark</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, fontSize: 12, fontWeight: 700, color: t.secondaryFg, lineHeight: 1 }}>F</span>Float dark</span>
               <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "float-dark" ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
           </div>
         </DropdownWrapper>
-        {!collapsed && <HoverBtn style={{ ...s.iconBtn, color: t.mutedFg }}><HelpCircle size={16} strokeWidth={1}/></HoverBtn>}
+        {showFullNav && <HoverBtn style={{ ...s.iconBtn, color: t.mutedFg }}><HelpCircle size={16} strokeWidth={1}/></HoverBtn>}
       </div>
     </aside>
+    </>
   )
 }
 
@@ -2514,6 +2608,8 @@ export default function App() {
   const [projectsClientFilter, setProjectsClientFilter] = useState<string|null>(null)
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "float-dark">("float-dark")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [navHoverOpen, setNavHoverOpen] = useState(false)
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
@@ -2545,8 +2641,15 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)}/>
-      <main style={{ ...s.main, position:"relative" as const }}>
+      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen}/>
+      {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
+      <main style={{ ...s.main, position:"relative" as const, paddingLeft: sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
+        {sidebarCollapsed && (
+          <button onClick={() => setSidebarCollapsed(false)}
+            style={{ position:"absolute", top:22, left:8, zIndex:10, display:"flex", alignItems:"center", background:"none", border:"none", cursor:"pointer", color:t.mutedFg, padding:2, borderRadius:4 }}>
+            <PanelLeftOpen size={16} strokeWidth={1}/>
+          </button>
+        )}
         {/* breadcrumb nav hidden — may restore later */}
         <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
           {renderMain()}
