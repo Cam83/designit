@@ -1001,8 +1001,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [hoverOpen, setHoverOpen] = useState(false)
 
-  useEffect(() => { if (!collapsed) setHoverOpen(false) }, [collapsed])
-  useEffect(() => { onHoverChange?.(hoverOpen) }, [hoverOpen])
+  useEffect(() => { if (!collapsed) { setHoverOpen(false); onHoverChange?.(false) } }, [collapsed])
 
   const showFullNav = !collapsed || hoverOpen
 
@@ -1049,10 +1048,10 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     {/* Hover trigger strip — invisible, catches mouse entry near left edge when nav is closed */}
     {collapsed && (
       <div style={{ position: "fixed", left: 0, top: 0, width: 16, height: "100vh", zIndex: 99 }}
-        onMouseEnter={() => setHoverOpen(true)} />
+        onMouseEnter={() => { setHoverOpen(true); onHoverChange?.(true) }} />
     )}
     <aside
-      onMouseLeave={collapsed ? () => setHoverOpen(false) : undefined}
+      onMouseLeave={collapsed ? () => { setHoverOpen(false); onHoverChange?.(false) } : undefined}
       style={{
         ...s.sidebar,
         position: "fixed",
@@ -1501,13 +1500,13 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
                 ✕ {filteredBusinessUnit}
               </HoverBtn>
             )}
-            <div style={{ width: 1, height: 16, background: t.border, margin: "0 6px" }}/>
+            <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
             {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
               <HoverBtn key={v} onClick={() => { setView(v); setSelectedPerson(null) }} style={s.pillBtn(view === v)}>
                 <Circle size={10} strokeWidth={1} style={{ fill: view === v ? t.fg : "none" }}/>{l}
               </HoverBtn>
             ))}
-            <div style={{ width: 1, height: 16, background: t.border }}/>
+            <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
             <HoverBtn onClick={() => { setView("departments"); setSelectedPerson(null) }} style={s.pillBtn(view === "departments")}>
               <Circle size={10} strokeWidth={1} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
             </HoverBtn>
