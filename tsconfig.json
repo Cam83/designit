@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@cam-ui/components": [
+        "../../cam-ui/src/index.ts"
       ]
     }
   },

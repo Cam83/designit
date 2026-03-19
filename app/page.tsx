@@ -8,6 +8,8 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
+import { HoverBtn as CamHoverBtn } from "@cam-ui/components"
+function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/components/ui/tag"
 
@@ -180,16 +182,6 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
   )
 }
 
-function HoverBtn({ style, children, onClick, title, disabled }: any) {
-  const [hov, setHov] = useState(false)
-  return (
-    <button title={title} onClick={onClick} disabled={disabled}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ ...style, background: hov ? t.accent : style?.background || "transparent" }}>
-      {children}
-    </button>
-  )
-}
 
 function DropdownWrapper({ trigger, children, open, setOpen }: any) {
   const wrapRef = useRef<HTMLDivElement>(null)
