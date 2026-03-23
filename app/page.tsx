@@ -115,17 +115,16 @@ function RowCheckbox({ checked, indeterminate, onClick }: any) {
   )
 }
 
-function ColResizeHandle({ header }: any) {
-  const [hov, setHov] = useState(false)
+function ColResizeHandle({ header, colIdx, onHoverChange, isHovered }: any) {
   const isResizing = header.column.getIsResizing()
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => { if (!isResizing) setHov(false) }}
+      onMouseEnter={() => onHoverChange(colIdx)}
+      onMouseLeave={() => { if (!isResizing) onHoverChange(null) }}
       onMouseDown={header.getResizeHandler()}
       onTouchStart={header.getResizeHandler()}
-      style={{ position: "absolute", top: 0, right: -3, width: 7, height: "100%", cursor: "col-resize", zIndex: 10, display: "flex", alignItems: "stretch", justifyContent: "center", userSelect: "none" as const }}>
-      <div style={{ width: 2, background: (hov || isResizing) ? "#3b82f6" : "transparent", borderRadius: 1 }}/>
+      style={{ position: "absolute", top: 0, right: -8, width: 16, height: "100%", cursor: "col-resize", zIndex: 10, display: "flex", alignItems: "stretch", justifyContent: "center", userSelect: "none" as const }}>
+      <div style={{ width: 2, background: (isHovered || isResizing) ? "#3b82f6" : "transparent", borderRadius: 1 }}/>
     </div>
   )
 }
@@ -145,6 +144,7 @@ function DataTableRow({ selected, onClick, template, children }: any) {
 
 function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, emptyNode }: any) {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
+  const [resizeHovCol, setResizeHovCol] = useState<number | null>(null)
   const table = useReactTable({
     data,
     columns,
@@ -161,36 +161,51 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
   const cbCol = "24px"
   const dataTemplate = hg?.headers.map((h: any) => `${h.getSize()}px`).join(" ") ?? ""
   const gridTemplate = `${cbCol} ${dataTemplate}`
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [headerH, setHeaderH] = useState(36)
+  useLayoutEffect(() => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) })
+  const resizingIdx = hg?.headers.findIndex((h: any) => h.column.getIsResizing()) ?? -1
+  const activeResizeCol = resizingIdx >= 0 ? resizingIdx : resizeHovCol
+  const getColRightX = (colIdx: number) => {
+    let x = 24
+    for (let i = 0; i <= colIdx; i++) x += hg.headers[i].getSize()
+    return x
+  }
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
-      <div style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
-        </div>
-        {hg?.headers.map((header: any, i: number) => (
-          <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center", paddingLeft: i === 0 ? 16 : 0 }}>
-            {flexRender(header.column.columnDef.header, header.getContext())}
-            {header.column.getCanResize() && <ColResizeHandle header={header}/>}
-          </div>
-        ))}
-      </div>
-      {rows.map((row: any, idx: number) => (
-        <DataTableRow
-          key={row.id}
-          selected={isRowSelected?.(row.original, row.index) || selectedRows.has(idx)}
-          onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
-          template={gridTemplate}>
+      <div style={{ position: "relative" }}>
+        <div ref={headerRef} style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
+            <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
           </div>
-          {row.getVisibleCells().map((cell: any, i: number) => (
-            <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", paddingLeft: i === 0 ? 16 : 0, overflow: "hidden", fontSize: 13 }}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {hg?.headers.map((header: any, i: number) => (
+            <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center", paddingLeft: i === 0 ? 16 : 8 }}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+              {header.column.getCanResize() && <ColResizeHandle header={header} colIdx={i} onHoverChange={setResizeHovCol} isHovered={activeResizeCol === i}/>}
             </div>
           ))}
-        </DataTableRow>
-      ))}
-      {emptyNode && rows.length === 0 && emptyNode}
+        </div>
+        {rows.map((row: any, idx: number) => (
+          <DataTableRow
+            key={row.id}
+            selected={isRowSelected?.(row.original, row.index) || selectedRows.has(idx)}
+            onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
+            template={gridTemplate}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
+            </div>
+            {row.getVisibleCells().map((cell: any, i: number) => (
+              <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", paddingLeft: i === 0 ? 16 : 8, overflow: "hidden", fontSize: 13 }}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </div>
+            ))}
+          </DataTableRow>
+        ))}
+        {emptyNode && rows.length === 0 && emptyNode}
+        {activeResizeCol !== null && activeResizeCol >= 0 && hg && (
+          <div style={{ position: "absolute", top: headerH, bottom: 0, left: getColRightX(activeResizeCol), width: 0, borderLeft: `1px dashed ${t.borderAlpha25}`, pointerEvents: "none", zIndex: 20 }}/>
+        )}
+      </div>
     </div>
   )
 }
