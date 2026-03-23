@@ -27,7 +27,7 @@
         "./*"
       ],
       "@cam-ui/components": [
-        "../cam-ui/src/index.ts"
+        "./packages/cam-ui/src/index.ts"
       ]
     }
   },

@@ -8,8 +8,7 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area } from "recharts"
-import { HoverBtn as CamHoverBtn } from "@cam-ui/components"
+import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
 function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/components/ui/tag"
@@ -29,14 +28,14 @@ const getGlobalStyles = (theme: any) => `
   }
 `
 
-const darkTheme = {
+const blackTheme = {
   bg: "#000000", fg: "#ededed", card: "#000000", popover: "#111111",
   primary: "#ededed", primaryFg: "#000000", secondary: "#1a1a1a",
   secondaryFg: "#a1a1a1", muted: "#1a1a1a", mutedFg: "#888888",
   accent: "#1a1a1a", accentFg: "#ededed", border: "#1f1f1f",
   sidebar: "#000000", sidebarFg: "#a1a1a1", sidebarBorder: "#1f1f1f",
-  fgAlpha30: "rgba(237,237,237,0.3)", fgAlpha10: "rgba(237,237,237,0.1)", 
-  fgAlpha06: "rgba(237,237,237,0.06)", fgAlpha03: "rgba(237,237,237,0.03)", 
+  fgAlpha30: "rgba(237,237,237,0.3)", fgAlpha10: "rgba(237,237,237,0.1)",
+  fgAlpha06: "rgba(237,237,237,0.06)", fgAlpha03: "rgba(237,237,237,0.03)",
   fgAlpha20: "rgba(237,237,237,0.2)", fgAlpha70: "rgba(237,237,237,0.7)",
   borderAlpha25: "rgba(168,168,168,0.25)", scrollAlpha40: "rgba(139,139,139,0.4)",
   scrollAlpha70: "rgba(139,139,139,0.7)", overlayBg: "rgba(0,0,0,0.7)", shadowDark: "rgba(0,0,0,0.5)", shadowDarker: "rgba(0,0,0,0.6)"
@@ -55,7 +54,7 @@ const lightTheme = {
   scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)"
 }
 
-const floatDarkTheme = {
+const darkTheme = {
   bg: "#141414", fg: "#f0f0f0", card: "#1a1a1a", popover: "#202020",
   primary: "#f0f0f0", primaryFg: "#141414", secondary: "#242424",
   secondaryFg: "#909090", muted: "#242424", mutedFg: "#686868",
@@ -68,10 +67,23 @@ const floatDarkTheme = {
   scrollAlpha70: "rgba(120,120,120,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
 }
 
-let t = darkTheme
+const floatDarkTheme = {
+  bg: "#141618", fg: "#eef0f2", card: "#191b1e", popover: "#1e2022",
+  primary: "#eef0f2", primaryFg: "#141618", secondary: "#1d1f22",
+  secondaryFg: "#8a9099", muted: "#1d1f22", mutedFg: "#626b74",
+  accent: "#1e2124", accentFg: "#eef0f2", border: "#242628",
+  sidebar: "#111314", sidebarFg: "#8a9099", sidebarBorder: "#1d1f22",
+  fgAlpha30: "rgba(238,240,242,0.3)", fgAlpha10: "rgba(238,240,242,0.1)",
+  fgAlpha06: "rgba(238,240,242,0.06)", fgAlpha03: "rgba(238,240,242,0.03)",
+  fgAlpha20: "rgba(238,240,242,0.2)", fgAlpha70: "rgba(238,240,242,0.7)",
+  borderAlpha25: "rgba(150,160,175,0.2)", scrollAlpha40: "rgba(130,140,155,0.4)",
+  scrollAlpha70: "rgba(130,140,155,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
+}
+
+let t = blackTheme
 
 const getStyles = (theme: any) => ({
-  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
+  sidebar: { width: 260, borderTop: "none", borderBottom: "none", borderLeft: "none", borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
   main: { flex: 1, display: "flex", flexDirection: "column" as const, background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
   primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
@@ -103,17 +115,16 @@ function RowCheckbox({ checked, indeterminate, onClick }: any) {
   )
 }
 
-function ColResizeHandle({ header }: any) {
-  const [hov, setHov] = useState(false)
+function ColResizeHandle({ header, colIdx, onHoverChange, isHovered }: any) {
   const isResizing = header.column.getIsResizing()
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => { if (!isResizing) setHov(false) }}
+      onMouseEnter={() => onHoverChange(colIdx)}
+      onMouseLeave={() => { if (!isResizing) onHoverChange(null) }}
       onMouseDown={header.getResizeHandler()}
       onTouchStart={header.getResizeHandler()}
-      style={{ position: "absolute", top: 0, right: -3, width: 7, height: "100%", cursor: "col-resize", zIndex: 10, display: "flex", alignItems: "stretch", justifyContent: "center", userSelect: "none" as const }}>
-      <div style={{ width: 2, background: (hov || isResizing) ? "#3b82f6" : "transparent", borderRadius: 1 }}/>
+      style={{ position: "absolute", top: 0, right: -8, width: 16, height: "100%", cursor: "col-resize", zIndex: 10, display: "flex", alignItems: "stretch", justifyContent: "center", userSelect: "none" as const }}>
+      <div style={{ width: 2, background: (isHovered || isResizing) ? "#3b82f6" : "transparent", borderRadius: 1 }}/>
     </div>
   )
 }
@@ -133,6 +144,7 @@ function DataTableRow({ selected, onClick, template, children }: any) {
 
 function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, emptyNode }: any) {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
+  const [resizeHovCol, setResizeHovCol] = useState<number | null>(null)
   const table = useReactTable({
     data,
     columns,
@@ -149,36 +161,51 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
   const cbCol = "24px"
   const dataTemplate = hg?.headers.map((h: any) => `${h.getSize()}px`).join(" ") ?? ""
   const gridTemplate = `${cbCol} ${dataTemplate}`
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [headerH, setHeaderH] = useState(36)
+  useLayoutEffect(() => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) })
+  const resizingIdx = hg?.headers.findIndex((h: any) => h.column.getIsResizing()) ?? -1
+  const activeResizeCol = resizingIdx >= 0 ? resizingIdx : resizeHovCol
+  const getColRightX = (colIdx: number) => {
+    let x = 24
+    for (let i = 0; i <= colIdx; i++) x += hg.headers[i].getSize()
+    return x
+  }
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
-      <div style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
-        </div>
-        {hg?.headers.map((header: any, i: number) => (
-          <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center", paddingLeft: i === 0 ? 16 : 0 }}>
-            {flexRender(header.column.columnDef.header, header.getContext())}
-            {header.column.getCanResize() && <ColResizeHandle header={header}/>}
-          </div>
-        ))}
-      </div>
-      {rows.map((row: any, idx: number) => (
-        <DataTableRow
-          key={row.id}
-          selected={isRowSelected?.(row.original, row.index) || selectedRows.has(idx)}
-          onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
-          template={gridTemplate}>
+      <div style={{ position: "relative" }}>
+        <div ref={headerRef} style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
+            <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
           </div>
-          {row.getVisibleCells().map((cell: any, i: number) => (
-            <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", paddingLeft: i === 0 ? 16 : 0, overflow: "hidden", fontSize: 13 }}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {hg?.headers.map((header: any, i: number) => (
+            <div key={header.id} style={{ position: "relative", fontSize: 12, fontWeight: 500, color: t.mutedFg, display: "flex", alignItems: "center", paddingLeft: i === 0 ? 16 : 8 }}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+              {header.column.getCanResize() && <ColResizeHandle header={header} colIdx={i} onHoverChange={setResizeHovCol} isHovered={activeResizeCol === i}/>}
             </div>
           ))}
-        </DataTableRow>
-      ))}
-      {emptyNode && rows.length === 0 && emptyNode}
+        </div>
+        {rows.map((row: any, idx: number) => (
+          <DataTableRow
+            key={row.id}
+            selected={isRowSelected?.(row.original, row.index) || selectedRows.has(idx)}
+            onClick={onRowClick ? () => onRowClick(row.original, row.index) : undefined}
+            template={gridTemplate}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <RowCheckbox checked={selectedRows.has(idx)} onClick={() => toggleRow(idx)} />
+            </div>
+            {row.getVisibleCells().map((cell: any, i: number) => (
+              <div key={cell.id} style={{ display: "flex", alignItems: "center", padding: "10px 0", paddingLeft: i === 0 ? 16 : 8, overflow: "hidden", fontSize: 13 }}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </div>
+            ))}
+          </DataTableRow>
+        ))}
+        {emptyNode && rows.length === 0 && emptyNode}
+        {activeResizeCol !== null && activeResizeCol >= 0 && hg && (
+          <div style={{ position: "absolute", top: headerH, bottom: 0, left: getColRightX(activeResizeCol), width: 0, borderLeft: `1px dashed ${t.borderAlpha25}`, pointerEvents: "none", zIndex: 20 }}/>
+        )}
+      </div>
     </div>
   )
 }
@@ -1126,7 +1153,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                   <div style={{ marginTop: 2 }}>
                     {loc.items.map(item => (
                       <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, item.name])}
-                        style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 32 }}>
+                        style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 32 }}>
                         {item.icon}{item.name}
                       </HoverBtn>
                     ))}
@@ -1175,7 +1202,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
-                  style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 16 }}>
+                  style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
                   {item.icon}{item.name}
                 </HoverBtn>
               ))}
@@ -1202,6 +1229,11 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Dark</span>
               <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "dark" ? "visible" : "hidden", color: t.secondaryFg }}/>
+            </button>
+            <button onClick={() => { onThemeChange("black"); setAvatarOpen(false) }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Black</span>
+              <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "black" ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange("float-dark"); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
@@ -1502,20 +1534,20 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             )}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
             {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
-              <HoverBtn key={v} onClick={() => { setView(v); setSelectedPerson(null) }} style={s.pillBtn(view === v)}>
+              <TabBtn key={v} active={view === v} onClick={() => { setView(v); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
                 <Circle size={10} strokeWidth={1} style={{ fill: view === v ? t.fg : "none" }}/>{l}
-              </HoverBtn>
+              </TabBtn>
             ))}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
-            <HoverBtn onClick={() => { setView("departments"); setSelectedPerson(null) }} style={s.pillBtn(view === "departments")}>
+            <TabBtn active={view === "departments"} onClick={() => { setView("departments"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
               <Circle size={10} strokeWidth={1} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
-            </HoverBtn>
-            <HoverBtn onClick={() => { setView("delivery-teams"); setSelectedPerson(null) }} style={s.pillBtn(view === "delivery-teams")}>
+            </TabBtn>
+            <TabBtn active={view === "delivery-teams"} onClick={() => { setView("delivery-teams"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
               <Circle size={10} strokeWidth={1} style={{ fill: view === "delivery-teams" ? t.fg : "none" }}/>Delivery teams
-            </HoverBtn>
-            <HoverBtn onClick={() => { setView("groups"); setSelectedPerson(null) }} style={s.pillBtn(view === "groups")}>
+            </TabBtn>
+            <TabBtn active={view === "groups"} onClick={() => { setView("groups"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
               <Circle size={10} strokeWidth={1} style={{ fill: view === "groups" ? t.fg : "none" }}/>Groups
-            </HoverBtn>
+            </TabBtn>
           </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
@@ -3230,7 +3262,7 @@ export default function App() {
   const [rateCardFilter, setRateCardFilter] = useState<string|null>(null)
   const [clientsFilter, setClientsFilter] = useState<string[]|null>(null)
   const [projectsClientFilter, setProjectsClientFilter] = useState<string|null>(null)
-  const [themeMode, setThemeMode] = useState<"light" | "dark" | "float-dark">("float-dark")
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "black" | "float-dark">("float-dark")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [navHoverOpen, setNavHoverOpen] = useState(false)
@@ -3242,7 +3274,7 @@ export default function App() {
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
 
   // Update theme based on mode
-  t = themeMode === "light" ? lightTheme : themeMode === "float-dark" ? floatDarkTheme : darkTheme
+  t = themeMode === "light" ? lightTheme : themeMode === "black" ? blackTheme : themeMode === "dark" ? darkTheme : floatDarkTheme
   s = getStyles(t)
 
   function renderMain() {
