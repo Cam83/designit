@@ -83,7 +83,7 @@ const floatDarkTheme = {
 let t = blackTheme
 
 const getStyles = (theme: any) => ({
-  sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
+  sidebar: { width: 260, borderTop: "none", borderBottom: "none", borderLeft: "none", borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
   main: { flex: 1, display: "flex", flexDirection: "column" as const, background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
   primaryBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: theme.fg, color: theme.bg, cursor: "pointer" },
@@ -1147,7 +1147,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                   <div style={{ marginTop: 2 }}>
                     {loc.items.map(item => (
                       <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, item.name])}
-                        style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 32 }}>
+                        style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 32 }}>
                         {item.icon}{item.name}
                       </HoverBtn>
                     ))}
@@ -1195,7 +1195,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
-                  style={{ ...navItemStyle(activeItem === item.name), paddingLeft: 16 }}>
+                  style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
                   {item.icon}{item.name}
                 </HoverBtn>
               ))}
