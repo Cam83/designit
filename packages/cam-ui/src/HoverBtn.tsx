@@ -28,7 +28,7 @@ export function HoverBtn({
       style={{
         ...style,
         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-        borderRadius: "4px",
+        borderRadius: "6px",
         background: hov ? accentColor : style?.background ?? "transparent",
       }}
     >
