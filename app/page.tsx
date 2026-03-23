@@ -28,14 +28,14 @@ const getGlobalStyles = (theme: any) => `
   }
 `
 
-const darkTheme = {
+const blackTheme = {
   bg: "#000000", fg: "#ededed", card: "#000000", popover: "#111111",
   primary: "#ededed", primaryFg: "#000000", secondary: "#1a1a1a",
   secondaryFg: "#a1a1a1", muted: "#1a1a1a", mutedFg: "#888888",
   accent: "#1a1a1a", accentFg: "#ededed", border: "#1f1f1f",
   sidebar: "#000000", sidebarFg: "#a1a1a1", sidebarBorder: "#1f1f1f",
-  fgAlpha30: "rgba(237,237,237,0.3)", fgAlpha10: "rgba(237,237,237,0.1)", 
-  fgAlpha06: "rgba(237,237,237,0.06)", fgAlpha03: "rgba(237,237,237,0.03)", 
+  fgAlpha30: "rgba(237,237,237,0.3)", fgAlpha10: "rgba(237,237,237,0.1)",
+  fgAlpha06: "rgba(237,237,237,0.06)", fgAlpha03: "rgba(237,237,237,0.03)",
   fgAlpha20: "rgba(237,237,237,0.2)", fgAlpha70: "rgba(237,237,237,0.7)",
   borderAlpha25: "rgba(168,168,168,0.25)", scrollAlpha40: "rgba(139,139,139,0.4)",
   scrollAlpha70: "rgba(139,139,139,0.7)", overlayBg: "rgba(0,0,0,0.7)", shadowDark: "rgba(0,0,0,0.5)", shadowDarker: "rgba(0,0,0,0.6)"
@@ -54,7 +54,7 @@ const lightTheme = {
   scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)"
 }
 
-const floatDarkTheme = {
+const darkTheme = {
   bg: "#141414", fg: "#f0f0f0", card: "#1a1a1a", popover: "#202020",
   primary: "#f0f0f0", primaryFg: "#141414", secondary: "#242424",
   secondaryFg: "#909090", muted: "#242424", mutedFg: "#686868",
@@ -67,7 +67,20 @@ const floatDarkTheme = {
   scrollAlpha70: "rgba(120,120,120,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
 }
 
-let t = darkTheme
+const floatDarkTheme = {
+  bg: "#141618", fg: "#eef0f2", card: "#191b1e", popover: "#1e2022",
+  primary: "#eef0f2", primaryFg: "#141618", secondary: "#1d1f22",
+  secondaryFg: "#8a9099", muted: "#1d1f22", mutedFg: "#626b74",
+  accent: "#1e2124", accentFg: "#eef0f2", border: "#242628",
+  sidebar: "#111314", sidebarFg: "#8a9099", sidebarBorder: "#1d1f22",
+  fgAlpha30: "rgba(238,240,242,0.3)", fgAlpha10: "rgba(238,240,242,0.1)",
+  fgAlpha06: "rgba(238,240,242,0.06)", fgAlpha03: "rgba(238,240,242,0.03)",
+  fgAlpha20: "rgba(238,240,242,0.2)", fgAlpha70: "rgba(238,240,242,0.7)",
+  borderAlpha25: "rgba(150,160,175,0.2)", scrollAlpha40: "rgba(130,140,155,0.4)",
+  scrollAlpha70: "rgba(130,140,155,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
+}
+
+let t = blackTheme
 
 const getStyles = (theme: any) => ({
   sidebar: { width: 260, borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
@@ -1194,6 +1207,11 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Dark</span>
               <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "dark" ? "visible" : "hidden", color: t.secondaryFg }}/>
+            </button>
+            <button onClick={() => { onThemeChange("black"); setAvatarOpen(false) }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Moon size={16} strokeWidth={1} style={{ color: t.secondaryFg }}/>Black</span>
+              <Check size={16} strokeWidth={1} style={{ visibility: themeMode === "black" ? "visible" : "hidden", color: t.secondaryFg }}/>
             </button>
             <button onClick={() => { onThemeChange("float-dark"); setAvatarOpen(false) }}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 12px", borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
@@ -2597,7 +2615,7 @@ export default function App() {
   const [rateCardFilter, setRateCardFilter] = useState<string|null>(null)
   const [clientsFilter, setClientsFilter] = useState<string[]|null>(null)
   const [projectsClientFilter, setProjectsClientFilter] = useState<string|null>(null)
-  const [themeMode, setThemeMode] = useState<"light" | "dark" | "float-dark">("float-dark")
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "black" | "float-dark">("float-dark")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [navHoverOpen, setNavHoverOpen] = useState(false)
@@ -2609,7 +2627,7 @@ export default function App() {
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
 
   // Update theme based on mode
-  t = themeMode === "light" ? lightTheme : themeMode === "float-dark" ? floatDarkTheme : darkTheme
+  t = themeMode === "light" ? lightTheme : themeMode === "black" ? blackTheme : themeMode === "dark" ? darkTheme : floatDarkTheme
   s = getStyles(t)
 
   function renderMain() {
