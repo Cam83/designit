@@ -1079,9 +1079,9 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         top: collapsed ? 8 : 0,
         height: collapsed ? "calc(100vh - 16px)" : "100vh",
         width: 252,
-        zIndex: 100,
+        zIndex: dataHubSettingsOpen ? 200 : 100,
         transition: "left 0.2s ease, top 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease",
-        overflow: "hidden",
+        overflow: dataHubSettingsOpen ? "visible" : "hidden",
         borderRadius: collapsed ? 10 : 0,
         border: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
         boxShadow: collapsed && hoverOpen ? `0 2px 12px rgba(0,0,0,0.25)` : "none",
@@ -1174,7 +1174,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </HoverBtn>
           )}
           {showFullNav && dataHubSettingsOpen && (
-            <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
+            <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, width: 200, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
                 {dataHubItems.map(item => (
@@ -1196,7 +1196,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
-                  {item.icon}{item.name}
+                  <span style={{ display: "flex", width: 16, flexShrink: 0, justifyContent: "center" }}>{item.icon}</span>{item.name}
                 </HoverBtn>
               ))}
             </div>
