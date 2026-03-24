@@ -1083,7 +1083,10 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         transition: "left 0.2s ease, top 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease",
         overflow: dataHubSettingsOpen ? "visible" : "hidden",
         borderRadius: collapsed ? 10 : 0,
-        border: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderTop: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderBottom: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderLeft: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderRight: collapsed && hoverOpen ? `1px solid ${t.border}` : `1px solid ${t.sidebarBorder}`,
         boxShadow: collapsed && hoverOpen ? `0 2px 12px rgba(0,0,0,0.25)` : "none",
       }}>
       <style>{getGlobalStyles(t)}</style>
