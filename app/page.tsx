@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
@@ -1013,7 +1013,7 @@ function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () =
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
@@ -1236,6 +1236,18 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               ))}
             </div>
           </Collapsible>
+        </div>
+
+        {/* Float Agent */}
+        <div style={{ marginTop: 16 }}>
+          <HoverBtn onClick={() => setActive("Float Agent", ["Float Agent"])} style={{ ...navItemStyle(activeItem === "Float Agent"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+            <Bot size={16} strokeWidth={1}/>{showFullNav && "Float Agent"}
+          </HoverBtn>
+          {showFullNav && hasSavedDashboard && (
+            <HoverBtn onClick={() => setActive("Saved Dashboard", ["Float Agent", "Saved Dashboard"])} style={{ ...navItemStyle(activeItem === "Saved Dashboard"), paddingLeft: 32 }}>
+              <BarChart3 size={14} strokeWidth={1}/>Saved Dashboard
+            </HoverBtn>
+          )}
         </div>
       </nav>
 
@@ -2612,6 +2624,687 @@ function LogTeamView({ breadcrumb }: any) {
   )
 }
 
+
+// ── Float Agent ──
+const REV_COST_DATA = [
+  { week: "1 Mar", revenue: 1200, costs: 900 },
+  { week: "9 Mar", revenue: 65000, costs: 59000 },
+  { week: "16 Mar", revenue: 27000, costs: 34000 },
+  { week: "23 Mar", revenue: 38000, costs: 30000 },
+  { week: "30 Mar", revenue: 14500, costs: 13800 },
+]
+
+const REV_LEGEND = [
+  { label: "On track", rev: "USD 151,087", cost: "USD 139,288" },
+  { label: "Proposal", rev: "USD 0", cost: "USD 0" },
+  { label: "Likely", rev: "USD 0", cost: "USD 0" },
+  { label: "Off track", rev: "USD 0", cost: "USD 0" },
+  { label: "Completed", rev: "USD 0", cost: "USD 0" },
+  { label: "+6 stages", rev: "USD 0", cost: "USD 0" },
+]
+
+function RevenueVsCostsCard() {
+  const fmtK = (v: number) => v >= 1000 ? `USD ${Math.round(v / 1000) * 10}K`.replace("10K", "10K") : `USD ${v}`
+  const fmt = (v: number) => `USD ${v.toLocaleString()}`
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Revenue vs. costs</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 10px", border: `1px solid ${t.border}`, borderRadius: 6, cursor: "pointer", fontSize: 12, color: t.mutedFg }}>
+          Weeks <ChevronDown size={12} strokeWidth={1.5}/>
+        </div>
+      </div>
+      <div style={{ display: "flex", minHeight: 280 }}>
+        <div style={{ flex: 1, padding: "16px 8px 8px 8px" }}>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={REV_COST_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
+              <YAxis tickFormatter={(v) => `USD ${v >= 1000 ? Math.round(v/1000) * 10 + "K" : v}`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={60}/>
+              <Tooltip
+                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+                formatter={(value: any, name: string) => [`USD ${Number(value).toLocaleString()}`, name === "revenue" ? "Delivery revenue" : "Delivery costs"]}
+              />
+              <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="costs" stroke={t.fgAlpha70} strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ width: 260, borderLeft: `1px solid ${t.border}`, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 20 }}>
+          {[{ label: "Delivery revenue", total: "USD 151,087", color: "#3B82F6" }, { label: "Delivery costs", total: "USD 139,288", color: t.fgAlpha70 }].map((series, si) => (
+            <div key={si}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: series.color, border: si === 1 ? `2px solid ${t.fgAlpha70}` : "none", boxSizing: "border-box" }}/>
+                  <span style={{ fontSize: 12, color: t.fg }}>{series.label}</span>
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 500, color: t.fg }}>{series.total}</span>
+              </div>
+              {REV_LEGEND.map((row, ri) => (
+                <div key={ri} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 0", borderBottom: `1px dashed ${t.border}` }}>
+                  <span style={{ fontSize: 11, color: t.mutedFg }}>{row.label}</span>
+                  <span style={{ fontSize: 11, color: t.mutedFg }}>{si === 0 ? row.rev : row.cost}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
+        Revenue exceeded costs by <span style={{ color: "#3B82F6", fontWeight: 500 }}>USD 11,799</span> this month — margin of ~7.8%. Peak week was 9 Mar.
+      </div>
+    </div>
+  )
+}
+
+const CLIENT_COLORS = ["#7DD3FC", "#3B82F6", "#60A5FA", "#93C5FD", "#2563EB", "#1D4ED8"]
+
+function ClientRevenueCard({ projects, clientsFull }: { projects: any[], clientsFull: any[] }) {
+  const byClient: Record<string, number> = {}
+  projects.forEach(p => {
+    const name = clientsFull[p.clientId]?.name ?? "No client"
+    byClient[name] = (byClient[name] ?? 0) + (p.budget ?? 0)
+  })
+  const entries = Object.entries(byClient).sort((a, b) => b[1] - a[1])
+  const total = entries.reduce((s, [, v]) => s + v, 0)
+  const data = entries.map(([name, value]) => ({ name, value }))
+  const top = data[0]
+  const topPct = total > 0 && top ? Math.round((top.value / total) * 100) : 0
+  // Simulate a MoM change seeded from the client name so it's stable
+  const seed = top ? top.name.charCodeAt(0) % 40 + 8 : 0
+  const momUp = top ? top.name.charCodeAt(0) % 2 === 0 : true
+
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Client revenue</span>
+      </div>
+      <div style={{ display: "flex", minHeight: 220 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 8px 20px 18px" }}>
+          <div style={{ position: "relative", width: 200, height: 200, flexShrink: 0 }}>
+            <PieChart width={200} height={200}>
+              <Pie data={data} cx={95} cy={95} innerRadius={78} outerRadius={92} dataKey="value" startAngle={90} endAngle={-270} strokeWidth={0}>
+                {data.map((_, i) => <Cell key={i} fill={CLIENT_COLORS[i % CLIENT_COLORS.length]}/>)}
+              </Pie>
+            </PieChart>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: t.fg, fontFamily: "Inter, sans-serif" }}>USD {total.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ flex: 1, borderLeft: `1px solid ${t.border}`, padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 0 }}>
+          {data.map((item, i) => {
+            const pct = total > 0 ? ((item.value / total) * 100).toFixed(0) : "0"
+            const isUp = i === 0
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < data.length - 1 ? `1px dashed ${t.border}` : "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: CLIENT_COLORS[i % CLIENT_COLORS.length], flexShrink: 0 }}/>
+                  <span style={{ fontSize: 12, color: t.fg, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, color: t.fg }}>USD {item.value.toLocaleString()}</span>
+                  <span style={{ fontSize: 11, color: isUp ? "#22C55E" : "#F97316", display: "flex", alignItems: "center", gap: 2 }}>
+                    {isUp ? "▲" : "▼"} {pct}%
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      {top && (
+        <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
+          <span style={{ color: t.fg, fontWeight: 500 }}>{top.name}</span> was the highest revenue client this month at {topPct}% of total —{" "}
+          <span style={{ color: momUp ? "#22C55E" : "#F97316", fontWeight: 500 }}>{momUp ? "up" : "down"} {seed}%</span> from last month.
+        </div>
+      )}
+    </div>
+  )
+}
+
+const TIME_OFF_DATA = [
+  { label: "Paid time off",    color: "#173074", days: 24, pct: 3,  up: true  },
+  { label: "Parental leave",   color: "#254cba", days: 12, pct: 8,  up: false },
+  { label: "Public holiday",   color: "#2e5fe8", days: 10, pct: 5,  up: true  },
+  { label: "Sick leave",       color: "#1a90dc", days: 9,  pct: 12, up: false },
+  { label: "Annual leave",     color: "#6ad2ff", days: 7,  pct: 2,  up: true  },
+  { label: "+2 time off types",color: "#cee7fe", days: 3,  pct: 0,  up: true  },
+]
+
+function TimeOffCard() {
+  const total = TIME_OFF_DATA.reduce((s, r) => s + r.days, 0)
+  const pieData = TIME_OFF_DATA.map(r => ({ name: r.label, value: r.days }))
+  const top = TIME_OFF_DATA[0]
+
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Time offs</span>
+      </div>
+      <div style={{ display: "flex", minHeight: 220 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 8px 20px 18px" }}>
+          <div style={{ position: "relative", width: 200, height: 200, flexShrink: 0 }}>
+            <PieChart width={200} height={200}>
+              <Pie data={pieData} cx={95} cy={95} innerRadius={78} outerRadius={92} dataKey="value" startAngle={90} endAngle={-270} strokeWidth={2} stroke={t.card}>
+                {pieData.map((_, i) => <Cell key={i} fill={TIME_OFF_DATA[i].color}/>)}
+              </Pie>
+            </PieChart>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: t.fg, fontFamily: "Inter, sans-serif" }}>{total} days</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ flex: 1, borderLeft: `1px solid ${t.border}`, padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 0 }}>
+          {TIME_OFF_DATA.map((row, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < TIME_OFF_DATA.length - 1 ? `1px dashed ${t.border}` : "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: row.color, flexShrink: 0 }}/>
+                <span style={{ fontSize: 12, color: t.fg, whiteSpace: "nowrap" }}>{row.label}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 12, color: t.fg }}>{row.days} days</span>
+                {row.pct > 0 && (
+                  <span style={{ fontSize: 11, color: row.up ? "#22C55E" : "#F97316", display: "flex", alignItems: "center", gap: 2 }}>
+                    {row.up ? "▲" : "▼"} {row.pct}%
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
+        <span style={{ color: t.fg, fontWeight: 500 }}>{top.label}</span> accounts for the most time off this month at{" "}
+        <span style={{ color: t.fg, fontWeight: 500 }}>{top.days} days</span> — up{" "}
+        <span style={{ color: "#22C55E", fontWeight: 500 }}>{top.pct}%</span> from last month.
+      </div>
+    </div>
+  )
+}
+
+const CAPACITY_DATA = [
+  { week: "1 Mar",  gross: 5500, delivery: 2000, scheduled: 2900 },
+  { week: "8 Mar",  gross: 5500, delivery: 3300, scheduled: 3100 },
+  { week: "15 Mar", gross: 4800, delivery: 3200, scheduled: 3000 },
+  { week: "22 Mar", gross: 4200, delivery: 3000, scheduled: 2800 },
+  { week: "29 Mar", gross: 4200, delivery: 1800, scheduled: 2400 },
+]
+
+const CAPACITY_LEGEND = [
+  { label: "On track",   value: "2,000h" },
+  { label: "Off track",  value: "2,000h" },
+  { label: "Completed",  value: "3,500h" },
+]
+
+function DeliveryCapacityCard() {
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: `1px solid ${t.border}` }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Capacity</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", border: `1px solid ${t.border}`, borderRadius: 6, cursor: "pointer", fontSize: 12, color: t.mutedFg }}>
+          Weeks <ChevronDown size={12} strokeWidth={1.5}/>
+        </div>
+      </div>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1, padding: "16px 8px 8px 8px", minWidth: 0 }}>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart data={CAPACITY_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <defs>
+                <pattern id="capHatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+                  <line x1="0" y1="0" x2="0" y2="6" stroke={t.fgAlpha06} strokeWidth="3"/>
+                </pattern>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
+              <YAxis tickFormatter={v => `${(v/1000).toFixed(0)},000h`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={56} ticks={[0,1000,2000,4000,6000]}/>
+              <Tooltip
+                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+                formatter={(value: any, name: string) => [`${Number(value).toLocaleString()}h`, name === "gross" ? "Gross capacity" : name === "delivery" ? "Delivery capacity" : "Scheduled"]}
+              />
+              <Area type="stepAfter" dataKey="gross" fill="url(#capHatch)" stroke={t.fgAlpha06} strokeWidth={1} fillOpacity={1}/>
+              <Line type="monotone" dataKey="delivery" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="6 3"/>
+              <Line type="monotone" dataKey="scheduled" stroke="#EF4444" strokeWidth={2} dot={false} strokeDasharray="6 3"/>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ width: 220, borderLeft: `1px solid ${t.border}`, padding: "20px 18px", display: "flex", flexDirection: "column", gap: 16, flexShrink: 0 }}>
+          {[
+            { label: "Gross capacity", value: "15,000h", icon: <div style={{ width: 10, height: 10, borderRadius: 3, background: t.fgAlpha06, border: `1px solid ${t.border}` }}/> },
+            { label: "Delivery capacity", value: "10,000h", icon: <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#3B82F6" strokeWidth="2" strokeDasharray="4 2"/></svg> },
+            { label: "Scheduled", value: "7,500h", icon: <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#EF4444" strokeWidth="2" strokeDasharray="4 2"/></svg> },
+          ].map((row, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {row.icon}
+                <span style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{row.label}</span>
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{row.value}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 12, display: "flex", flexDirection: "column", gap: 0 }}>
+            {CAPACITY_LEGEND.map((row, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderBottom: i < CAPACITY_LEGEND.length - 1 ? `1px dashed ${t.border}` : "none" }}>
+                <span style={{ fontSize: 12, color: t.mutedFg }}>{row.label}</span>
+                <span style={{ fontSize: 12, color: t.mutedFg }}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
+        Delivery capacity is at <span style={{ color: t.fg, fontWeight: 500 }}>10,000h</span> this month — scheduled hours are{" "}
+        <span style={{ color: "#22C55E", fontWeight: 500 }}>75% utilised</span>, with 3,500h already completed.
+      </div>
+    </div>
+  )
+}
+
+const ATTENTION_CONFIGS = [
+  { tag: "Over budget",      tagBg: "rgba(205,43,49,0.15)",  tagFg: "#EF4444", accent: "#EF4444", estVsAct: "+18%", estColor: "#EF4444", ctc: "124%", reason: "Costs have exceeded the approved budget with no approved change order." },
+  { tag: "At risk",          tagBg: "rgba(249,115,22,0.15)", tagFg: "#F97316", accent: "#F97316", estVsAct: "+11%", estColor: "#F97316", ctc: "108%", reason: "Team is under-scheduled for remaining deliverables in Q1." },
+  { tag: "Delayed",          tagBg: "rgba(234,179,8,0.15)",  tagFg: "#EAB308", accent: "#EAB308", estVsAct: "+6%",  estColor: "#EAB308", ctc: "103%", reason: "Key milestone missed — delivery is now 2 weeks behind schedule." },
+  { tag: "Under resourced",  tagBg: "rgba(168,85,247,0.15)", tagFg: "#A855F7", accent: "#A855F7", estVsAct: "+9%",  estColor: "#F97316", ctc: "107%", reason: "Not enough allocated hours to meet the end-of-month deadline." },
+  { tag: "Scope creep",      tagBg: "rgba(59,130,246,0.15)", tagFg: "#3B82F6", accent: "#3B82F6", estVsAct: "+22%", estColor: "#EF4444", ctc: "131%", reason: "Multiple untracked change requests have inflated scope beyond estimate." },
+]
+
+function ProjectsAttentionCard({ projects, clientsFull, onRowClick }: { projects: any[], clientsFull: any[], onRowClick: (p: any) => void }) {
+  const atRisk = projects
+    .filter(p => p.health === "off-track" || p.health === "at-risk")
+    .slice(0, 5)
+    .map((p, i) => ({ ...p, ...ATTENTION_CONFIGS[i % ATTENTION_CONFIGS.length] }))
+
+  const display = atRisk.length >= 3 ? atRisk : projects.slice(0, 5).map((p, i) => ({ ...p, ...ATTENTION_CONFIGS[i % ATTENTION_CONFIGS.length] }))
+
+  const cols = "2fr 1fr 1fr 1fr 2fr"
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null)
+
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ padding: "14px 18px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Projects Requiring Attention</span>
+        <span style={{ fontSize: 12, color: t.mutedFg }}>{display.length} projects</span>
+      </div>
+      <div style={{ padding: "0 18px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: cols, borderBottom: `1px solid ${t.border}`, padding: "8px 0", gap: 8 }}>
+          {["Project", "Client", "Status", "Est. vs. Actual", "Reason"].map(h => (
+            <span key={h} style={{ fontSize: 12, fontWeight: 500, color: t.mutedFg }}>{h}</span>
+          ))}
+        </div>
+        {display.map((p: any, i: number) => {
+          const clientName = clientsFull[p.clientId]?.name ?? "No client"
+          const isHovered = hoveredRow === i
+          return (
+            <div
+              key={i}
+              onClick={() => onRowClick({ ...p, clientName })}
+              onMouseEnter={() => setHoveredRow(i)}
+              onMouseLeave={() => setHoveredRow(null)}
+              style={{ display: "grid", gridTemplateColumns: cols, borderBottom: i < display.length - 1 ? `1px solid ${t.border}` : "none", padding: "10px 8px", margin: "0 -8px", gap: 8, alignItems: "center", cursor: "pointer", borderRadius: 6, background: isHovered ? t.fgAlpha06 : "transparent", transition: "background 0.1s" }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: t.fg, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {p.name}
+                {isHovered && <span style={{ fontSize: 11, color: t.mutedFg, marginLeft: 6, fontWeight: 400 }}>View detail →</span>}
+              </span>
+              <span style={{ fontSize: 13, color: t.fg }}>{clientName}</span>
+              <span>
+                <div style={{ display: "inline-flex", background: p.tagBg, borderRadius: 50, padding: "3px 10px" }}>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: p.tagFg, whiteSpace: "nowrap" }}>{p.tag}</span>
+                </div>
+              </span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: p.estColor }}>{p.estVsAct}</span>
+              <span style={{ fontSize: 12, color: t.mutedFg, lineHeight: 1.4 }}>{p.reason}</span>
+            </div>
+          )
+        })}
+      </div>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+        <span style={{ color: t.fg, fontWeight: 500 }}>{display.length} projects</span> need immediate attention —{" "}
+        <span style={{ color: "#EF4444", fontWeight: 500 }}>{display.filter((p: any) => p.tag === "Over budget").length} over budget</span> and{" "}
+        <span style={{ color: "#F97316", fontWeight: 500 }}>{display.filter((p: any) => p.tag === "At risk" || p.tag === "Delayed").length} at risk of missing deadlines</span>.
+      </div>
+    </div>
+  )
+}
+
+type AgentMessage = { role: "user" | "assistant"; text: string; card?: "revenue-vs-costs" | "client-revenue" | "time-off" | "delivery-capacity" | "projects-attention" | "project-detail"; projectData?: any }
+
+function ProjectDetailCard({ project, clientName, people, config }: { project: any, clientName: string, people: any[], config: any }) {
+  const logData = Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(2026, 2, 1 + i * 7) // March 2026 weeks
+    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    const sched = Math.round(40 + i * 18 + (i === 2 ? 8 : 0))
+    const logged = Math.round(sched * (1.12 + i * 0.04))
+    return { week: label, logged, scheduled: sched }
+  })
+
+  const utilization = Math.round(100 + (100 - project.margin) * 0.6)
+  const owner = people[project.ownerId] ?? people[0]
+  const second = people[(project.ownerId + 1) % people.length] ?? people[1]
+  const concerns = [
+    { name: owner.name, role: owner.role ?? "Engineer", pct: Math.round(utilization * 0.13), status: "Over utilized", statusBg: "rgba(239,68,68,0.15)", statusFg: "#EF4444" },
+    { name: second.name, role: second.role ?? "Designer", pct: Math.round(utilization * 0.15), status: "Under utilized", statusBg: "rgba(249,115,22,0.12)", statusFg: "#F97316" },
+  ]
+
+  const metrics = [
+    { label: "Cost Est. vs Actual", value: config.estVsAct, color: config.estColor },
+    { label: "Cost to Completion", value: config.ctc, color: t.fg },
+    { label: "Hours Est. vs Actual", value: `+${Math.round(parseFloat(config.estVsAct) * 1.1)}%`, color: config.estColor },
+    { label: "Hours Completion", value: `${Math.round(parseFloat(config.ctc) - 4)}%`, color: t.fg },
+  ]
+
+  const SparkLine = ({ over }: { over: boolean }) => {
+    const pts = over
+      ? [0,4,6,3,8,12,10,14,10] : [14,10,12,8,4,6,2,4,2]
+    const w = 80, h = 28, max = 16
+    const path = pts.map((y, x) => `${x === 0 ? "M" : "L"}${(x / (pts.length - 1)) * w},${h - (y / max) * h}`).join(" ")
+    return (
+      <svg width={w} height={h} style={{ overflow: "visible" }}>
+        <path d={path} fill="none" stroke={t.border} strokeWidth={1.5}/>
+        <path d={`M${(4 / 8) * w},${h - (pts[4] / max) * h} Q${(5 / 8) * w},${h - (pts[5] / max) * h} ${(6 / 8) * w},${h - (pts[6] / max) * h}`} fill="none" stroke="#E62768" strokeWidth={2}/>
+      </svg>
+    )
+  }
+
+  return (
+    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%" }}>
+      <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h2 style={{ fontSize: 22, fontWeight: 600, color: t.fg, margin: 0, fontFamily: "Inter, sans-serif" }}>{project.name}</h2>
+              <div style={{ background: config.tagBg, borderRadius: 4, padding: "3px 10px" }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: config.tagFg }}>{config.tag}</span>
+              </div>
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 500, color: t.mutedFg, margin: "4px 0 0" }}>{clientName}</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 8px 4px 8px" }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 8px 10px" }}>Logged vs Scheduled</p>
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={logData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
+            <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
+            <YAxis tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={36} tickFormatter={v => `${v}h`}/>
+            <Tooltip
+              contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+              formatter={(v: any, n: string) => [`${v}h`, n === "logged" ? "Logged" : "Scheduled"]}
+            />
+            <Line type="monotone" dataKey="logged" stroke="#3B82F6" strokeWidth={2} dot={false}/>
+            <Line type="monotone" dataKey="scheduled" stroke={t.fgAlpha70} strokeWidth={2} dot={false}/>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", padding: "8px 20px 16px", gap: 12, borderBottom: `1px solid ${t.border}` }}>
+        {metrics.map((m, i) => (
+          <div key={i}>
+            <p style={{ fontSize: 10, fontWeight: 500, color: t.mutedFg, margin: "0 0 4px" }}>{m.label}</p>
+            <p style={{ fontSize: 22, fontWeight: 600, color: m.color, margin: 0, fontFamily: "Inter, sans-serif" }}>{m.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: "14px 20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 14 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: 0, flexShrink: 0 }}>Utilization</p>
+        <div style={{ flex: 1, height: 8, background: t.fgAlpha06, borderRadius: 4, overflow: "hidden" }}>
+          <div style={{ width: `${Math.min(utilization, 100)}%`, height: "100%", background: utilization > 100 ? "#EF4444" : "#22C55E", borderRadius: 4 }}/>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.fg, flexShrink: 0 }}>{utilization}% utilization</span>
+      </div>
+
+      <div style={{ padding: "12px 20px 4px" }}>
+        <p style={{ fontSize: 10, fontWeight: 600, color: t.mutedFg, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Concerns</p>
+      </div>
+      {concerns.map((c, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 20px", borderTop: `1px solid ${t.border}` }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: t.fg, flexShrink: 0 }}>
+            {c.name.charAt(0)}
+          </div>
+          <div style={{ minWidth: 120 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: 0 }}>{c.name}</p>
+            <p style={{ fontSize: 12, color: t.mutedFg, margin: "2px 0 0" }}>{c.role}</p>
+          </div>
+          <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            <SparkLine over={c.status === "Over utilized"}/>
+          </div>
+          <span style={{ fontSize: 20, fontWeight: 600, color: t.fg, flexShrink: 0 }}>{c.pct}%</span>
+          <div style={{ background: c.statusBg, borderRadius: 4, padding: "3px 8px", flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 500, color: c.statusFg }}>{c.status}</span>
+          </div>
+        </div>
+      ))}
+      <div style={{ padding: "12px 20px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
+        {config.reason}
+      </div>
+    </div>
+  )
+}
+
+function detectDashboard(q: string): boolean {
+  const l = q.toLowerCase()
+  return (l.includes("dashboard") || l.includes("save") || l.includes("build me")) && (l.includes("graph") || l.includes("chart") || l.includes("dashboard") || l.includes("these"))
+}
+
+function detectCard(q: string): "revenue-vs-costs" | "client-revenue" | "time-off" | "delivery-capacity" | "projects-attention" | null {
+  const l = q.toLowerCase()
+  if (l.includes("attention") || l.includes("require") || l.includes("at risk") || (l.includes("project") && (l.includes("issue") || l.includes("problem") || l.includes("concern")))) return "projects-attention"
+  if (l.includes("delivery capacity") || l.includes("capacity") && l.includes("delivery")) return "delivery-capacity"
+  if (l.includes("time off") || l.includes("timeoff") || l.includes("leave") || l.includes("holiday") || l.includes("pto")) return "time-off"
+  if (l.includes("client revenue") || (l.includes("client") && l.includes("revenue"))) return "client-revenue"
+  if ((l.includes("revenue") || l.includes("cost")) && (l.includes("vs") || l.includes("versus") || l.includes("compare") || l.includes("against"))) return "revenue-vs-costs"
+  if (l.includes("revenue vs cost") || l.includes("revenue vs. cost")) return "revenue-vs-costs"
+  return null
+}
+
+function SavedDashboardView({ cards, projects, clientsFull, people }: { cards: string[], projects: any[], clientsFull: any[], people: any[] }) {
+  const cardMap: Record<string, React.ReactNode> = {
+    "revenue-vs-costs": <RevenueVsCostsCard/>,
+    "client-revenue": <ClientRevenueCard projects={projects} clientsFull={clientsFull}/>,
+    "time-off": <TimeOffCard/>,
+    "delivery-capacity": <DeliveryCapacityCard/>,
+    "projects-attention": <ProjectsAttentionCard projects={projects} clientsFull={clientsFull} onRowClick={() => {}}/>,
+  }
+  const labelMap: Record<string, string> = {
+    "revenue-vs-costs": "Revenue vs. Costs",
+    "client-revenue": "Client Revenue",
+    "time-off": "Time Off",
+    "delivery-capacity": "Delivery Capacity",
+    "projects-attention": "Projects Requiring Attention",
+  }
+  return (
+    <div style={{ flex: 1, overflowY: "auto", background: t.bg, padding: "28px 32px 40px" }}>
+      <style>{`@keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.card-fade{animation:cardFadeIn 0.7s cubic-bezier(0.16,1,0.3,1) both}`}</style>
+      <div style={{ width: "100%" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, fontFamily: "Inter, sans-serif", margin: "0 0 6px" }}>Saved Dashboard</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif", margin: "0 0 28px" }}>{cards.length} graph{cards.length !== 1 ? "s" : ""} · March 2026</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
+          {cards.map((card, i) => {
+            const fullWidth = card === "revenue-vs-costs" || card === "delivery-capacity" || card === "projects-attention"
+            return (
+              <div key={card} className="card-fade" style={{ animationDelay: `${i * 0.08}s`, width: fullWidth ? 760 : "calc(50% - 10px)", minWidth: fullWidth ? 0 : 340, flexShrink: 1 }}>
+                {cardMap[card]}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { projects: any[], clientsFull: any[], people: any[], onSaveDashboard?: (cards: string[]) => void }) {
+  const [phase, setPhase] = useState<"idle" | "loading" | "chat">("idle")
+  const [messages, setMessages] = useState<AgentMessage[]>([])
+  const [input, setInput] = useState("")
+  const threadRef = useRef<HTMLDivElement>(null)
+
+  function onProjectClick(p: any) {
+    setMessages(prev => [...prev, { role: "user", text: `Tell me more about ${p.name}` }])
+    setPhase("loading")
+    setTimeout(() => {
+      setMessages(prev => [...prev, { role: "assistant", text: `Here's a detailed breakdown for ${p.name}:`, card: "project-detail", projectData: p }])
+      setPhase("chat")
+    }, 800)
+  }
+
+  function submit() {
+    const q = input.trim()
+    if (!q) return
+    setInput("")
+    setMessages(prev => [...prev, { role: "user", text: q }])
+    setPhase("loading")
+    setTimeout(() => {
+      if (detectDashboard(q)) {
+        setMessages(prev => {
+          const cards = [...new Set(prev.filter(m => m.card && m.card !== "project-detail").map(m => m.card!))]
+          if (cards.length > 0) onSaveDashboard?.(cards)
+          const text = cards.length > 0
+            ? `Done — I've saved a dashboard with ${cards.length} graph${cards.length > 1 ? "s" : ""}. You'll find it under Float Agent in the nav.`
+            : "No graphs loaded yet. Ask me about revenue, clients, time off, capacity, or projects first."
+          return [...prev, { role: "assistant", text }]
+        })
+        setPhase("chat")
+        return
+      }
+      const card = detectCard(q)
+      const text = card === "revenue-vs-costs"
+        ? "Here's your revenue vs. costs breakdown for March:"
+        : card === "client-revenue"
+        ? "Here's this month's revenue broken down by client:"
+        : card === "time-off"
+        ? "Here's a breakdown of time off taken this month:"
+        : card === "delivery-capacity"
+        ? "Here's your delivery capacity breakdown for March:"
+        : card === "projects-attention"
+        ? "Here are the projects that need your attention right now:"
+        : "I don't have a visual for that yet — try asking about revenue vs. costs, client revenue, time off, delivery capacity, or projects requiring attention."
+      setMessages(prev => [...prev, { role: "assistant", text, card: card ?? undefined }])
+      setPhase("chat")
+    }, 1200)
+  }
+
+  useEffect(() => {
+    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight
+  }, [messages, phase])
+
+  const inputBox = (compact: boolean) => (
+    <div style={{ position: "relative", width: "100%", maxWidth: compact ? "100%" : 654, border: `1px solid ${t.border}`, borderRadius: compact ? 12 : 16, background: t.card }}>
+      <style>{`.fai::placeholder{color:${t.mutedFg}}@keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.card-fade{animation:cardFadeIn 0.7s cubic-bezier(0.16,1,0.3,1) both}`}</style>
+      {compact ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px" }}>
+          <input
+            className="fai"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() } }}
+            placeholder="Ask a follow-up..."
+            style={{ flex: 1, border: "none", background: "transparent", color: t.fg, fontSize: 14, fontFamily: "Inter, sans-serif", outline: "none" }}
+          />
+          <HoverBtn onClick={submit} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ArrowUp size={14} strokeWidth={1.5}/>
+          </HoverBtn>
+        </div>
+      ) : (
+        <>
+          <textarea
+            className="fai"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() } }}
+            placeholder="Ask me anything"
+            style={{ width: "100%", minHeight: 112, padding: "20px 52px 52px 20px", border: "none", borderRadius: 16, background: "transparent", color: t.fg, fontSize: 16, fontFamily: "Inter, sans-serif", resize: "none", outline: "none", boxSizing: "border-box" }}
+            rows={3}
+          />
+          <HoverBtn onClick={submit} style={{ position: "absolute", right: 20, bottom: 20, width: 29, height: 29, borderRadius: 8, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <ArrowUp size={16} strokeWidth={1.5}/>
+          </HoverBtn>
+        </>
+      )}
+    </div>
+  )
+
+  if (phase === "idle") {
+    return (
+      <div style={{ display: "flex", flex: 1, flexDirection: "column", background: t.bg, overflow: "auto" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <p style={{ fontSize: 18, fontWeight: 600, color: t.fg, marginBottom: 24, fontFamily: "Inter, sans-serif" }}>Good Afternoon Cam</p>
+          {inputBox(false)}
+          <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", justifyContent: "center" }}>
+            {[
+              "what is the client revenue for this month?",
+              "what's the time off this month?",
+            ].map(q => (
+              <button key={q} onClick={() => setInput(q)} style={{ background: t.fgAlpha06, border: `1px solid ${t.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, color: t.fgAlpha70, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                &lsquo;{q}&rsquo;
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: "flex", flex: 1, flexDirection: "column", background: t.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 24px 0", flexShrink: 0 }}>
+        <HoverBtn onClick={() => { setMessages([]); setPhase("idle"); setInput("") }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: t.mutedFg, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+          New chat
+        </HoverBtn>
+      </div>
+      <div ref={threadRef} style={{ flex: 1, overflowY: "auto", padding: "12px 24px 12px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+          {messages.map((msg, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start", gap: 10 }}>
+              {msg.role === "user" ? (
+                <div style={{ background: t.fgAlpha06, borderRadius: 12, padding: "10px 14px", maxWidth: "70%", fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif" }}>
+                  {msg.text}
+                </div>
+              ) : (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Bot size={12} strokeWidth={1.5} color={t.fg}/>
+                    </div>
+                    <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif" }}>Float Agent</span>
+                  </div>
+                  <p className="card-fade" style={{ fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif", margin: 0 }}>{msg.text}</p>
+                  {msg.card === "revenue-vs-costs" && <div className="card-fade"><RevenueVsCostsCard/></div>}
+                  {msg.card === "client-revenue" && <div className="card-fade"><ClientRevenueCard projects={projects} clientsFull={clientsFull}/></div>}
+                  {msg.card === "time-off" && <div className="card-fade"><TimeOffCard/></div>}
+                  {msg.card === "delivery-capacity" && <div className="card-fade"><DeliveryCapacityCard/></div>}
+                  {msg.card === "projects-attention" && <div className="card-fade"><ProjectsAttentionCard projects={projects} clientsFull={clientsFull} onRowClick={onProjectClick}/></div>}
+                  {msg.card === "project-detail" && msg.projectData && <div className="card-fade"><ProjectDetailCard project={msg.projectData} clientName={msg.projectData.clientName ?? clientsFull[msg.projectData.clientId]?.name ?? "No client"} people={people} config={msg.projectData}/></div>}
+                </div>
+              )}
+            </div>
+          ))}
+          {phase === "loading" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 22, height: 22, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Bot size={12} strokeWidth={1.5} color={t.fg}/>
+              </div>
+              <style>{`@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}.dot{animation:blink 1.4s infinite both}.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}`}</style>
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                {[0,1,2].map(i => <span key={i} className={`dot`} style={{ width: 5, height: 5, borderRadius: "50%", background: t.mutedFg, display: "inline-block" }}/>)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{ padding: "12px 24px 20px", flexShrink: 0 }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          {inputBox(true)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+
 function PlaceholderView({ title, breadcrumb }: any) {
   return (
     <div style={{ display:"flex", flex:1, flexDirection:"column" }}>
@@ -2673,6 +3366,7 @@ export default function App() {
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
+  const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -2690,6 +3384,8 @@ export default function App() {
     if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
+    if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people} onSaveDashboard={cards => { setSavedDashboardCards(cards); setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
+    if (activeItem === "Saved Dashboard") return <SavedDashboardView cards={savedDashboardCards} projects={projects} clientsFull={clientsFull} people={people}/>
     if (activeItem === "Settings") return <SettingsPage key={settingsOfficeTarget ?? "__org__"} t={t} s={s} locations={LOCATIONS_INIT} officeTarget={settingsOfficeTarget} onBack={() => { setActiveItem("Dashboard"); setBreadcrumb(["Global", "Dashboard"]); setSettingsOfficeTarget(null) }}/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
@@ -2703,7 +3399,7 @@ export default function App() {
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       {activeItem !== "Settings" && <>
-        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }}/>
+        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
         {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
       </>}
       <main style={{ ...s.main, position:"relative" as const, paddingLeft: activeItem !== "Settings" && sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
