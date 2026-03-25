@@ -4,7 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
 
-const _inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: 'Float',
@@ -42,7 +42,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className={`${inter.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

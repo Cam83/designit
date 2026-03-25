@@ -2749,10 +2749,10 @@ function RevenueVsCostsCard() {
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={REV_COST_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
-              <YAxis tickFormatter={(v) => `USD ${v >= 1000 ? Math.round(v/1000) * 10 + "K" : v}`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={60}/>
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false}/>
+              <YAxis tickFormatter={(v) => `USD ${v >= 1000 ? Math.round(v/1000) * 10 + "K" : v}`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false} width={60}/>
               <Tooltip
-                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}
                 formatter={(value: any, name: string) => [`USD ${Number(value).toLocaleString()}`, name === "revenue" ? "Delivery revenue" : "Delivery costs"]}
               />
               <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} dot={false} />
@@ -2818,7 +2818,7 @@ function ClientRevenueCard({ projects, clientsFull }: { projects: any[], clients
               </Pie>
             </PieChart>
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: t.fg, fontFamily: "Inter, sans-serif" }}>USD {total.toLocaleString()}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>USD {total.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -2881,7 +2881,7 @@ function TimeOffCard() {
               </Pie>
             </PieChart>
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: t.fg, fontFamily: "Inter, sans-serif" }}>{total} days</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{total} days</span>
             </div>
           </div>
         </div>
@@ -2946,10 +2946,10 @@ function DeliveryCapacityCard() {
                 </pattern>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
-              <YAxis tickFormatter={v => `${(v/1000).toFixed(0)},000h`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={56} ticks={[0,1000,2000,4000,6000]}/>
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false}/>
+              <YAxis tickFormatter={v => `${(v/1000).toFixed(0)},000h`} tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false} width={56} ticks={[0,1000,2000,4000,6000]}/>
               <Tooltip
-                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}
                 formatter={(value: any, name: string) => [`${Number(value).toLocaleString()}h`, name === "gross" ? "Gross capacity" : name === "delivery" ? "Delivery capacity" : "Scheduled"]}
               />
               <Area type="stepAfter" dataKey="gross" fill="url(#capHatch)" stroke={t.fgAlpha06} strokeWidth={1} fillOpacity={1}/>
@@ -3101,7 +3101,7 @@ function ProjectDetailCard({ project, clientName, people, config }: { project: a
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <h2 style={{ fontSize: 22, fontWeight: 600, color: t.fg, margin: 0, fontFamily: "Inter, sans-serif" }}>{project.name}</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 600, color: t.fg, margin: 0, fontFamily: "var(--font-sans), sans-serif" }}>{project.name}</h2>
               <div style={{ background: config.tagBg, borderRadius: 4, padding: "3px 10px" }}>
                 <span style={{ fontSize: 12, fontWeight: 500, color: config.tagFg }}>{config.tag}</span>
               </div>
@@ -3116,10 +3116,10 @@ function ProjectDetailCard({ project, clientName, people, config }: { project: a
         <ResponsiveContainer width="100%" height={160}>
           <LineChart data={logData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={t.border} vertical={false}/>
-            <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false}/>
-            <YAxis tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "Inter, sans-serif" }} axisLine={false} tickLine={false} width={36} tickFormatter={v => `${v}h`}/>
+            <XAxis dataKey="week" tick={{ fontSize: 11, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false}/>
+            <YAxis tick={{ fontSize: 10, fill: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }} axisLine={false} tickLine={false} width={36} tickFormatter={v => `${v}h`}/>
             <Tooltip
-              contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "Inter, sans-serif" }}
+              contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}
               formatter={(v: any, n: string) => [`${v}h`, n === "logged" ? "Logged" : "Scheduled"]}
             />
             <Line type="monotone" dataKey="logged" stroke="#3B82F6" strokeWidth={2} dot={false}/>
@@ -3132,7 +3132,7 @@ function ProjectDetailCard({ project, clientName, people, config }: { project: a
         {metrics.map((m, i) => (
           <div key={i}>
             <p style={{ fontSize: 10, fontWeight: 500, color: t.mutedFg, margin: "0 0 4px" }}>{m.label}</p>
-            <p style={{ fontSize: 22, fontWeight: 600, color: m.color, margin: 0, fontFamily: "Inter, sans-serif" }}>{m.value}</p>
+            <p style={{ fontSize: 22, fontWeight: 600, color: m.color, margin: 0, fontFamily: "var(--font-sans), sans-serif" }}>{m.value}</p>
           </div>
         ))}
       </div>
@@ -3208,8 +3208,8 @@ function SavedDashboardView({ cards, projects, clientsFull, people }: { cards: s
     <div style={{ flex: 1, overflowY: "auto", background: t.bg, padding: "28px 32px 40px" }}>
       <style>{`@keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.card-fade{animation:cardFadeIn 0.7s cubic-bezier(0.16,1,0.3,1) both}`}</style>
       <div style={{ width: "100%" }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, fontFamily: "Inter, sans-serif", margin: "0 0 6px" }}>Saved Dashboard</h2>
-        <p style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif", margin: "0 0 28px" }}>{cards.length} graph{cards.length !== 1 ? "s" : ""} · March 2026</p>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif", margin: "0 0 6px" }}>Saved Dashboard</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif", margin: "0 0 28px" }}>{cards.length} graph{cards.length !== 1 ? "s" : ""} · March 2026</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
           {cards.map((card, i) => {
             const fullWidth = card === "revenue-vs-costs" || card === "delivery-capacity" || card === "projects-attention"
@@ -3291,7 +3291,7 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() } }}
             placeholder="Ask a follow-up..."
-            style={{ flex: 1, border: "none", background: "transparent", color: t.fg, fontSize: 14, fontFamily: "Inter, sans-serif", outline: "none" }}
+            style={{ flex: 1, border: "none", background: "transparent", color: t.fg, fontSize: 14, fontFamily: "var(--font-sans), sans-serif", outline: "none" }}
           />
           <HoverBtn onClick={submit} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <ArrowUp size={14} strokeWidth={1.5}/>
@@ -3305,7 +3305,7 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() } }}
             placeholder="Ask me anything"
-            style={{ width: "100%", minHeight: 112, padding: "20px 52px 52px 20px", border: "none", borderRadius: 16, background: "transparent", color: t.fg, fontSize: 16, fontFamily: "Inter, sans-serif", resize: "none", outline: "none", boxSizing: "border-box" }}
+            style={{ width: "100%", minHeight: 112, padding: "20px 52px 52px 20px", border: "none", borderRadius: 16, background: "transparent", color: t.fg, fontSize: 16, fontFamily: "var(--font-sans), sans-serif", resize: "none", outline: "none", boxSizing: "border-box" }}
             rows={3}
           />
           <HoverBtn onClick={submit} style={{ position: "absolute", right: 20, bottom: 20, width: 29, height: 29, borderRadius: 8, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -3320,14 +3320,14 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
     return (
       <div style={{ display: "flex", flex: 1, flexDirection: "column", background: t.bg, overflow: "auto" }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <p style={{ fontSize: 18, fontWeight: 600, color: t.fg, marginBottom: 24, fontFamily: "Inter, sans-serif" }}>Good Afternoon Cam</p>
+          <p style={{ fontSize: 18, fontWeight: 600, color: t.fg, marginBottom: 24, fontFamily: "var(--font-sans), sans-serif" }}>Good Afternoon Cam</p>
           {inputBox(false)}
           <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", justifyContent: "center" }}>
             {[
               "what is the client revenue for this month?",
               "what's the time off this month?",
             ].map(q => (
-              <button key={q} onClick={() => setInput(q)} style={{ background: t.fgAlpha06, border: `1px solid ${t.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, color: t.fgAlpha70, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+              <button key={q} onClick={() => setInput(q)} style={{ background: t.fgAlpha06, border: `1px solid ${t.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, color: t.fgAlpha70, cursor: "pointer", fontFamily: "var(--font-sans), sans-serif" }}>
                 &lsquo;{q}&rsquo;
               </button>
             ))}
@@ -3340,7 +3340,7 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
   return (
     <div style={{ display: "flex", flex: 1, flexDirection: "column", background: t.bg, overflow: "hidden" }}>
       <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 24px 0", flexShrink: 0 }}>
-        <HoverBtn onClick={() => { setMessages([]); setPhase("idle"); setInput("") }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: t.mutedFg, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+        <HoverBtn onClick={() => { setMessages([]); setPhase("idle"); setInput("") }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 8, border: `1px solid ${t.border}`, background: "transparent", color: t.mutedFg, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-sans), sans-serif" }}>
           New chat
         </HoverBtn>
       </div>
@@ -3349,7 +3349,7 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
           {messages.map((msg, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start", gap: 10 }}>
               {msg.role === "user" ? (
-                <div style={{ background: t.fgAlpha06, borderRadius: 12, padding: "10px 14px", maxWidth: "70%", fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif" }}>
+                <div style={{ background: t.fgAlpha06, borderRadius: 12, padding: "10px 14px", maxWidth: "70%", fontSize: 14, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>
                   {msg.text}
                 </div>
               ) : (
@@ -3358,9 +3358,9 @@ function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { pr
                     <div style={{ width: 22, height: 22, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <Bot size={12} strokeWidth={1.5} color={t.fg}/>
                     </div>
-                    <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif" }}>Float Agent</span>
+                    <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>Float Agent</span>
                   </div>
-                  <p className="card-fade" style={{ fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif", margin: 0 }}>{msg.text}</p>
+                  <p className="card-fade" style={{ fontSize: 14, color: t.fg, fontFamily: "var(--font-sans), sans-serif", margin: 0 }}>{msg.text}</p>
                   {msg.card === "revenue-vs-costs" && <div className="card-fade"><RevenueVsCostsCard/></div>}
                   {msg.card === "client-revenue" && <div className="card-fade"><ClientRevenueCard projects={projects} clientsFull={clientsFull}/></div>}
                   {msg.card === "time-off" && <div className="card-fade"><TimeOffCard/></div>}
@@ -3490,7 +3490,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
+    <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"var(--font-sans), -apple-system, sans-serif" }}>
       {activeItem !== "Settings" && <>
         <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }} showFloatAgent={showFloatAgent} onFloatAgentToggle={setShowFloatAgent}/>
         {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
