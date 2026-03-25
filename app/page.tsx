@@ -3430,8 +3430,8 @@ function VersionsToggle({ version, onChange }: any) {
 
 export default function App() {
   const [version, setVersion] = useState("multi")
-  const [activeItem, setActiveItem] = useState("Float Agent")
-  const [breadcrumb, setBreadcrumb] = useState(["Float Agent"])
+  const [activeItem, setActiveItem] = useState("People")
+  const [breadcrumb, setBreadcrumb] = useState(["The Grid", "People"])
   const [roles, setRoles] = useState(INITIAL_ROLES)
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
@@ -3453,7 +3453,7 @@ export default function App() {
   const [filteredRoleForPeople, setFilteredRoleForPeople] = useState<string|null>(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
-  const [showFloatAgent, setShowFloatAgent] = useState(true)
+  const [showFloatAgent, setShowFloatAgent] = useState(false)
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
