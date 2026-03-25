@@ -1608,6 +1608,9 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   const [groupMode, setGroupMode] = useState<"single"|"multiple">("single")
   const [teamSettingsOpen, setTeamSettingsOpen] = useState(false)
   const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
+  const [filteredDepartment, setFilteredDepartment] = useState<string|null>(null)
+  const [filteredDeliveryTeam, setFilteredDeliveryTeam] = useState<string|null>(null)
+  const [filteredGroup, setFilteredGroup] = useState<string|null>(null)
 
   const isGroupView = view === "departments" || view === "delivery-teams" || view === "groups"
   const current = view === "employees" ? people : view === "contractors" ? contractors : people
@@ -1615,7 +1618,10 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   const isAll = selectedOffices.length === ALL_OFFICES.length
   const filtered = isAll ? current : current.filter((p: any) => selectedOffices.includes(p.office))
   const roleFiltered = filteredRole ? filtered.filter((p: any) => roles[p.roleId]?.name === filteredRole) : filtered
-  const display = tab === "archived" ? [] : roleFiltered
+  const deptFiltered = filteredDepartment ? roleFiltered.filter((p: any) => departments[p.departmentId]?.name === filteredDepartment) : roleFiltered
+  const teamFiltered = filteredDeliveryTeam ? deptFiltered.filter((p: any) => (p.deliveryTeamIds || []).some((id: number) => deliveryTeams[id]?.name === filteredDeliveryTeam)) : deptFiltered
+  const groupFiltered = filteredGroup ? teamFiltered.filter((p: any) => (p.groupIds || []).some((id: number) => groups[id]?.name === filteredGroup)) : teamFiltered
+  const display = tab === "archived" ? [] : groupFiltered
 
   function handleAdd(person: any) {
     if (view === "employees") onPeopleChange([...people, person])
@@ -1637,11 +1643,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
       {groupSettingsOpen && <TeamSettingsModal type="groups" mode={groupMode} onSave={(m: any) => setGroupMode(m)} onClose={() => setGroupSettingsOpen(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader
-          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : roleFiltered.length}
+          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : groupFiltered.length}
           label={view === "departments" ? "Departments" : view === "delivery-teams" ? "Delivery teams" : view === "groups" ? "Groups" : view === "employees" ? "Employees" : "Contractors"}
-          filterField={filteredRole ? "Role" : undefined}
-          filterValue={filteredRole}
-          onClearFilter={onRoleFilterClear}
+          filterField={filteredRole ? "Role" : filteredDepartment ? "Department" : filteredDeliveryTeam ? "Delivery team" : filteredGroup ? "Group" : undefined}
+          filterValue={filteredRole ?? filteredDepartment ?? filteredDeliveryTeam ?? filteredGroup}
+          onClearFilter={filteredRole ? onRoleFilterClear : filteredDepartment ? () => setFilteredDepartment(null) : filteredDeliveryTeam ? () => setFilteredDeliveryTeam(null) : filteredGroup ? () => setFilteredGroup(null) : undefined}
           onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1701,7 +1707,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{deptPeopleCounts[departments.indexOf(row.original)] ?? 0}</span> },
+                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => { const count = deptPeopleCounts[departments.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredDepartment(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
               ]}
               data={departments}
               onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
@@ -1718,7 +1724,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setDeliveryTeams(deliveryTeams.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => deliveryTeamCounts[i] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{deliveryTeamCounts[deliveryTeams.indexOf(row.original)] ?? 0}</span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => deliveryTeamCounts[i] ?? 0, cell: ({ row }: any) => { const count = deliveryTeamCounts[deliveryTeams.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredDeliveryTeam(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
               ]}
               data={deliveryTeams}
               onRowClick={(_: any, idx: number) => setSelectedDeliveryTeam(idx)}
@@ -1735,7 +1741,7 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             <DataTable
               columns={[
                 { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setGroups(groups.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => groupCounts[i] ?? 0, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{groupCounts[groups.indexOf(row.original)] ?? 0}</span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => groupCounts[i] ?? 0, cell: ({ row }: any) => { const count = groupCounts[groups.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredGroup(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
               ]}
               data={groups}
               onRowClick={(_: any, idx: number) => setSelectedGroup(idx)}
