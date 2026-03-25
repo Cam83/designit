@@ -1480,7 +1480,7 @@ function GroupSelector({ groupIds, groups, mode, onChange }: any) {
 }
 
 // ── Pages ──
-function RolesAndRates({ roles, onRolesChange }: any) {
+function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole }: any) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -1488,7 +1488,12 @@ function RolesAndRates({ roles, onRolesChange }: any) {
   const rolesColumns = useMemo(() => [
     { accessorKey: "name", header: "Role", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, name: v} : r))} style={{ background: "transparent" }}/></span> },
     { accessorKey: "costRate", header: "Cost rate", size: 140, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEditRate value={row.original.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, costRate: v} : r))}/></span> },
-    { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.activePeople}</span> },
+    { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => {
+      const count = (people ?? []).filter((p: any) => p.roleId === roles.indexOf(row.original)).length
+      return count > 0
+        ? <button onClick={e => { e.stopPropagation(); onNavigateToPeopleByRole?.(row.original.name) }} style={{ fontSize: 13, color: t.fg, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", textDecorationColor: t.mutedFg, textUnderlineOffset: 3 }}>{count}</button>
+        : <span style={{ fontSize: 13, color: t.mutedFg }}>0</span>
+    }},
     { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unassigned}</span> },
   ], [roles, onRolesChange])
   return (
@@ -1528,7 +1533,7 @@ function RolesAndRates({ roles, onRolesChange }: any) {
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear }: any) {
+function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear, filteredRole, onRoleFilterClear }: any) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState<number|null>(null)
@@ -1549,7 +1554,8 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
   const setCurrent = view === "employees" ? onPeopleChange : view === "contractors" ? onContractorsChange : onPeopleChange
   const isAll = selectedOffices.length === ALL_OFFICES.length
   const filtered = isAll ? current : current.filter((p: any) => selectedOffices.includes(p.office))
-  const display = tab === "archived" ? [] : filtered
+  const roleFiltered = filteredRole ? filtered.filter((p: any) => roles[p.roleId]?.name === filteredRole) : filtered
+  const display = tab === "archived" ? [] : roleFiltered
 
   function handleAdd(person: any) {
     if (view === "employees") onPeopleChange([...people, person])
@@ -1580,6 +1586,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             {filteredBusinessUnit && (
               <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
                 ✕ {filteredBusinessUnit}
+              </HoverBtn>
+            )}
+            {filteredRole && (
+              <HoverBtn onClick={onRoleFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredRole}
               </HoverBtn>
             )}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
@@ -3375,6 +3386,7 @@ export default function App() {
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Brands")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
+  const [filteredRoleForPeople, setFilteredRoleForPeople] = useState<string|null>(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
   const [showFloatAgent, setShowFloatAgent] = useState(true)
@@ -3387,8 +3399,8 @@ export default function App() {
   s = getStyles(t)
 
   function renderMain() {
-    if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles}/>
-    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)}/>
+    if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
+    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)} filteredClient={projectsClientFilter} onClientFilterClear={() => setProjectsClientFilter(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} projects={projects} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects") }}/>
