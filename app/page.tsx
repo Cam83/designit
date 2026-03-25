@@ -2368,7 +2368,7 @@ function Clients({ roles, people, clients, onClientsChange, projects, onNavigate
   )
 }
 
-function RateCards({ roles, clients, onClientsChange, filterClient, onClearFilter, onNavigateToClients }: any) {
+function RateCards({ roles, clients, onClientsChange, filterClient, onClearFilter, onNavigateToClients, projects, onNavigateToProjects }: any) {
   const setClients = onClientsChange
   const [tab, setTab] = useState("active")
   const [selectedClient, setSelectedClient] = useState<number|null>(null)
@@ -2393,7 +2393,7 @@ function RateCards({ roles, clients, onClientsChange, filterClient, onClearFilte
           columns={[
             { accessorKey: "rateCardName", header: "Rate card", size: 300, cell: ({ row }: any) => <span style={{ display:"flex", alignItems:"center", fontWeight:500, color:t.fg }}>{row.original.rateCardName || row.original.name}</span> },
             { id: "client", header: "Clients", size: 160, cell: ({ row }: any) => { const linked = row.original.rateCards[0]?.linkedClients || []; return linked.length > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={linked.length} onClick={() => onNavigateToClients(linked)}/></span> : <span style={{ color:t.mutedFg }}>—</span> } },
-            { accessorKey: "projects", header: "Projects", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ color:t.fg }}>{row.original.projects}</span> },
+            { id: "projects", header: "Projects", size: 120, enableResizing: false, cell: ({ row }: any) => { const count = (projects||[]).filter((p: any) => clients[p.clientId]?.name === row.original.name).length; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToProjects?.(row.original.name)}/></span> : <span style={{ color:t.mutedFg }}>—</span> } },
           ]}
           data={tab==="archived"?[]:displayClients}
           onRowClick={(_: any, idx: number) => { setSelectedClient(idx); setSelectedRC(0) }}
@@ -3466,7 +3466,7 @@ export default function App() {
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)} filteredClient={projectsClientFilter} onClientFilterClear={() => setProjectsClientFilter(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} projects={projects} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects") }}/>
-    if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }}/>
+    if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }} projects={projects} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects"); setBreadcrumb(["The Grid", "Projects"]) }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people} onSaveDashboard={cards => { setSavedDashboardCards(cards); setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
