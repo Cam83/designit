@@ -1980,10 +1980,12 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const [filteredOwner, setFilteredOwner] = useState<string|null>(null)
   const isAll = selectedOffices.length === ALL_OFFICES.length
   let filtered = isAll ? projects : projects.filter((p: any) => selectedOffices.includes(p.office))
   if (filteredBusinessUnit) filtered = filtered.filter((p: any) => p.unit === filteredBusinessUnit)
   if (filteredClient) filtered = filtered.filter((p: any) => clients[p.clientId]?.name === filteredClient)
+  if (filteredOwner) filtered = filtered.filter((p: any) => people[p.ownerId]?.name === filteredOwner)
   const display = tab === "archived" ? [] : filtered
 
   const projColumns = useMemo(() => {
@@ -1998,14 +2000,23 @@ function ProjectsDataHub({ visibleItems, projects, onProjectsChange, people, cli
     ) })
     cols.push({ accessorKey: "office", header: "Office", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.office}</span> })
     if (visibleItems.has("Business Units")) cols.push({ accessorKey: "unit", header: "Business Unit", size: 130, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unit || "—"}</span> })
-    cols.push({ id: "owner", header: "Owner", size: 130, enableResizing: false, accessorFn: () => "", cell: ({ row }: any) => <span style={{ display: "flex", alignItems: "center" }}><div style={{ width: 24, height: 24, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>{people[row.original.ownerId]?.name.charAt(0) || "?"}</div></span> })
+    cols.push({ id: "owner", header: "Owner", size: 160, enableResizing: false, accessorFn: () => "", cell: ({ row }: any) => {
+      const owner = people[row.original.ownerId]
+      if (!owner) return <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
+      return (
+        <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 22, height: 22, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg, flexShrink: 0 }}>{owner.name.charAt(0)}</div>
+          <button onClick={() => setFilteredOwner(owner.name)} style={{ fontSize: 13, color: t.fg, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", fontFamily: "inherit" }}>{owner.name}</button>
+        </span>
+      )
+    }})
     return cols
   }, [visibleItems, projects, onProjectsChange, clients, people])
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
-        <SectionHeader count={filtered.length} label="Projects" onAdd={() => {}} filterField={filteredClient ? "Client" : undefined} filterValue={filteredClient} onClearFilter={onClientFilterClear}/>
+        <SectionHeader count={filtered.length} label="Projects" onAdd={() => {}} filterField={filteredOwner ? "Owner" : filteredClient ? "Client" : undefined} filterValue={filteredOwner ?? filteredClient} onClearFilter={filteredOwner ? () => setFilteredOwner(null) : onClientFilterClear}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
