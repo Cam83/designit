@@ -483,24 +483,24 @@ const PERSON_ACTIVITY = {
 }
 
 const CLIENTS_FULL = [
-  { name: "Google", rateCardName: "Base premium rates, 2026", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "", crmUrl: "", rateCards: [
-    { title: "Base ecomm rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
-    { title: "Ecomm rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
+  { name: "Google", rateCardName: "Base premium rates, 2026", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "admin", crmUrl: "https://crm.internal/clients/google", rateCards: [
+    { title: "Base premium rates, 2026", currency: "USD", offices: "all", notes: "Agreed at QBR Jan 2026. Includes 10% uplift on all senior roles.", effectiveFrom: "2026-01-01", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
+    { title: "Ecomm rates, 2026", currency: "USD", offices: "all", notes: "Secondary card for ecomm-only engagements.", effectiveFrom: "2026-02-01", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
   ]},
-  { name: "Verizon", rateCardName: "Base ecomm rates, 2026", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "", crmUrl: "", rateCards: [
-    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
+  { name: "Verizon", rateCardName: "Base ecomm rates, 2026", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "edit", crmUrl: "https://crm.internal/clients/verizon", rateCards: [
+    { title: "Base ecomm rates, 2026", currency: "USD", offices: "all", notes: "Standard retainer rates. Reviewed annually each December.", effectiveFrom: "2026-01-15", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
   ]},
-  { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "", crmUrl: "", rateCards: [
-    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
+  { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "edit", crmUrl: "https://crm.internal/clients/linkedin", rateCards: [
+    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "Premium tier agreed following contract renewal in Q4 2025.", effectiveFrom: "2026-01-01", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
   ]},
-  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
-    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
+  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Jordan Kim", email: "j.kim@nike.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
   { name: "Toyota", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
-    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
+    { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "Patagonia", rateCardName: "Nike Q1 2026", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
-    { title: "Agency specific", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
+  { name: "Patagonia", rateCardName: "Agency specific, 2026", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
+    { title: "Agency specific, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
   ]},
 ]
 
