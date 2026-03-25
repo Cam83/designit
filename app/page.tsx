@@ -1491,8 +1491,8 @@ function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole 
     { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => {
       const count = (people ?? []).filter((p: any) => p.roleId === roles.indexOf(row.original)).length
       return count > 0
-        ? <button onClick={e => { e.stopPropagation(); onNavigateToPeopleByRole?.(row.original.name) }} style={{ fontSize: 13, color: t.fg, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", textDecorationColor: t.mutedFg, textUnderlineOffset: 3 }}>{count}</button>
-        : <span style={{ fontSize: 13, color: t.mutedFg }}>0</span>
+        ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToPeopleByRole?.(row.original.name)}/></span>
+        : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
     }},
     { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unassigned}</span> },
   ], [roles, onRolesChange])
