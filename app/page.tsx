@@ -12,6 +12,7 @@ import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
 function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/components/ui/tag"
+import { SettingsPage } from "@/app/settings-page"
 
 const getGlobalStyles = (theme: any) => `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1012,7 +1013,7 @@ function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () =
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
@@ -1020,6 +1021,8 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
   const [orgOpen, setOrgOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [hoverOpen, setHoverOpen] = useState(false)
+  const [officeKebabOpen, setOfficeKebabOpen] = useState<string | null>(null)
+  const [officeHovered, setOfficeHovered] = useState<string | null>(null)
 
   useEffect(() => { if (!collapsed) { setHoverOpen(false); onHoverChange?.(false) } }, [collapsed])
 
@@ -1047,6 +1050,13 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  useEffect(() => {
+    if (!officeKebabOpen) return
+    function handleClick() { setOfficeKebabOpen(null) }
+    document.addEventListener("click", handleClick)
+    return () => document.removeEventListener("click", handleClick)
+  }, [officeKebabOpen])
 
   function setActive(name: any, bc: any) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
   function toggleLoc(i: any) {
@@ -1079,11 +1089,14 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         top: collapsed ? 8 : 0,
         height: collapsed ? "calc(100vh - 16px)" : "100vh",
         width: 252,
-        zIndex: 100,
+        zIndex: dataHubSettingsOpen || officeKebabOpen ? 200 : 100,
         transition: "left 0.2s ease, top 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease",
-        overflow: "hidden",
+        overflow: dataHubSettingsOpen || officeKebabOpen ? "visible" : "hidden",
         borderRadius: collapsed ? 10 : 0,
-        border: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderTop: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderBottom: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderLeft: collapsed && hoverOpen ? `1px solid ${t.border}` : "none",
+        borderRight: collapsed && hoverOpen ? `1px solid ${t.border}` : `1px solid ${t.sidebarBorder}`,
         boxShadow: collapsed && hoverOpen ? `0 2px 12px rgba(0,0,0,0.25)` : "none",
       }}>
       <style>{getGlobalStyles(t)}</style>
@@ -1097,7 +1110,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               </HoverBtn>
             }>
             <div style={{ ...s.dropdown, width: 200 }}>
-              <HoverBtn onClick={() => { setActive("Settings", null); setOrgOpen(false) }}
+              <HoverBtn onClick={() => { onSettingsOffice?.(null); setActive("Settings", null); setOrgOpen(false) }}
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" }}>
                 <Settings size={14} strokeWidth={1}/> Settings
               </HoverBtn>
@@ -1139,14 +1152,36 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
                 </HoverBtn>
               ) : (
-                <HoverBtn onClick={() => toggleLoc(i)}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
-                  </div>
-                  <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
-                </HoverBtn>
+                <div style={{ position: "relative" }}
+                  onMouseEnter={() => setOfficeHovered(loc.name)}
+                  onMouseLeave={() => { setOfficeHovered(null) }}>
+                  <HoverBtn onClick={() => toggleLoc(i)}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      {(officeHovered === loc.name || officeKebabOpen === loc.name) && (
+                        <HoverBtn
+                          onClick={(e: any) => { e.stopPropagation(); setOfficeKebabOpen(officeKebabOpen === loc.name ? null : loc.name) }}
+                          style={{ ...s.iconBtn, width: 20, height: 20, color: t.mutedFg }}>
+                          <MoreVertical size={13} strokeWidth={1}/>
+                        </HoverBtn>
+                      )}
+                      <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+                    </div>
+                  </HoverBtn>
+                  {officeKebabOpen === loc.name && (
+                    <div style={{ ...s.dropdown, left: "auto", right: 0, top: "100%", minWidth: 150 }}>
+                      <HoverBtn
+                        onClick={() => { onSettingsOffice?.(loc.name); setOfficeKebabOpen(null) }}
+                        style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" as const }}>
+                        <Settings size={13} strokeWidth={1}/> Office settings
+                      </HoverBtn>
+                    </div>
+                  )}
+                </div>
               )}
               {showFullNav && loc.items && (
                 <Collapsible expanded={loc.expanded}>
@@ -1181,7 +1216,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </HoverBtn>
           )}
           {showFullNav && dataHubSettingsOpen && (
-            <div ref={dataHubSettingsRef} style={{ position: "fixed", left: 256, top: 240, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
+            <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, width: 200, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
                 {dataHubItems.map(item => (
@@ -1203,7 +1238,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
                 <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
-                  {item.icon}{item.name}
+                  <span style={{ display: "flex", width: 16, flexShrink: 0, justifyContent: "center" }}>{item.icon}</span>{item.name}
                 </HoverBtn>
               ))}
             </div>
@@ -3269,6 +3304,7 @@ export default function App() {
   const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Clients")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
+  const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -3286,7 +3322,7 @@ export default function App() {
     if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
-    if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people}/>
+    if (activeItem === "Settings") return <SettingsPage key={settingsOfficeTarget ?? "__org__"} t={t} s={s} locations={LOCATIONS_INIT} officeTarget={settingsOfficeTarget} onBack={() => { setActiveItem("Dashboard"); setBreadcrumb(["Global", "Dashboard"]); setSettingsOfficeTarget(null) }}/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
     if (activeItem === "Schedule") return <ScheduleView breadcrumb={breadcrumb}/>
@@ -3298,10 +3334,12 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
-      <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen}/>
-      {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
-      <main style={{ ...s.main, position:"relative" as const, paddingLeft: sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
-        {sidebarCollapsed && (
+      {activeItem !== "Settings" && <>
+        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }}/>
+        {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
+      </>}
+      <main style={{ ...s.main, position:"relative" as const, paddingLeft: activeItem !== "Settings" && sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
+        {activeItem !== "Settings" && sidebarCollapsed && (
           <button onClick={() => setSidebarCollapsed(false)}
             style={{ position:"absolute", top:22, left:8, zIndex:10, display:"flex", alignItems:"center", background:"none", border:"none", cursor:"pointer", color:t.mutedFg, padding:2, borderRadius:4 }}>
             <PanelLeftOpen size={16} strokeWidth={1}/>
