@@ -1220,7 +1220,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data hub</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>The Grid</span>
               </div>
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
             </HoverBtn>
@@ -1250,7 +1250,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <Collapsible expanded={showFullNav && dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
-                <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data hub", item.name])}
+                <HoverBtn key={item.name} onClick={() => setActive(item.name, ["The Grid", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
                   <span style={{ display: "flex", width: 16, flexShrink: 0, justifyContent: "center" }}>{item.icon}</span>{item.name}
                 </HoverBtn>

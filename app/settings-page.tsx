@@ -27,7 +27,7 @@ function Collapsible({ expanded, children }: any) {
 
 export function SettingsPage({ t, s, locations, officeTarget, onBack }: any) {
   const officeSubItems = ["Policies", "Work schedule", "Currencies", "Time tracking", "Time off"]
-  const orgItems = ["Plans & billing", "General", "Notifications", "Integrations", "Security", "Access rights", "Data hub", "Time off", "Statuses"]
+  const orgItems = ["Plans & billing", "General", "Notifications", "Integrations", "Security", "Access rights", "The Grid", "Time off", "Statuses"]
   const offices = locations.filter((l: any) => l.name !== "Global")
 
   const [activeSection, setActiveSection] = useState<string>(officeTarget ? "" : "General")
