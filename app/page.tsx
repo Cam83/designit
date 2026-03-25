@@ -8,6 +8,7 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
 import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
 function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
 import { Checkbox } from "@/components/ui/checkbox"
@@ -1013,7 +1014,7 @@ function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () =
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick, showFloatAgent, onFloatAgentToggle }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
@@ -1131,6 +1132,20 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
       </div>
 
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
+        {/* Float Agent */}
+        {showFloatAgent && (
+          <div style={{ marginBottom: 8 }}>
+            <HoverBtn onClick={() => setActive("Float Agent", ["Float Agent"])} style={{ ...navItemStyle(activeItem === "Float Agent"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+              <Bot size={16} strokeWidth={1}/>{showFullNav && "Float Agent"}
+            </HoverBtn>
+            {showFullNav && hasSavedDashboard && (
+              <HoverBtn onClick={() => setActive("Saved Dashboard", ["Float Agent", "Saved Dashboard"])} style={{ ...navItemStyle(activeItem === "Saved Dashboard"), paddingLeft: 32 }}>
+                <BarChart3 size={14} strokeWidth={1}/>Saved Dashboard
+              </HoverBtn>
+            )}
+          </div>
+        )}
+
         {version === "single" ? (
           officeItems.map(item => (
             <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
@@ -1212,6 +1227,10 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, width: 200, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg, borderBottom: `1px solid ${t.border}`, marginBottom: 4 }}>
+                  <input type="checkbox" checked={showFloatAgent} onChange={e => onFloatAgentToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Float Agent
+                </label>
                 {dataHubItems.map(item => (
                   <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
                     <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
@@ -1238,17 +1257,6 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           </Collapsible>
         </div>
 
-        {/* Float Agent */}
-        <div style={{ marginTop: 16 }}>
-          <HoverBtn onClick={() => setActive("Float Agent", ["Float Agent"])} style={{ ...navItemStyle(activeItem === "Float Agent"), justifyContent: showFullNav ? "flex-start" : "center" }}>
-            <Bot size={16} strokeWidth={1}/>{showFullNav && "Float Agent"}
-          </HoverBtn>
-          {showFullNav && hasSavedDashboard && (
-            <HoverBtn onClick={() => setActive("Saved Dashboard", ["Float Agent", "Saved Dashboard"])} style={{ ...navItemStyle(activeItem === "Saved Dashboard"), paddingLeft: 32 }}>
-              <BarChart3 size={14} strokeWidth={1}/>Saved Dashboard
-            </HoverBtn>
-          )}
-        </div>
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: showFullNav ? "space-between" : "center", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
@@ -3367,6 +3375,7 @@ export default function App() {
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
+  const [showFloatAgent, setShowFloatAgent] = useState(true)
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -3399,7 +3408,7 @@ export default function App() {
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       {activeItem !== "Settings" && <>
-        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
+        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }} showFloatAgent={showFloatAgent} onFloatAgentToggle={setShowFloatAgent}/>
         {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
       </>}
       <main style={{ ...s.main, position:"relative" as const, paddingLeft: activeItem !== "Settings" && sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
