@@ -3372,7 +3372,7 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [navHoverOpen, setNavHoverOpen] = useState(false)
-  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Clients")))
+  const [visibleDataHubItems, setVisibleDataHubItems] = useState(new Set(dataHubItems.map(item => item.name).filter(n => n !== "Brands")))
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
