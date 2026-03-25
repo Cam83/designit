@@ -737,7 +737,7 @@ function SectionHeader({ count, label, onAdd, filterField, filterValue, onClearF
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 400, fontFamily: "Lexend", color: t.fg }}>{count} {label}</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 400, fontFamily: "var(--font-lexend), sans-serif", color: t.fg }}>{count} {label}</h1>
         {filterField && filterValue
           ? <div style={{ display:"flex", alignItems:"center", gap:4 }}>
               <Tag label={filterField}/>

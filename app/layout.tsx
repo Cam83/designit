@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import { Lexend } from 'next/font/google'
+import { Inter, Lexend } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
 
-const lexend = Lexend({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend" });
 
 export const metadata: Metadata = {
   title: 'Float',
@@ -42,7 +43,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={`${lexend.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${lexend.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
