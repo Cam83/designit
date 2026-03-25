@@ -40,7 +40,8 @@ const blackTheme = {
   fgAlpha06: "rgba(237,237,237,0.06)", fgAlpha03: "rgba(237,237,237,0.03)",
   fgAlpha20: "rgba(237,237,237,0.2)", fgAlpha70: "rgba(237,237,237,0.7)",
   borderAlpha25: "rgba(168,168,168,0.25)", scrollAlpha40: "rgba(139,139,139,0.4)",
-  scrollAlpha70: "rgba(139,139,139,0.7)", overlayBg: "rgba(0,0,0,0.7)", shadowDark: "rgba(0,0,0,0.5)", shadowDarker: "rgba(0,0,0,0.6)"
+  scrollAlpha70: "rgba(139,139,139,0.7)", overlayBg: "rgba(0,0,0,0.7)", shadowDark: "rgba(0,0,0,0.5)", shadowDarker: "rgba(0,0,0,0.6)",
+  sectionAddBtnBg: "#6AD2FF", sectionAddBtnFg: "#141618"
 }
 
 const lightTheme = {
@@ -53,7 +54,8 @@ const lightTheme = {
   fgAlpha06: "rgba(11,12,16,0.06)", fgAlpha03: "rgba(11,12,16,0.03)",
   fgAlpha20: "rgba(11,12,16,0.2)", fgAlpha70: "rgba(11,12,16,0.7)",
   borderAlpha25: "rgba(11,12,16,0.15)", scrollAlpha40: "rgba(180,180,180,0.4)",
-  scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)"
+  scrollAlpha70: "rgba(180,180,180,0.7)", overlayBg: "rgba(0,0,0,0.5)", shadowDark: "rgba(0,0,0,0.3)", shadowDarker: "rgba(0,0,0,0.4)",
+  sectionAddBtnBg: "#0B0C10", sectionAddBtnFg: "#ffffff"
 }
 
 const darkTheme = {
@@ -66,7 +68,8 @@ const darkTheme = {
   fgAlpha06: "rgba(240,240,240,0.06)", fgAlpha03: "rgba(240,240,240,0.03)",
   fgAlpha20: "rgba(240,240,240,0.2)", fgAlpha70: "rgba(240,240,240,0.7)",
   borderAlpha25: "rgba(168,168,168,0.2)", scrollAlpha40: "rgba(120,120,120,0.4)",
-  scrollAlpha70: "rgba(120,120,120,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
+  scrollAlpha70: "rgba(120,120,120,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)",
+  sectionAddBtnBg: "#6AD2FF", sectionAddBtnFg: "#141618"
 }
 
 const floatDarkTheme = {
@@ -79,7 +82,8 @@ const floatDarkTheme = {
   fgAlpha06: "rgba(238,240,242,0.06)", fgAlpha03: "rgba(238,240,242,0.03)",
   fgAlpha20: "rgba(238,240,242,0.2)", fgAlpha70: "rgba(238,240,242,0.7)",
   borderAlpha25: "rgba(150,160,175,0.2)", scrollAlpha40: "rgba(130,140,155,0.4)",
-  scrollAlpha70: "rgba(130,140,155,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)"
+  scrollAlpha70: "rgba(130,140,155,0.7)", overlayBg: "rgba(0,0,0,0.75)", shadowDark: "rgba(0,0,0,0.6)", shadowDarker: "rgba(0,0,0,0.75)",
+  sectionAddBtnBg: "#6AD2FF", sectionAddBtnFg: "#141618"
 }
 
 let t = blackTheme
@@ -483,23 +487,23 @@ const PERSON_ACTIVITY = {
 }
 
 const CLIENTS_FULL = [
-  { name: "Google", rateCardName: "Base premium rates, 2026", projects: 12, contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "admin", crmUrl: "https://crm.internal/clients/google", rateCards: [
-    { title: "Base premium rates, 2026", currency: "USD", offices: "all", notes: "Agreed at QBR Jan 2026. Includes 10% uplift on all senior roles.", effectiveFrom: "2026-01-01", linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
-    { title: "Ecomm rates, 2026", currency: "USD", offices: "all", notes: "Secondary card for ecomm-only engagements.", effectiveFrom: "2026-02-01", linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
+  { name: "Google", rateCardName: "Base premium rates, 2026", projects: 12, office: "New York", contact: { name: "Sam Park", email: "sam.park@google.com" }, owner: "Jake Peralta", access: "admin", crmUrl: "https://crm.internal/clients/google", rateCards: [
+    { title: "Base premium rates, 2026", currency: "USD", offices: "all", notes: "Agreed at QBR Jan 2026. Includes 10% uplift on all senior roles.", effectiveFrom: "2026-01-01", linkedClients: ["Nike", "LinkedIn"], linkedRoles: [{roleId:0,billRate:160},{roleId:1,billRate:210},{roleId:2,billRate:185},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:190}] },
+    { title: "Ecomm rates, 2026", currency: "USD", offices: "all", notes: "Secondary card for ecomm-only engagements.", effectiveFrom: "2026-02-01", linkedClients: ["Patagonia"], linkedRoles: [{roleId:0,billRate:135},{roleId:1,billRate:185},{roleId:2,billRate:165},{roleId:3,billRate:190},{roleId:4,billRate:175},{roleId:5,billRate:155}] },
   ]},
-  { name: "Verizon", rateCardName: "Base ecomm rates, 2026", projects: 6, contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "edit", crmUrl: "https://crm.internal/clients/verizon", rateCards: [
-    { title: "Base ecomm rates, 2026", currency: "USD", offices: "all", notes: "Standard retainer rates. Reviewed annually each December.", effectiveFrom: "2026-01-15", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
+  { name: "Verizon", rateCardName: "Base ecomm rates, 2026", projects: 6, office: "New York", contact: { name: "Alex Monroe", email: "alex.monroe@verizon.com" }, owner: "Rosa Diaz", access: "edit", crmUrl: "https://crm.internal/clients/verizon", rateCards: [
+    { title: "Base ecomm rates, 2026", currency: "USD", offices: "all", notes: "Standard retainer rates. Reviewed annually each December.", effectiveFrom: "2026-01-15", linkedClients: ["Toyota"], linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:200},{roleId:2,billRate:175},{roleId:3,billRate:205},{roleId:4,billRate:190},{roleId:5,billRate:170}] },
   ]},
-  { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "edit", crmUrl: "https://crm.internal/clients/linkedin", rateCards: [
-    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "Premium tier agreed following contract renewal in Q4 2025.", effectiveFrom: "2026-01-01", linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
+  { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, office: "London", contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "edit", crmUrl: "https://crm.internal/clients/linkedin", rateCards: [
+    { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "Premium tier agreed following contract renewal in Q4 2025.", effectiveFrom: "2026-01-01", linkedClients: ["Google", "Verizon"], linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
   ]},
-  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Jordan Kim", email: "j.kim@nike.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, office: "Beaverton HQ", contact: { name: "Jordan Kim", email: "j.kim@nike.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
     { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "Toyota", rateCardName: "Standard rates, 2026", projects: 10, contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+  { name: "Toyota", rateCardName: "Standard rates, 2026", projects: 10, office: "Sydney", contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
     { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
-  { name: "Patagonia", rateCardName: "Agency specific, 2026", projects: 6, contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
+  { name: "Patagonia", rateCardName: "Agency specific, 2026", projects: 6, office: "London", contact: { name: "Claire Moss", email: "claire@patagonia.com" }, owner: "", access: "", crmUrl: "", rateCards: [
     { title: "Agency specific, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:155},{roleId:1,billRate:205},{roleId:2,billRate:175},{roleId:3,billRate:215},{roleId:4,billRate:200},{roleId:5,billRate:180}] },
   ]},
 ]
@@ -744,7 +748,7 @@ function SectionHeader({ count, label, onAdd, filterField, filterValue, onClearF
           : <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
         }
       </div>
-      <button onClick={onAdd} style={{ ...s.primaryBtn, background: "rgba(46, 95, 232, 1)" }}><Plus size={16} strokeWidth={1}/></button>
+      <button onClick={onAdd} style={{ ...s.primaryBtn, background: t.sectionAddBtnBg, color: t.sectionAddBtnFg }}><Plus size={16} strokeWidth={1}/></button>
     </div>
   )
 }
@@ -1537,25 +1541,28 @@ function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole 
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const isAll = selectedOffices.length === ALL_OFFICES.length
+  const filteredPeople = isAll ? (people ?? []) : (people ?? []).filter((p: any) => selectedOffices.includes(p.office))
   const display = tab === "archived" ? [] : roles
   const rolesColumns = useMemo(() => [
     { accessorKey: "name", header: "Role", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, name: v} : r))} style={{ background: "transparent" }}/></span> },
     { accessorKey: "costRate", header: "Cost rate", size: 140, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEditRate value={row.original.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, costRate: v} : r))}/></span> },
     { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => {
-      const count = (people ?? []).filter((p: any) => p.roleId === roles.indexOf(row.original)).length
+      const count = filteredPeople.filter((p: any) => p.roleId === roles.indexOf(row.original)).length
       return count > 0
         ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToPeopleByRole?.(row.original.name)}/></span>
         : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
     }},
     { accessorKey: "unassigned", header: "Unassigned", size: 120, enableResizing: false, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.unassigned}</span> },
-  ], [roles, onRolesChange])
+  ], [roles, onRolesChange, filteredPeople])
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
       {showModal && <AddRoleModal onAdd={(r: any) => onRolesChange([...roles, r])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader count={roles.length} label="Roles" onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
-          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
@@ -1927,7 +1934,6 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
     <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
-      {showModal && <AddProjectModal people={people} clients={clients} onAdd={(p: any) => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
           <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
@@ -1959,6 +1965,7 @@ function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
           </HoverRow>
         ))}
       </div>
+      {showModal && <AddProjectModal people={people} clients={clients} onAdd={(p: any) => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
     </div>
     {notesIdx !== null && projects[notesIdx] && (
       <NotesPanel
@@ -2302,14 +2309,17 @@ function RateCardSheet({ client, clientIdx, rcIdx, roles, onUpdateClients, onClo
 function Clients({ roles, people, clients, onClientsChange, projects, onNavigateToRateCards, filterClients, onClearClientsFilter, onNavigateToProjects }: any) {
   const setClients = onClientsChange
   const [tab, setTab] = useState("active")
-  const displayClients = filterClients ? clients.filter((c: any) => filterClients.includes(c.name)) : clients
+  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const isAll = selectedOffices.length === ALL_OFFICES.length
+  const officeFiltered = isAll ? clients : clients.filter((c: any) => selectedOffices.includes(c.office))
+  const displayClients = filterClients ? officeFiltered.filter((c: any) => filterClients.includes(c.name)) : officeFiltered
 
   return (
     <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
         <SectionHeader count={displayClients.length} label="Clients" onAdd={() => {}} filterField={filterClients ? "Client" : undefined} filterValue={filterClients} onClearFilter={onClearClientsFilter}/>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
-          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
@@ -2341,19 +2351,6 @@ function Clients({ roles, people, clients, onClientsChange, projects, onNavigate
                 {(people || []).map((p: any) => <option key={p.name} value={p.name}>{p.name}</option>)}
               </select>
             )},
-            { id: "access", header: "Access", size: 160, cell: ({ row }: any) => (
-              <select
-                value={row.original.access}
-                onClick={e => e.stopPropagation()}
-                onChange={e => { e.stopPropagation(); setClients((cl: any) => cl.map((x: any) => x === row.original ? {...x, access: e.target.value} : x)) }}
-                style={{ fontSize:13, color: row.original.access ? t.fg : t.mutedFg, background:"transparent", border:"none", outline:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
-              >
-                <option value="">Select access</option>
-                <option value="view">View only</option>
-                <option value="edit">Can edit</option>
-                <option value="admin">Admin</option>
-              </select>
-            )},
             { id: "crm", header: "CRM", size: 180, cell: ({ row }: any) => {
               const url = row.original.crmUrl
               if (url) return <a href={url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color:t.secondaryFg, textDecoration:"underline", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"100%", display:"block" }}>{url}</a>
@@ -2374,16 +2371,19 @@ function RateCards({ roles, clients, onClientsChange, filterClient, onClearFilte
   const [tab, setTab] = useState("active")
   const [selectedClient, setSelectedClient] = useState<number|null>(null)
   const [selectedRC, setSelectedRC] = useState<number|null>(null)
+  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
   function updateClient(idx: any, updated: any) { onClientsChange((prev: any) => prev.map((c: any,i: any) => i===idx ? updated : c)) }
   const client = selectedClient !== null ? clients[selectedClient] : null
-  const displayClients = filterClient ? clients.filter((c: any) => (c.rateCards[0]?.linkedClients || []).includes(filterClient)) : clients
+  const isAll = selectedOffices.length === ALL_OFFICES.length
+  const officeFiltered = isAll ? clients : clients.filter((c: any) => selectedOffices.includes(c.office))
+  const displayClients = filterClient ? officeFiltered.filter((c: any) => (c.rateCards[0]?.linkedClients || []).includes(filterClient)) : officeFiltered
 
   return (
     <div style={{ display:"flex", flex:1, overflow:"hidden", background:t.bg }}>
       <div style={{ display:"flex", flex:1, flexDirection:"column", overflow:"hidden" }}>
         <SectionHeader count={displayClients.length} label="Rate cards" onAdd={() => {}} filterField={filterClient ? "Client" : undefined} filterValue={filterClient} onClearFilter={onClearFilter}/>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px 12px" }}>
-          <HoverBtn style={s.pillBtn(false)}><Circle size={10} strokeWidth={1}/>All offices<ChevronDown size={11} strokeWidth={1}/></HoverBtn>
+          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:4, padding:"12px 24px 8px" }}>
