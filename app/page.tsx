@@ -1577,8 +1577,11 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
       {groupSettingsOpen && <TeamSettingsModal type="groups" mode={groupMode} onSave={(m: any) => setGroupMode(m)} onClose={() => setGroupSettingsOpen(false)}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader
-          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : filtered.length}
-          label={`${view === "departments" ? "Departments" : view === "delivery-teams" ? "Delivery teams" : view === "groups" ? "Groups" : view === "employees" ? "Employees" : "Contractors"}${filteredBusinessUnit ? ` - ${filteredBusinessUnit}` : ""}`}
+          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : roleFiltered.length}
+          label={view === "departments" ? "Departments" : view === "delivery-teams" ? "Delivery teams" : view === "groups" ? "Groups" : view === "employees" ? "Employees" : "Contractors"}
+          filterField={filteredRole ? "Role" : undefined}
+          filterValue={filteredRole}
+          onClearFilter={onRoleFilterClear}
           onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1586,11 +1589,6 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
             {filteredBusinessUnit && (
               <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
                 ✕ {filteredBusinessUnit}
-              </HoverBtn>
-            )}
-            {filteredRole && (
-              <HoverBtn onClick={onRoleFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
-                ✕ {filteredRole}
               </HoverBtn>
             )}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
