@@ -1154,11 +1154,6 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           ))
         ) : (
           <>
-            <div style={{ marginBottom: 8 }}>
-              <HoverBtn onClick={() => setActive("Float Agent", ["Float Agent"])} style={navItemStyle(activeItem === "Float Agent")}>
-                <Bot size={16} strokeWidth={1}/>{showFullNav && "Float Agent"}
-              </HoverBtn>
-            </div>
             {locs.map((loc, i) => (
             <div key={loc.name} style={{ marginTop: i > 0 ? 2 : 0 }}>
               {!showFullNav ? (
