@@ -8,6 +8,7 @@ import {
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
 import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
 function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
 import { Checkbox } from "@/components/ui/checkbox"
@@ -1013,7 +1014,7 @@ function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () =
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick, showFloatAgent, onFloatAgentToggle }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
@@ -1131,6 +1132,20 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
       </div>
 
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
+        {/* Float Agent */}
+        {showFloatAgent && (
+          <div style={{ marginBottom: 8 }}>
+            <HoverBtn onClick={() => setActive("Float Agent", ["Float Agent"])} style={{ ...navItemStyle(activeItem === "Float Agent"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+              <Bot size={16} strokeWidth={1}/>{showFullNav && "Float Agent"}
+            </HoverBtn>
+            {showFullNav && hasSavedDashboard && (
+              <HoverBtn onClick={() => setActive("Saved Dashboard", ["Float Agent", "Saved Dashboard"])} style={{ ...navItemStyle(activeItem === "Saved Dashboard"), paddingLeft: 32 }}>
+                <BarChart3 size={14} strokeWidth={1}/>Saved Dashboard
+              </HoverBtn>
+            )}
+          </div>
+        )}
+
         {version === "single" ? (
           officeItems.map(item => (
             <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
@@ -1219,6 +1234,10 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             <div ref={dataHubSettingsRef} style={{ position: "absolute", left: 242, top: 240, width: 200, background: t.bg, border: `1px solid ${t.border}`, borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 1000 }}>
               <div style={{ padding: "8px" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: t.mutedFg, padding: "8px 12px" }}>Visible items</div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg, borderBottom: `1px solid ${t.border}`, marginBottom: 4 }}>
+                  <input type="checkbox" checked={showFloatAgent} onChange={e => onFloatAgentToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Float Agent
+                </label>
                 {dataHubItems.map(item => (
                   <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
                     <input type="checkbox" checked={visibleDataHubItems.has(item.name)} onChange={(e) => {
@@ -1244,6 +1263,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
             </div>
           </Collapsible>
         </div>
+
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: showFullNav ? "space-between" : "center", borderTop: `1px solid ${t.sidebarBorder}`, padding: "10px 12px" }}>
@@ -2619,6 +2639,8 @@ function LogTeamView({ breadcrumb }: any) {
   )
 }
 
+
+// ── Float Agent ──
 const REV_COST_DATA = [
   { week: "1 Mar", revenue: 1200, costs: 900 },
   { week: "9 Mar", revenue: 65000, costs: 59000 },
@@ -2683,7 +2705,7 @@ function RevenueVsCostsCard() {
           ))}
         </div>
       </div>
-      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
         Revenue exceeded costs by <span style={{ color: "#3B82F6", fontWeight: 500 }}>USD 11,799</span> this month — margin of ~7.8%. Peak week was 9 Mar.
       </div>
     </div>
@@ -2747,7 +2769,7 @@ function ClientRevenueCard({ projects, clientsFull }: { projects: any[], clients
         </div>
       </div>
       {top && (
-        <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+        <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
           <span style={{ color: t.fg, fontWeight: 500 }}>{top.name}</span> was the highest revenue client this month at {topPct}% of total —{" "}
           <span style={{ color: momUp ? "#22C55E" : "#F97316", fontWeight: 500 }}>{momUp ? "up" : "down"} {seed}%</span> from last month.
         </div>
@@ -2807,7 +2829,7 @@ function TimeOffCard() {
           ))}
         </div>
       </div>
-      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
         <span style={{ color: t.fg, fontWeight: 500 }}>{top.label}</span> accounts for the most time off this month at{" "}
         <span style={{ color: t.fg, fontWeight: 500 }}>{top.days} days</span> — up{" "}
         <span style={{ color: "#22C55E", fontWeight: 500 }}>{top.pct}%</span> from last month.
@@ -2817,11 +2839,11 @@ function TimeOffCard() {
 }
 
 const CAPACITY_DATA = [
-  { week: "1 Dec",  gross: 5500, delivery: 2000, scheduled: 2900 },
-  { week: "8 Dec",  gross: 5500, delivery: 3300, scheduled: 3100 },
-  { week: "15 Dec", gross: 4800, delivery: 3200, scheduled: 3000 },
-  { week: "22 Dec", gross: 4200, delivery: 3000, scheduled: 2800 },
-  { week: "29 Dec", gross: 4200, delivery: 1800, scheduled: 2400 },
+  { week: "1 Mar",  gross: 5500, delivery: 2000, scheduled: 2900 },
+  { week: "8 Mar",  gross: 5500, delivery: 3300, scheduled: 3100 },
+  { week: "15 Mar", gross: 4800, delivery: 3200, scheduled: 3000 },
+  { week: "22 Mar", gross: 4200, delivery: 3000, scheduled: 2800 },
+  { week: "29 Mar", gross: 4200, delivery: 1800, scheduled: 2400 },
 ]
 
 const CAPACITY_LEGEND = [
@@ -2885,7 +2907,7 @@ function DeliveryCapacityCard() {
           </div>
         </div>
       </div>
-      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+      <div style={{ padding: "12px 18px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
         Delivery capacity is at <span style={{ color: t.fg, fontWeight: 500 }}>10,000h</span> this month — scheduled hours are{" "}
         <span style={{ color: "#22C55E", fontWeight: 500 }}>75% utilised</span>, with 3,500h already completed.
       </div>
@@ -2962,9 +2984,8 @@ function ProjectsAttentionCard({ projects, clientsFull, onRowClick }: { projects
 type AgentMessage = { role: "user" | "assistant"; text: string; card?: "revenue-vs-costs" | "client-revenue" | "time-off" | "delivery-capacity" | "projects-attention" | "project-detail"; projectData?: any }
 
 function ProjectDetailCard({ project, clientName, people, config }: { project: any, clientName: string, people: any[], config: any }) {
-  const startDate = new Date(project.startDate)
   const logData = Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(startDate); d.setDate(d.getDate() + i * 7)
+    const d = new Date(2026, 2, 1 + i * 7) // March 2026 weeks
     const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
     const sched = Math.round(40 + i * 18 + (i === 2 ? 8 : 0))
     const logged = Math.round(sched * (1.12 + i * 0.04))
@@ -3070,11 +3091,16 @@ function ProjectDetailCard({ project, clientName, people, config }: { project: a
           </div>
         </div>
       ))}
-      <div style={{ padding: "12px 20px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.mutedFg }}>
+      <div style={{ padding: "12px 20px", borderTop: `1px solid ${t.border}`, fontSize: 13, color: t.fgAlpha70 }}>
         {config.reason}
       </div>
     </div>
   )
+}
+
+function detectDashboard(q: string): boolean {
+  const l = q.toLowerCase()
+  return (l.includes("dashboard") || l.includes("save") || l.includes("build me")) && (l.includes("graph") || l.includes("chart") || l.includes("dashboard") || l.includes("these"))
 }
 
 function detectCard(q: string): "revenue-vs-costs" | "client-revenue" | "time-off" | "delivery-capacity" | "projects-attention" | null {
@@ -3088,7 +3114,43 @@ function detectCard(q: string): "revenue-vs-costs" | "client-revenue" | "time-of
   return null
 }
 
-function FloatAgentView({ projects, clientsFull, people }: { projects: any[], clientsFull: any[], people: any[] }) {
+function SavedDashboardView({ cards, projects, clientsFull, people }: { cards: string[], projects: any[], clientsFull: any[], people: any[] }) {
+  const cardMap: Record<string, React.ReactNode> = {
+    "revenue-vs-costs": <RevenueVsCostsCard/>,
+    "client-revenue": <ClientRevenueCard projects={projects} clientsFull={clientsFull}/>,
+    "time-off": <TimeOffCard/>,
+    "delivery-capacity": <DeliveryCapacityCard/>,
+    "projects-attention": <ProjectsAttentionCard projects={projects} clientsFull={clientsFull} onRowClick={() => {}}/>,
+  }
+  const labelMap: Record<string, string> = {
+    "revenue-vs-costs": "Revenue vs. Costs",
+    "client-revenue": "Client Revenue",
+    "time-off": "Time Off",
+    "delivery-capacity": "Delivery Capacity",
+    "projects-attention": "Projects Requiring Attention",
+  }
+  return (
+    <div style={{ flex: 1, overflowY: "auto", background: t.bg, padding: "28px 32px 40px" }}>
+      <style>{`@keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.card-fade{animation:cardFadeIn 0.7s cubic-bezier(0.16,1,0.3,1) both}`}</style>
+      <div style={{ width: "100%" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, fontFamily: "Inter, sans-serif", margin: "0 0 6px" }}>Saved Dashboard</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif", margin: "0 0 28px" }}>{cards.length} graph{cards.length !== 1 ? "s" : ""} · March 2026</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
+          {cards.map((card, i) => {
+            const fullWidth = card === "revenue-vs-costs" || card === "delivery-capacity" || card === "projects-attention"
+            return (
+              <div key={card} className="card-fade" style={{ animationDelay: `${i * 0.08}s`, width: fullWidth ? 760 : "calc(50% - 10px)", minWidth: fullWidth ? 0 : 340, flexShrink: 1 }}>
+                {cardMap[card]}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FloatAgentView({ projects, clientsFull, people, onSaveDashboard }: { projects: any[], clientsFull: any[], people: any[], onSaveDashboard?: (cards: string[]) => void }) {
   const [phase, setPhase] = useState<"idle" | "loading" | "chat">("idle")
   const [messages, setMessages] = useState<AgentMessage[]>([])
   const [input, setInput] = useState("")
@@ -3110,6 +3172,18 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
     setMessages(prev => [...prev, { role: "user", text: q }])
     setPhase("loading")
     setTimeout(() => {
+      if (detectDashboard(q)) {
+        setMessages(prev => {
+          const cards = [...new Set(prev.filter(m => m.card && m.card !== "project-detail").map(m => m.card!))]
+          if (cards.length > 0) onSaveDashboard?.(cards)
+          const text = cards.length > 0
+            ? `Done — I've saved a dashboard with ${cards.length} graph${cards.length > 1 ? "s" : ""}. You'll find it under Float Agent in the nav.`
+            : "No graphs loaded yet. Ask me about revenue, clients, time off, capacity, or projects first."
+          return [...prev, { role: "assistant", text }]
+        })
+        setPhase("chat")
+        return
+      }
       const card = detectCard(q)
       const text = card === "revenue-vs-costs"
         ? "Here's your revenue vs. costs breakdown for March:"
@@ -3118,7 +3192,7 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
         : card === "time-off"
         ? "Here's a breakdown of time off taken this month:"
         : card === "delivery-capacity"
-        ? "Here's your delivery capacity breakdown for December:"
+        ? "Here's your delivery capacity breakdown for March:"
         : card === "projects-attention"
         ? "Here are the projects that need your attention right now:"
         : "I don't have a visual for that yet — try asking about revenue vs. costs, client revenue, time off, delivery capacity, or projects requiring attention."
@@ -3133,7 +3207,7 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
 
   const inputBox = (compact: boolean) => (
     <div style={{ position: "relative", width: "100%", maxWidth: compact ? "100%" : 654, border: `1px solid ${t.border}`, borderRadius: compact ? 12 : 16, background: t.card }}>
-      <style>{`.fai::placeholder{color:${t.mutedFg}}`}</style>
+      <style>{`.fai::placeholder{color:${t.mutedFg}}@keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.card-fade{animation:cardFadeIn 0.7s cubic-bezier(0.16,1,0.3,1) both}`}</style>
       {compact ? (
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px" }}>
           <input
@@ -3156,7 +3230,7 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() } }}
             placeholder="Ask me anything"
-            style={{ width: "100%", minHeight: 128, padding: "20px 52px 44px 20px", border: "none", borderRadius: 16, background: "transparent", color: t.fg, fontSize: 16, fontFamily: "Inter, sans-serif", resize: "none", outline: "none", boxSizing: "border-box" }}
+            style={{ width: "100%", minHeight: 112, padding: "20px 52px 52px 20px", border: "none", borderRadius: 16, background: "transparent", color: t.fg, fontSize: 16, fontFamily: "Inter, sans-serif", resize: "none", outline: "none", boxSizing: "border-box" }}
             rows={3}
           />
           <HoverBtn onClick={submit} style={{ position: "absolute", right: 20, bottom: 20, width: 29, height: 29, borderRadius: 8, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -3211,13 +3285,13 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
                     </div>
                     <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "Inter, sans-serif" }}>Float Agent</span>
                   </div>
-                  <p style={{ fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif", margin: 0 }}>{msg.text}</p>
-                  {msg.card === "revenue-vs-costs" && <RevenueVsCostsCard/>}
-                  {msg.card === "client-revenue" && <ClientRevenueCard projects={projects} clientsFull={clientsFull}/>}
-                  {msg.card === "time-off" && <TimeOffCard/>}
-                  {msg.card === "delivery-capacity" && <DeliveryCapacityCard/>}
-                  {msg.card === "projects-attention" && <ProjectsAttentionCard projects={projects} clientsFull={clientsFull} onRowClick={onProjectClick}/>}
-                  {msg.card === "project-detail" && msg.projectData && <ProjectDetailCard project={msg.projectData} clientName={msg.projectData.clientName ?? clientsFull[msg.projectData.clientId]?.name ?? "No client"} people={people} config={msg.projectData}/>}
+                  <p className="card-fade" style={{ fontSize: 14, color: t.fg, fontFamily: "Inter, sans-serif", margin: 0 }}>{msg.text}</p>
+                  {msg.card === "revenue-vs-costs" && <div className="card-fade"><RevenueVsCostsCard/></div>}
+                  {msg.card === "client-revenue" && <div className="card-fade"><ClientRevenueCard projects={projects} clientsFull={clientsFull}/></div>}
+                  {msg.card === "time-off" && <div className="card-fade"><TimeOffCard/></div>}
+                  {msg.card === "delivery-capacity" && <div className="card-fade"><DeliveryCapacityCard/></div>}
+                  {msg.card === "projects-attention" && <div className="card-fade"><ProjectsAttentionCard projects={projects} clientsFull={clientsFull} onRowClick={onProjectClick}/></div>}
+                  {msg.card === "project-detail" && msg.projectData && <div className="card-fade"><ProjectDetailCard project={msg.projectData} clientName={msg.projectData.clientName ?? clientsFull[msg.projectData.clientId]?.name ?? "No client"} people={people} config={msg.projectData}/></div>}
                 </div>
               )}
             </div>
@@ -3243,6 +3317,8 @@ function FloatAgentView({ projects, clientsFull, people }: { projects: any[], cl
     </div>
   )
 }
+
+
 
 function PlaceholderView({ title, breadcrumb }: any) {
   return (
@@ -3305,6 +3381,8 @@ export default function App() {
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
+  const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
+  const [showFloatAgent, setShowFloatAgent] = useState(true)
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -3322,6 +3400,8 @@ export default function App() {
     if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
+    if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people} onSaveDashboard={cards => { setSavedDashboardCards(cards); setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
+    if (activeItem === "Saved Dashboard") return <SavedDashboardView cards={savedDashboardCards} projects={projects} clientsFull={clientsFull} people={people}/>
     if (activeItem === "Settings") return <SettingsPage key={settingsOfficeTarget ?? "__org__"} t={t} s={s} locations={LOCATIONS_INIT} officeTarget={settingsOfficeTarget} onBack={() => { setActiveItem("Dashboard"); setBreadcrumb(["Global", "Dashboard"]); setSettingsOfficeTarget(null) }}/>
     if (activeItem === "Dashboard") return <DashboardView breadcrumb={breadcrumb}/>
     if (activeItem === "Report") return <ReportView breadcrumb={breadcrumb}/>
@@ -3335,7 +3415,7 @@ export default function App() {
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"Inter, -apple-system, sans-serif" }}>
       {activeItem !== "Settings" && <>
-        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }}/>
+        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }} showFloatAgent={showFloatAgent} onFloatAgentToggle={setShowFloatAgent}/>
         {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
       </>}
       <main style={{ ...s.main, position:"relative" as const, paddingLeft: activeItem !== "Settings" && sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
