@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
@@ -1273,6 +1273,14 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <HoverBtn onClick={() => setActive("Talent graph", ["Talent graph"])}
             style={{ ...navItemStyle(activeItem === "Talent graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
             <Share2 size={16} strokeWidth={1}/>{showFullNav && "Talent graph"}
+          </HoverBtn>
+        </div>
+
+        {/* Project Graph — primary nav item */}
+        <div style={{ marginTop: 4 }}>
+          <HoverBtn onClick={() => setActive("Project graph", ["Project graph"])}
+            style={{ ...navItemStyle(activeItem === "Project graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+            <GitFork size={16} strokeWidth={1}/>{showFullNav && "Project graph"}
           </HoverBtn>
         </div>
 
@@ -3829,6 +3837,346 @@ function TalentGraphView({ people, roles, departments }: any) {
   )
 }
 
+// ── Project Graph ──
+const STAGE_COLOR: Record<string, string> = { active: "#10b981", planning: "#f59e0b", "on-hold": "#ef4444", completed: "#6b7280" }
+const HEALTH_COLOR: Record<string, string> = { "on-track": "#10b981", "at-risk": "#f59e0b", "off-track": "#ef4444" }
+
+type PGNode = { id: number, name: string, initials: string, stage: string, health: string, budget: number, unit: string, clientId: number, ownerId: number, office: string, code: string, x: number, y: number, fx?: number | null, fy?: number | null }
+type PGLink = { source: number | PGNode, target: number | PGNode, strength: number }
+
+function ProjectGraphView({ projects, roles, people, clientsFull }: any) {
+  const nodeDefs = useMemo(() => projects.map((p: any, i: number) => {
+    const parts = p.name.trim().split(/\s+/)
+    const initials = ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? parts[0]?.[1] ?? "")).toUpperCase()
+    return { id: i, name: p.name, initials, stage: p.stage, health: p.health, budget: p.budget, unit: p.unit, clientId: p.clientId, ownerId: p.ownerId, office: p.office, code: p.code }
+  }), [projects])
+
+  const edgeDefs = useMemo(() => {
+    const buRoles = new Map<string, Set<number>>()
+    BUSINESS_UNITS_FULL.forEach(bu => {
+      const s = new Set<number>(); bu.departments.forEach((d: any) => d.linkedRoles.forEach((lr: any) => s.add(lr.roleId))); buRoles.set(bu.name, s)
+    })
+    const result: { source: number, target: number, strength: number }[] = []
+    for (let i = 0; i < projects.length; i++) {
+      for (let j = i + 1; j < projects.length; j++) {
+        const a = projects[i], b = projects[j]; let score = 0
+        if (a.unit === b.unit) score += 4
+        if (a.clientId === b.clientId) score += 3
+        if (a.ownerId === b.ownerId) score += 3
+        const aR = buRoles.get(a.unit) ?? new Set(), bR = buRoles.get(b.unit) ?? new Set()
+        if ([...aR].filter(r => bR.has(r)).length >= 4) score += 2
+        if (score >= 3) result.push({ source: i, target: j, strength: Math.min(score, 10) })
+      }
+    }
+    return result
+  }, [projects])
+
+  const d3NodesRef = useRef<PGNode[]>([])
+  const d3LinksRef = useRef<PGLink[]>([])
+  const simRef = useRef<any>(null)
+  const frameRef = useRef(0)
+  const [, setRenderTick] = useState(0)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ w: 680, h: 480 })
+  const dragRef = useRef<{ nodeId: number, startX: number, startY: number, moved: boolean } | null>(null)
+  const [zoom, setZoom] = useState(1)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [agentInput, setAgentInput] = useState("")
+  const [agentFilter, setAgentFilter] = useState<{ response: string, matchIds: Set<number> } | null>(null)
+  const startLoopRef = useRef<() => void>(() => {})
+
+  useEffect(() => {
+    const el = containerRef.current; if (!el) return
+    const ro = new ResizeObserver(([e]) => setDims({ w: e.contentRect.width, h: e.contentRect.height }))
+    ro.observe(el); return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const { w, h } = dims
+    const r0 = Math.min(w, h) * 0.32
+    const d3Nodes: PGNode[] = nodeDefs.map((n: any, i: number) => ({
+      ...n, x: w / 2 + Math.cos((i / nodeDefs.length) * Math.PI * 2) * r0, y: h / 2 + Math.sin((i / nodeDefs.length) * Math.PI * 2) * r0,
+    }))
+    const d3Links: PGLink[] = edgeDefs.map((e: any) => ({ ...e }))
+    const sim = forceSimulation<PGNode>(d3Nodes)
+      .force("link", forceLink<PGNode, PGLink>(d3Links).id(d => d.id).distance(100).strength((d: any) => d.strength * 0.05))
+      .force("charge", forceManyBody().strength(-320))
+      .force("center", forceCenter(w / 2, h / 2).strength(0.8))
+      .force("collide", forceCollide(36))
+      .stop()
+    sim.tick(500)
+    d3NodesRef.current = d3Nodes; d3LinksRef.current = d3Links; simRef.current = sim
+    cancelAnimationFrame(frameRef.current); frameRef.current = 0; setRenderTick(c => c + 1)
+    function startLoop() {
+      if (frameRef.current) return
+      function loop() {
+        setRenderTick(c => c + 1)
+        if (sim.alpha() > sim.alphaMin()) { frameRef.current = requestAnimationFrame(loop) }
+        else { sim.stop(); frameRef.current = 0; setRenderTick(c => c + 1) }
+      }
+      frameRef.current = requestAnimationFrame(loop)
+    }
+    startLoopRef.current = startLoop
+    return () => { sim.stop(); cancelAnimationFrame(frameRef.current); frameRef.current = 0 }
+  }, [nodeDefs, edgeDefs, dims])
+
+  function onNodeMouseDown(e: React.MouseEvent, nodeId: number) { e.stopPropagation(); dragRef.current = { nodeId, startX: e.clientX, startY: e.clientY, moved: false } }
+  function onSvgMouseMove(e: React.MouseEvent<SVGSVGElement>) {
+    if (!dragRef.current) return
+    const { nodeId } = dragRef.current
+    const dx = e.clientX - dragRef.current.startX, dy = e.clientY - dragRef.current.startY
+    if (!dragRef.current.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      dragRef.current.moved = true
+      const n = d3NodesRef.current[nodeId]; if (n) { n.fx = n.x; n.fy = n.y }
+      simRef.current?.alphaTarget(0.3).restart(); startLoopRef.current()
+    }
+    if (!dragRef.current.moved) return
+    const rect = svgRef.current!.getBoundingClientRect()
+    const n = d3NodesRef.current[nodeId]; if (n) { n.fx = (e.clientX - rect.left) / zoom; n.fy = (e.clientY - rect.top) / zoom }
+    setRenderTick(c => c + 1)
+  }
+  function onNodeMouseUp(nodeId: number) {
+    if (!dragRef.current) return
+    if (!dragRef.current.moved) setSelected(s => s === nodeId ? null : nodeId)
+    else { const n = d3NodesRef.current[nodeId]; if (n) { n.fx = null; n.fy = null }; simRef.current?.alphaTarget(0) }
+    dragRef.current = null
+  }
+  function onSvgMouseUp() {
+    if (!dragRef.current) return
+    const n = d3NodesRef.current[dragRef.current.nodeId]; if (n) { n.fx = null; n.fy = null }
+    simRef.current?.alphaTarget(0); dragRef.current = null
+  }
+
+  function runQuery(raw: string) {
+    const q = raw.toLowerCase().trim()
+    const match = (pred: (p: any) => boolean) => new Set<number>(projects.map((_: any, i: number) => i).filter((i: number) => pred(projects[i])))
+    // Stage
+    if (q.includes("active") && !q.includes("at")) { const ids = match(p => p.stage === "active"); setAgentFilter({ matchIds: ids, response: `${ids.size} active projects` }); return }
+    if (q.includes("planning")) { const ids = match(p => p.stage === "planning"); setAgentFilter({ matchIds: ids, response: `${ids.size} projects in planning` }); return }
+    if (q.includes("on hold") || q.includes("on-hold")) { const ids = match(p => p.stage === "on-hold"); setAgentFilter({ matchIds: ids, response: `${ids.size} projects on hold` }); return }
+    // Health
+    if (q.includes("at risk") || q.includes("at-risk")) { const ids = match(p => p.health === "at-risk"); setAgentFilter({ matchIds: ids, response: `${ids.size} at-risk projects` }); return }
+    if (q.includes("off track") || q.includes("off-track")) { const ids = match(p => p.health === "off-track"); setAgentFilter({ matchIds: ids, response: `${ids.size} off-track projects` }); return }
+    if (q.includes("on track")) { const ids = match(p => p.health === "on-track"); setAgentFilter({ matchIds: ids, response: `${ids.size} on-track projects` }); return }
+    // Business units
+    for (const bu of BUSINESS_UNITS_FULL) {
+      if (q.includes(bu.name.toLowerCase())) { const ids = match(p => p.unit === bu.name); setAgentFilter({ matchIds: ids, response: `${ids.size} ${bu.name} projects` }); return }
+    }
+    // Clients
+    for (const [ci, client] of (clientsFull as any[]).entries()) {
+      if (q.includes(client.name.toLowerCase())) { const ids = match(p => p.clientId === ci); setAgentFilter({ matchIds: ids, response: `${ids.size} projects for ${client.name}` }); return }
+    }
+    // Owner/PM
+    for (const [pi, person] of (people as any[]).entries()) {
+      const first = person.name.split(" ")[0].toLowerCase()
+      if (q.includes(first)) { const ids = match(p => p.ownerId === pi); if (ids.size > 0) { setAgentFilter({ matchIds: ids, response: `${ids.size} projects owned by ${person.name.split(" ")[0]}` }); return } }
+    }
+    // Roles
+    for (const [ri, role] of (roles as any[]).entries()) {
+      if (q.includes(role.name.toLowerCase())) {
+        const buSet = new Set(BUSINESS_UNITS_FULL.filter(bu => bu.departments.some((d: any) => d.linkedRoles.some((lr: any) => lr.roleId === ri))).map(bu => bu.name))
+        const ids = match(p => buSet.has(p.unit)); setAgentFilter({ matchIds: ids, response: `${ids.size} projects using ${role.name}s` }); return
+      }
+    }
+    // Office
+    for (const kw of ["new york", "london", "sydney", "beaverton", "hilversum", "shanghai", "global"]) {
+      if (q.includes(kw)) { const ids = match(p => p.office.toLowerCase().includes(kw)); setAgentFilter({ matchIds: ids, response: `${ids.size} projects in ${kw}` }); return }
+    }
+    // Budget threshold: "over 200k" / "above 300k"
+    const bm = q.match(/(\d+)k/)
+    if (bm) {
+      const threshold = parseInt(bm[1]) * 1000
+      const over = q.includes("over") || q.includes("above") || q.includes("more")
+      const ids = match(p => over ? p.budget >= threshold : p.budget <= threshold)
+      setAgentFilter({ matchIds: ids, response: `${ids.size} projects ${over ? "over" : "under"} $${bm[1]}k` }); return
+    }
+    setAgentFilter({ matchIds: new Set(projects.map((_: any, i: number) => i)), response: `Showing all ${projects.length} projects` })
+  }
+
+  const hasSelection = selected !== null
+  const agentActive = agentFilter !== null
+  const activeCount = projects.filter((p: any) => p.stage === "active").length
+  const atRiskCount = projects.filter((p: any) => p.health === "at-risk").length
+  const totalBudget = projects.reduce((s: number, p: any) => s + (p.budget || 0), 0)
+  const fmt = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : `$${(n / 1000).toFixed(0)}K`
+
+  const neighbourIds = useMemo(() => {
+    if (selected === null) return new Set<number>()
+    return new Set(edgeDefs.filter(e => e.source === selected || e.target === selected).map(e => e.source === selected ? e.target : e.source))
+  }, [selected, edgeDefs])
+
+  const selProject = selected !== null ? (() => {
+    const p = projects[selected]
+    const bu = BUSINESS_UNITS_FULL.find(b => b.name === p.unit)
+    const buProject = bu?.projectsList?.find((bp: any) => bp.title === p.name)
+    const buRoleIds = new Set<number>(); bu?.departments.forEach((d: any) => d.linkedRoles.forEach((lr: any) => buRoleIds.add(lr.roleId)))
+    return {
+      name: p.name, code: p.code, stage: p.stage, health: p.health, unit: p.unit,
+      client: clientsFull[p.clientId]?.name ?? "—", owner: people[p.ownerId]?.name ?? "—",
+      budget: p.budget, office: p.office, teamSize: buProject?.team ?? "—",
+      roles: [...buRoleIds].slice(0, 4).map((id: number) => roles[id]?.name).filter(Boolean),
+      connections: neighbourIds.size,
+    }
+  })() : null
+
+  const PTag = ({ label }: { label: string }) => (
+    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: t.fgAlpha10, color: t.fg, fontFamily: "var(--font-sans), sans-serif", whiteSpace: "nowrap" as const }}>{label}</span>
+  )
+
+  return (
+    <div style={{ flex: 1, display: "flex", overflow: "hidden", background: t.bg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, overflow: "hidden", padding: "24px 0 24px 28px" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, margin: "0 0 4px", fontFamily: "var(--font-sans), sans-serif" }}>Project Graph</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, margin: "0 0 16px", fontFamily: "var(--font-sans), sans-serif" }}>Click nodes for details, drag to rearrange. Edges = shared team, client, or PM.</p>
+        <div ref={containerRef} style={{ flex: 1, position: "relative" as const, overflow: "hidden", minHeight: 0 }}>
+          {/* Toolbar */}
+          <div style={{ position: "absolute" as const, top: 12, left: 12, right: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 10 }}>
+            {/* Stage legend */}
+            {(["active","planning","on-hold"] as const).map(s => (
+              <button key={s} onClick={() => { const ids = new Set<number>(projects.map((_: any, i: number) => i).filter((i: number) => projects[i].stage === s)); setAgentFilter({ matchIds: ids, response: `${ids.size} ${s} projects` }) }}
+                style={{ height: 28, padding: "0 10px", borderRadius: 100, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-sans), sans-serif" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: STAGE_COLOR[s], display: "inline-block", flexShrink: 0 }} />
+                {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
+              </button>
+            ))}
+            <div style={{ flex: 1 }} />
+            {[{ label: "+", action: () => setZoom(z => Math.min(2, +(z + 0.15).toFixed(2))) },
+              { label: "−", action: () => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2))) },
+              { label: <RefreshCw size={13} strokeWidth={1.5} />, action: () => setZoom(1) }].map(({ label, action }, i) => (
+              <button key={i} onClick={action} style={{ width: 32, height: 32, borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontFamily: "var(--font-sans), sans-serif" }}>{label}</button>
+            ))}
+          </div>
+          {/* SVG */}
+          <svg ref={svgRef} style={{ position: "absolute" as const, inset: 0, width: "100%", height: "100%", display: "block" }}
+            onMouseMove={onSvgMouseMove} onMouseUp={onSvgMouseUp} onMouseLeave={onSvgMouseUp}>
+            <g transform={`translate(${dims.w / 2 * (1 - zoom)},${dims.h / 2 * (1 - zoom)}) scale(${zoom})`}>
+              <rect x={-9999} y={-9999} width={99999} height={99999} fill="transparent" onClick={() => setSelected(null)} />
+              {d3LinksRef.current.map((e, i) => {
+                const a = e.source as PGNode, b = e.target as PGNode
+                if (a.x == null || b.x == null) return null
+                const agentVis = !agentActive || (agentFilter!.matchIds.has(a.id) && agentFilter!.matchIds.has(b.id))
+                const isConn = hasSelection && (a.id === selected || b.id === selected)
+                const op = !agentVis ? 0.03 : hasSelection ? (isConn ? 0.85 : 0.06) : (edgeDefs[i]?.strength >= 6 ? 0.55 : 0.25)
+                return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                  stroke={isConn ? t.fg : t.border} strokeDasharray={isConn ? undefined : "4 3"}
+                  strokeWidth={isConn ? 2 : 1} opacity={op} style={{ pointerEvents: "none" as const }} />
+              })}
+              {d3NodesRef.current.map(n => {
+                if (n.x == null) return null
+                const isSel = selected === n.id
+                const isNeighbour = neighbourIds.has(n.id)
+                const agentMatch = !agentActive || agentFilter!.matchIds.has(n.id)
+                const dimmed = !agentMatch || (agentMatch && hasSelection && !isSel && !isNeighbour)
+                const stageCol = STAGE_COLOR[n.stage] ?? t.fg
+                return (
+                  <g key={n.id} style={{ cursor: "pointer" }} opacity={dimmed ? 0.12 : 1}
+                    onMouseDown={ev => { ev.stopPropagation(); onNodeMouseDown(ev, n.id) }}
+                    onMouseUp={ev => { ev.stopPropagation(); onNodeMouseUp(n.id) }}
+                    onClick={ev => ev.stopPropagation()}>
+                    {/* Stage ring */}
+                    <circle cx={n.x} cy={n.y} r={25} fill="none" stroke={stageCol} strokeWidth={isSel ? 2.5 : 1.5} opacity={isSel ? 1 : 0.7} />
+                    <circle cx={n.x} cy={n.y} r={21} fill={t.fg} />
+                    <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="central"
+                      fill={t.bg} fontSize={10} fontWeight={600}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.initials}
+                    </text>
+                    <text x={n.x} y={n.y + 34} textAnchor="middle" fill={t.fg} fontSize={10}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.name.split(" ")[0]}
+                    </text>
+                  </g>
+                )
+              })}
+            </g>
+          </svg>
+          {/* Agent input */}
+          <div style={{ position: "absolute" as const, bottom: 16, left: 16, right: 16, zIndex: 10 }}>
+            {agentFilter && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: t.fg, color: t.bg, fontSize: 12, fontFamily: "var(--font-sans), sans-serif", fontWeight: 500 }}>
+                  <Layers size={11} strokeWidth={2} />{agentFilter.response}
+                  <button onClick={() => { setAgentFilter(null); setAgentInput("") }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: t.bg, opacity: 0.6, padding: 0, display: "flex", alignItems: "center", marginLeft: 2 }}>
+                    <X size={12} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            )}
+            <form onSubmit={ev => { ev.preventDefault(); runQuery(agentInput); setAgentInput("") }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, padding: "8px 12px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }}>
+              <input value={agentInput} onChange={e => setAgentInput(e.target.value)}
+                placeholder="Ask about projects… e.g. 'show at-risk' or 'Jordan projects' or 'over 300k'"
+                style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }} />
+              <button type="submit" disabled={!agentInput.trim()}
+                style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: agentInput.trim() ? t.fg : t.fgAlpha10, color: agentInput.trim() ? t.bg : t.mutedFg, cursor: agentInput.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                <ArrowUp size={13} strokeWidth={2} />
+              </button>
+            </form>
+          </div>
+          {/* Footer */}
+          <div style={{ position: "absolute" as const, bottom: 88, right: 16, display: "flex", gap: 12 }}>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Layers size={12} strokeWidth={1.5} /> {agentActive ? `${agentFilter!.matchIds.size}/` : ""}{projects.length} Projects
+            </span>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Share2 size={12} strokeWidth={1.5} /> {edgeDefs.length} Links
+            </span>
+          </div>
+        </div>
+      </div>
+      {/* Right sidebar */}
+      <div style={{ width: 288, flexShrink: 0, overflowY: "auto" as const, padding: "24px 24px 24px 16px", display: "flex", flexDirection: "column" as const, gap: 12 }}>
+        {/* Graph Stats */}
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 14px", fontFamily: "var(--font-sans), sans-serif" }}>Graph Stats</h3>
+          {([["Total Projects", projects.length], ["Active", activeCount], ["At Risk", atRiskCount], ["Total Budget", fmt(totalBudget)]] as [string, any][]).map(([label, val]) => (
+            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: `1px solid ${t.fgAlpha06}` }}>
+              <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+            </div>
+          ))}
+        </div>
+        {/* Selected Project */}
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 12px", fontFamily: "var(--font-sans), sans-serif" }}>Selected Project</h3>
+          {selProject ? (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif", lineHeight: 1.3 }}>{selProject.name}</div>
+                <div style={{ fontSize: 12, color: t.mutedFg, marginTop: 3, fontFamily: "var(--font-sans), sans-serif" }}>{selProject.code} · {selProject.unit}</div>
+                <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" as const }}>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: STAGE_COLOR[selProject.stage] + "22", color: STAGE_COLOR[selProject.stage], fontWeight: 600, fontFamily: "var(--font-sans), sans-serif", border: `1px solid ${STAGE_COLOR[selProject.stage]}44` }}>
+                    {selProject.stage.charAt(0).toUpperCase() + selProject.stage.slice(1).replace("-", " ")}
+                  </span>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: HEALTH_COLOR[selProject.health] + "22", color: HEALTH_COLOR[selProject.health], fontWeight: 600, fontFamily: "var(--font-sans), sans-serif", border: `1px solid ${HEALTH_COLOR[selProject.health]}44` }}>
+                    {selProject.health.replace("-", " ")}
+                  </span>
+                </div>
+              </div>
+              {([["Client", selProject.client], ["Owner / PM", selProject.owner], ["Budget", fmt(selProject.budget)], ["Team size", selProject.teamSize], ["Office", selProject.office], ["Connections", selProject.connections]] as [string, any][]).map(([label, val]) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: `1px solid ${t.fgAlpha06}` }}>
+                  <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+                </div>
+              ))}
+              {selProject.roles.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: t.mutedFg, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 6, fontFamily: "var(--font-sans), sans-serif" }}>Roles</div>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>{selProject.roles.map((r: string) => <PTag key={r} label={r} />)}</div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p style={{ fontSize: 12, color: t.mutedFg, margin: 0, fontFamily: "var(--font-sans), sans-serif" }}>Click a node to view details</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function VersionsToggle({ version, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
@@ -3896,6 +4244,7 @@ export default function App() {
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
     if (activeItem === "Talent graph") return <TalentGraphView people={people} roles={roles} departments={departments}/>
+    if (activeItem === "Project graph") return <ProjectGraphView projects={projects} roles={roles} people={people} clientsFull={clientsFull}/>
     if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people} onSaveDashboard={cards => { setSavedDashboardCards(cards); setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
     if (activeItem === "Saved Dashboard") return <SavedDashboardView cards={savedDashboardCards} projects={projects} clientsFull={clientsFull} people={people}/>
     if (activeItem === "Settings") return <SettingsPage key={settingsOfficeTarget ?? "__org__"} t={t} s={s} locations={LOCATIONS_INIT} officeTarget={settingsOfficeTarget} onBack={() => { setActiveItem("Dashboard"); setBreadcrumb(["Global", "Dashboard"]); setSettingsOfficeTarget(null) }}/>
