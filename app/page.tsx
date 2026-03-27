@@ -3610,7 +3610,7 @@ function TalentGraphView({ people, roles, departments }: any) {
       <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, overflow: "hidden", padding: "24px 0 24px 28px" }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, margin: "0 0 4px", fontFamily: "var(--font-sans), sans-serif" }}>Talent Visualization</h2>
         <p style={{ fontSize: 13, color: t.mutedFg, margin: "0 0 16px", fontFamily: "var(--font-sans), sans-serif" }}>Click nodes for details, drag to rearrange.</p>
-        <div ref={containerRef} style={{ flex: 1, border: `1px solid ${t.border}`, borderRadius: 10, position: "relative" as const, overflow: "hidden", background: t.card, minHeight: 0 }}>
+        <div ref={containerRef} style={{ flex: 1, position: "relative" as const, overflow: "hidden", minHeight: 0 }}>
           {/* Toolbar */}
           <div style={{ position: "absolute" as const, top: 12, left: 12, right: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 10 }}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search: 'fashion, ux' or 'nike'"
