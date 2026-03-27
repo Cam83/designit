@@ -1269,7 +1269,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         )}
 
         {/* Talent Graph — primary nav item */}
-        <div style={{ marginTop: 4 }}>
+        <div style={{ marginTop: 24 }}>
           <HoverBtn onClick={() => setActive("Talent graph", ["Talent graph"])}
             style={{ ...navItemStyle(activeItem === "Talent graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
             <Share2 size={16} strokeWidth={1}/>{showFullNav && "Talent graph"}
@@ -3580,6 +3580,83 @@ function TalentGraphView({ people, roles, departments }: any) {
     dragRef.current = null
   }
 
+  const [agentInput, setAgentInput] = useState("")
+  const [agentFilter, setAgentFilter] = useState<{ response: string, matchIds: Set<number> } | null>(null)
+  const agentInputRef = useRef<HTMLInputElement>(null)
+
+  function runQuery(raw: string) {
+    const q = raw.toLowerCase().trim()
+    if (!q) return
+
+    // Helper: build match set from predicate
+    const match = (pred: (p: any, i: number) => boolean) =>
+      new Set<number>(people.map((_: any, i: number) => i).filter((i: number) => pred(people[i], i)))
+
+    // 1. Client names
+    for (const client of TALENT_CLIENTS) {
+      if (q.includes(client.toLowerCase())) {
+        const ids = match((_: any, i: number) => [0,1,2].map(o => TALENT_CLIENTS[(i + o * 7) % 6]).includes(client))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people who have worked with ${client}` })
+        return
+      }
+    }
+    // 2. Roles
+    for (const [ri, role] of roles.entries()) {
+      if (q.includes(role.name.toLowerCase())) {
+        const ids = match((p: any) => p.roleId === ri)
+        setAgentFilter({ matchIds: ids, response: `${ids.size} ${role.name}${ids.size !== 1 ? "s" : ""}` })
+        return
+      }
+    }
+    // 3. Departments
+    for (const [di, dept] of departments.entries()) {
+      if (q.includes(dept.name.toLowerCase())) {
+        const ids = match((p: any) => p.departmentId === di)
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people in ${dept.name}` })
+        return
+      }
+    }
+    // 4. Delivery teams
+    const teamNames = ["acquisition", "retention", "core", "creative studio"]
+    for (const [ti, teamName] of teamNames.entries()) {
+      if (q.includes(teamName)) {
+        const ids = match((p: any) => (p.deliveryTeamIds ?? []).includes(ti))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people on the ${teamName.charAt(0).toUpperCase() + teamName.slice(1)} team` })
+        return
+      }
+    }
+    // 5. Groups
+    const groupNames = ["leadership", "ai working group", "hiring committee"]
+    for (const [gi, groupName] of groupNames.entries()) {
+      if (q.includes(groupName)) {
+        const ids = match((p: any) => (p.groupIds ?? []).includes(gi))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people in ${groupName.charAt(0).toUpperCase() + groupName.slice(1)}` })
+        return
+      }
+    }
+    // 6. Offices
+    const officeKeywords = ["new york", "london", "sydney", "beaverton", "hilversum", "shanghai", "melbourne"]
+    for (const kw of officeKeywords) {
+      if (q.includes(kw)) {
+        const ids = match((p: any) => p.office.toLowerCase().includes(kw))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people based in ${kw.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}` })
+        return
+      }
+    }
+    // 7. Person name — show their network
+    for (const [pi, person] of people.entries()) {
+      const first = person.name.split(" ")[0].toLowerCase()
+      if (q.includes(first) || q.includes(person.name.toLowerCase())) {
+        const nbrs = new Set(edgeDefs.filter((e: any) => e.source === pi || e.target === pi).map((e: any) => e.source === pi ? e.target : e.source))
+        const ids = new Set([pi, ...nbrs])
+        setAgentFilter({ matchIds: ids, response: `${person.name.split(" ")[0]} and ${nbrs.size} connections` })
+        return
+      }
+    }
+    // No match
+    setAgentFilter({ matchIds: new Set(people.map((_: any, i: number) => i)), response: `Showing all ${people.length} people` })
+  }
+
   const searchLower = search.toLowerCase()
   const strongBonds = edgeDefs.filter(e => e.strength >= 6).length
   const avgStr = edgeDefs.length > 0 ? (edgeDefs.reduce((s, e) => s + e.strength, 0) / edgeDefs.length).toFixed(1) : "0"
@@ -3604,6 +3681,7 @@ function TalentGraphView({ people, roles, departments }: any) {
   )
 
   const hasSelection = selected !== null
+  const agentActive = agentFilter !== null
 
   return (
     <div style={{ flex: 1, display: "flex", overflow: "hidden", background: t.bg }}>
@@ -3640,8 +3718,9 @@ function TalentGraphView({ people, roles, departments }: any) {
                 const b = e.target as TGNode
                 if (a.x == null || b.x == null) return null
                 const srcId = a.id, tgtId = b.id
+                const agentVisible = !agentActive || (agentFilter!.matchIds.has(srcId) && agentFilter!.matchIds.has(tgtId))
                 const isConnected = hasSelection && (srcId === selected || tgtId === selected)
-                const edgeOpacity = hasSelection ? (isConnected ? 0.85 : 0.06) : (edgeDefs[i]?.strength >= 6 ? 0.55 : 0.25)
+                const edgeOpacity = !agentVisible ? 0.03 : hasSelection ? (isConnected ? 0.85 : 0.06) : (edgeDefs[i]?.strength >= 6 ? 0.55 : 0.25)
                 return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
                   stroke={isConnected ? t.fg : t.border}
                   strokeDasharray={isConnected ? undefined : "4 3"}
@@ -3655,7 +3734,8 @@ function TalentGraphView({ people, roles, departments }: any) {
                 const searchMatch = !searchLower || n.name.toLowerCase().includes(searchLower) || n.role.toLowerCase().includes(searchLower)
                 const isSel = selected === n.id
                 const isNeighbour = neighbourIds.has(n.id)
-                const dimmed = (hasSelection && !isSel && !isNeighbour) || (!!searchLower && !searchMatch)
+                const agentMatch = !agentActive || agentFilter!.matchIds.has(n.id)
+                const dimmed = !agentMatch || (agentMatch && hasSelection && !isSel && !isNeighbour) || (!agentActive && !!searchLower && !searchMatch)
                 return (
                   <g key={n.id} style={{ cursor: "pointer" }} opacity={dimmed ? 0.15 : 1}
                     onMouseDown={ev => { ev.stopPropagation(); onNodeMouseDown(ev, n.id) }}
@@ -3677,10 +3757,35 @@ function TalentGraphView({ people, roles, departments }: any) {
               })}
             </g>
           </svg>
-          {/* Footer */}
-          <div style={{ position: "absolute" as const, bottom: 12, right: 16, display: "flex", gap: 12 }}>
+          {/* Agent input */}
+          <div style={{ position: "absolute" as const, bottom: 16, left: 16, right: 16, zIndex: 10 }}>
+            {agentFilter && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: t.fg, color: t.bg, fontSize: 12, fontFamily: "var(--font-sans), sans-serif", fontWeight: 500 }}>
+                  <Share2 size={11} strokeWidth={2} />
+                  {agentFilter.response}
+                  <button onClick={() => { setAgentFilter(null); setAgentInput("") }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: t.bg, opacity: 0.6, padding: 0, display: "flex", alignItems: "center", marginLeft: 2 }}>
+                    <X size={12} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            )}
+            <form onSubmit={ev => { ev.preventDefault(); runQuery(agentInput); setAgentInput("") }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, padding: "8px 12px", boxShadow: `0 2px 12px rgba(0,0,0,0.12)` }}>
+              <input ref={agentInputRef} value={agentInput} onChange={e => setAgentInput(e.target.value)}
+                placeholder="Ask about connections… e.g. 'who worked on Nike' or 'show leadership'"
+                style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }} />
+              <button type="submit" disabled={!agentInput.trim()}
+                style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: agentInput.trim() ? t.fg : t.fgAlpha10, color: agentInput.trim() ? t.bg : t.mutedFg, cursor: agentInput.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                <ArrowUp size={13} strokeWidth={2} />
+              </button>
+            </form>
+          </div>
+          {/* Footer stats */}
+          <div style={{ position: "absolute" as const, bottom: 88, right: 16, display: "flex", gap: 12 }}>
             <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
-              <Users size={12} strokeWidth={1.5} /> {people.length} People
+              <Users size={12} strokeWidth={1.5} /> {agentActive ? `${agentFilter!.matchIds.size}/` : ""}{people.length} People
             </span>
             <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
               <Share2 size={12} strokeWidth={1.5} /> {edgeDefs.length} Connections
