@@ -4215,13 +4215,16 @@ const ROLE_SKILLS_EXTENDED: Record<string, { category: string, skills: string[] 
 type SGNode = { id: string, type: "category" | "skill" | "person", label: string, sub: string, r: number, x: number, y: number, fx?: number | null, fy?: number | null }
 type SGLink = { source: string | SGNode, target: string | SGNode }
 
-function SkillsGraphView({ people, roles }: any) {
-  const [view, setView] = useState<"categories" | "skills" | "people">("categories")
+function SkillsGraphView({ people: allPeople, roles }: any) {
+  const [view, setView] = useState<"categories" | "skills" | "people" | "person-skills">("categories")
   const [selCat, setSelCat] = useState<string | null>(null)
   const [selSkill, setSelSkill] = useState<string | null>(null)
+  const [selPerson, setSelPerson] = useState<any | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
   const [hoveredAt, setHoveredAt] = useState(0)
   const [transitionStart, setTransitionStart] = useState(0)
+  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const people = selectedOffices.length === ALL_OFFICES.length ? allPeople : allPeople.filter((p: any) => selectedOffices.includes(p.office))
   const containerRef = useRef<HTMLDivElement>(null)
   const [dims, setDims] = useState({ w: 800, h: 600 })
   const nodesRef = useRef<SGNode[]>([])
@@ -4284,6 +4287,17 @@ function SkillsGraphView({ people, roles }: any) {
       })
       nodes = [centerNode, ...personNodes]
       links = personNodes.map(n => ({ source: selSkill, target: n.id }))
+    } else if (view === "person-skills" && selPerson) {
+      const roleData = getRoleData(selPerson)
+      const initials = selPerson.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+      const centerNode: SGNode = { id: selPerson.name, type: "person", label: initials, sub: roles[selPerson.roleId]?.name ?? "", r: 36, x: w/2, y: h/2 }
+      const skillNodes: SGNode[] = roleData.skills.map((skill: string, i: number) => {
+        const angle = (i / roleData.skills.length) * Math.PI * 2
+        const r0 = Math.min(w, h) * 0.28
+        return { id: `ps-${skill}`, type: "skill" as const, label: skill, sub: "", r: 20, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+      nodes = [centerNode, ...skillNodes]
+      links = skillNodes.map(s => ({ source: selPerson.name, target: s.id }))
     }
 
     nodesRef.current = nodes
@@ -4323,7 +4337,7 @@ function SkillsGraphView({ people, roles }: any) {
       sim.stop()
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [view, selCat, selSkill, dims.w, dims.h])
+  }, [view, selCat, selSkill, selPerson?.name, dims.w, dims.h])
 
   const nodes = nodesRef.current
   const links = linksRef.current
@@ -4387,7 +4401,7 @@ function SkillsGraphView({ people, roles }: any) {
       return (
         <>
           <div style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 4, fontFamily: "var(--font-sans), sans-serif" }}>{selSkill}</div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.mutedFg, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 12, fontFamily: "var(--font-sans), sans-serif" }}>{matching.length} People</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.mutedFg, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 12, fontFamily: "var(--font-sans), sans-serif" }}>{matching.length} People — click to see their skills</div>
           {matching.map((p: any) => {
             const initials = p.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
             return (
@@ -4403,6 +4417,25 @@ function SkillsGraphView({ people, roles }: any) {
         </>
       )
     }
+    if (view === "person-skills" && selPerson) {
+      const roleData = getRoleData(selPerson)
+      const initials = selPerson.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+      return (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 16, borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600, color: t.fg, flexShrink: 0, fontFamily: "var(--font-sans), sans-serif" }}>{initials}</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{selPerson.name}</div>
+              <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{roles[selPerson.roleId]?.name ?? ""}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.mutedFg, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10, fontFamily: "var(--font-sans), sans-serif" }}>{roleData.skills.length} Skills</div>
+          {roleData.skills.map((skill: string) => (
+            <div key={skill} style={{ fontSize: 12, color: t.fg, padding: "7px 0", borderBottom: `1px solid ${t.border}`, fontFamily: "var(--font-sans), sans-serif" }}>{skill}</div>
+          ))}
+        </>
+      )
+    }
     return null
   }
 
@@ -4413,17 +4446,20 @@ function SkillsGraphView({ people, roles }: any) {
         <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10, display: "flex", alignItems: "center", gap: 8 }}>
           {view !== "categories" && (
             <button onClick={() => {
-              if (view === "people") { setView("skills"); setSelSkill(null) }
+              if (view === "person-skills") { setView("people"); setSelPerson(null) }
+              else if (view === "people") { setView("skills"); setSelSkill(null) }
               else { setView("categories"); setSelCat(null) }
             }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 6, border: `1px solid ${t.border}`, background: t.card, color: t.fg, cursor: "pointer", fontSize: 13, fontFamily: "var(--font-sans), sans-serif" }}>
               <ChevronLeft size={14} strokeWidth={1.5}/>
-              {view === "people" ? selCat : "All categories"}
+              {view === "person-skills" ? selSkill : view === "people" ? selCat : "All categories"}
             </button>
           )}
+          <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
           <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>
             {view === "categories" && "Click a category to explore skills"}
             {view === "skills" && `${SKILLS_CATEGORIES.find(c=>c.name===selCat)?.skills.length} skills — click a node`}
             {view === "people" && `${people.filter((p: any) => getRoleData(p).skills.includes(selSkill??"")).length} people with this skill`}
+            {view === "person-skills" && selPerson && `${getRoleData(selPerson).skills.length} skills`}
           </span>
         </div>
 
@@ -4461,10 +4497,13 @@ function SkillsGraphView({ people, roles }: any) {
           {/* Nodes */}
           {nodes.map((n, ni) => {
             const isHov = hovered === n.id
-            const isCenterNode = (view === "skills" && n.id === selCat) || (view === "people" && n.id === selSkill)
+            const isCenterNode = (view === "skills" && n.id === selCat) || (view === "people" && n.id === selSkill) || (view === "person-skills" && n.id === selPerson?.name)
             const fillOpacity = isCenterNode ? 0.18 : isHov ? 0.14 : 0.06
             const strokeOpacity = isCenterNode ? 1 : isHov ? 0.9 : 0.5
-            const cursor = n.type === "category" ? "pointer" : n.type === "skill" && n.sub !== "—" ? "pointer" : "default"
+            const cursor = n.type === "category" ? "pointer"
+              : n.type === "skill" && view !== "person-skills" && n.sub !== "—" ? "pointer"
+              : n.type === "person" && view === "people" ? "pointer"
+              : "default"
             // Staggered fade-in on transition
             const elapsed = (Date.now() - transitionStart) / 1000
             const delay = isCenterNode ? 0 : ni * 0.04
@@ -4477,7 +4516,11 @@ function SkillsGraphView({ people, roles }: any) {
                 onMouseLeave={() => { setHovered(null) }}
                 onClick={() => {
                   if (n.type === "category") { setSelCat(n.id); setView("skills") }
-                  else if (n.type === "skill" && n.sub !== "—") { setSelSkill(n.id); setView("people") }
+                  else if (n.type === "skill" && view !== "person-skills" && n.sub !== "—") { setSelSkill(n.id); setView("people") }
+                  else if (n.type === "person" && view === "people") {
+                    const person = people.find((p: any) => p.name === n.id)
+                    if (person) { setSelPerson(person); setView("person-skills") }
+                  }
                 }}>
               <g style={view === "categories" ? {
                 animation: `sg-float-${ni % 7} ${4.5 + ni * 0.7}s ease-in-out infinite`,
