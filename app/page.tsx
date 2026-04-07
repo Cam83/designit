@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
@@ -670,6 +670,7 @@ const officeItemsMyTime = [
 const dataHubItems = [
   { name: "People", icon: <Users size={16} strokeWidth={1}/> },
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
+  { name: "Offices", icon: <MapPin size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
   { name: "Clients", icon: <Building2 size={16} strokeWidth={1}/> },
   { name: "Rate cards", icon: <DollarSign size={16} strokeWidth={1}/> },
@@ -1618,14 +1619,23 @@ function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole 
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear, filteredRole, onRoleFilterClear }: any) {
+function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear, filteredRole, onRoleFilterClear, filteredOffice, onOfficeFilterClear, initialView, onInitialViewConsumed }: any) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState<number|null>(null)
   const [selectedDept, setSelectedDept] = useState<number|null>(null)
   const [selectedDeliveryTeam, setSelectedDeliveryTeam] = useState<number|null>(null)
   const [selectedGroup, setSelectedGroup] = useState<number|null>(null)
-  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const [selectedOffices, setSelectedOffices] = useState(() => filteredOffice ? [filteredOffice] : [...ALL_OFFICES])
+
+  useEffect(() => {
+    if (filteredOffice) setSelectedOffices([filteredOffice])
+    else setSelectedOffices([...ALL_OFFICES])
+  }, [filteredOffice])
+
+  useEffect(() => {
+    if (initialView) { setView(initialView); onInitialViewConsumed?.() }
+  }, [initialView])
   const [showModal, setShowModal] = useState(false)
   const [deliveryTeams, setDeliveryTeams] = useState(INITIAL_DELIVERY_TEAMS)
   const [groups, setGroups] = useState(INITIAL_GROUPS)
@@ -1676,7 +1686,12 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
           onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            <OfficeFilter selected={selectedOffices} onChange={(val: any) => { setSelectedOffices(val); if (onOfficeFilterClear) onOfficeFilterClear() }}/>
+            {filteredOffice && (
+              <HoverBtn onClick={onOfficeFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredOffice}
+              </HoverBtn>
+            )}
             {filteredBusinessUnit && (
               <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
                 ✕ {filteredBusinessUnit}
@@ -4899,6 +4914,124 @@ function SkillsGraphView({ people: allEmployees, contractors: allContractors, ro
   )
 }
 
+function OfficesPage({ people, departments, groups, roles, onNavigateToPeople, onNavigateToDepartments, onNavigateToGroups }: any) {
+  const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
+  const offices = ALL_OFFICES.filter(o => o !== "Global")
+
+  const officePeopleCount = (o: string) => people.filter((p: any) => p.office === o).length
+  const officeDeptCount = (o: string) => departments.filter((_: any, i: number) => people.some((p: any) => p.office === o && p.departmentId === i)).length
+  const officeGroupCount = (o: string) => groups.filter((_: any, i: number) => people.some((p: any) => p.office === o && (p.groupIds || []).includes(i))).length
+
+  const selectedOffice = selectedIdx !== null ? offices[selectedIdx] : null
+  const officeRoleCounts = selectedOffice
+    ? Object.entries(
+        people.filter((p: any) => p.office === selectedOffice).reduce((acc: any, p: any) => {
+          const r = roles[p.roleId]?.name ?? "Unknown"; acc[r] = (acc[r] || 0) + 1; return acc
+        }, {} as Record<string, number>)
+      ).sort((a: any, b: any) => b[1] - a[1])
+    : []
+
+  return (
+    <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
+      <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
+        <SectionHeader count={offices.length} label="Offices"/>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+          <Tabs active="active" onChange={() => {}} tabs={[{ label: `${offices.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+        </div>
+        <DataTable
+          columns={[
+            { accessorKey: "name", header: "Office", size: 240,
+              cell: ({ row }: any) => (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 6, background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <MapPin size={13} strokeWidth={1.5} color={t.mutedFg}/>
+                  </div>
+                  <span style={{ fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{row.original}</span>
+                </div>
+              )
+            },
+            { id: "people", header: "People", size: 120,
+              accessorFn: (row: any) => officePeopleCount(row),
+              cell: ({ row }: any) => {
+                const count = officePeopleCount(row.original)
+                return count > 0
+                  ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToPeople(row.original)}/></span>
+                  : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
+              }
+            },
+            { id: "departments", header: "Departments", size: 140,
+              accessorFn: (row: any) => officeDeptCount(row),
+              cell: ({ row }: any) => {
+                const count = officeDeptCount(row.original)
+                return count > 0
+                  ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToDepartments(row.original)}/></span>
+                  : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
+              }
+            },
+            { id: "groups", header: "Groups", size: 120, enableResizing: false,
+              accessorFn: (row: any) => officeGroupCount(row),
+              cell: ({ row }: any) => {
+                const count = officeGroupCount(row.original)
+                return count > 0
+                  ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToGroups(row.original)}/></span>
+                  : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span>
+              }
+            },
+          ]}
+          data={offices}
+          onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+          isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+        />
+      </div>
+
+      {/* Office detail panel */}
+      <div style={{ width: selectedOffice ? 280 : 0, overflow: "hidden", borderLeft: selectedOffice ? `1px solid ${t.border}` : "none", flexShrink: 0, transition: "width 0.22s ease", background: t.bg }}>
+        {selectedOffice && (
+          <div style={{ width: 280, padding: 20, overflowY: "auto" as const, height: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <MapPin size={16} strokeWidth={1.5} color={t.mutedFg}/>
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{selectedOffice}</div>
+                  <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{officePeopleCount(selectedOffice)} people</div>
+                </div>
+              </div>
+              <button onClick={() => setSelectedIdx(null)} style={{ background: "none", border: "none", cursor: "pointer", color: t.mutedFg, fontSize: 16, lineHeight: 1 }}>×</button>
+            </div>
+
+            {[
+              { label: "People", value: officePeopleCount(selectedOffice), onClick: () => onNavigateToPeople(selectedOffice) },
+              { label: "Departments", value: officeDeptCount(selectedOffice), onClick: () => onNavigateToDepartments(selectedOffice) },
+              { label: "Groups", value: officeGroupCount(selectedOffice), onClick: () => onNavigateToGroups(selectedOffice) },
+            ].map(({ label, value, onClick }) => (
+              <div key={label} onClick={onClick} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${t.border}`, cursor: "pointer" }}>
+                <span style={{ fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+                <Tag label={value} onClick={onClick}/>
+              </div>
+            ))}
+
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.mutedFg, letterSpacing: "0.08em", textTransform: "uppercase" as const, margin: "20px 0 10px", fontFamily: "var(--font-sans), sans-serif" }}>Roles</div>
+            {officeRoleCounts.map(([role, count]: any) => (
+              <div key={role} style={{ marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                  <span style={{ fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{role}</span>
+                  <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{count}</span>
+                </div>
+                <div style={{ height: 3, borderRadius: 2, background: t.border }}>
+                  <div style={{ height: 3, borderRadius: 2, background: t.fg, opacity: 0.4, width: `${Math.round((count / officePeopleCount(selectedOffice)) * 100)}%` }}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function VersionsToggle({ version, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
@@ -4945,6 +5078,8 @@ export default function App() {
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [filteredRoleForPeople, setFilteredRoleForPeople] = useState<string|null>(null)
+  const [filteredOfficeForPeople, setFilteredOfficeForPeople] = useState<string|null>(null)
+  const [initialPeopleView, setInitialPeopleView] = useState<string|null>(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
   const [showFloatAgent, setShowFloatAgent] = useState(false)
@@ -4957,8 +5092,9 @@ export default function App() {
   s = getStyles(t)
 
   function renderMain() {
+    if (activeItem === "Offices") return <OfficesPage people={people} departments={departments} groups={groups} roles={roles} onNavigateToPeople={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView(null); setActiveItem("People"); setBreadcrumb(["The Grid", "People"]) }} onNavigateToDepartments={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView("departments"); setActiveItem("People"); setBreadcrumb(["The Grid", "People"]) }} onNavigateToGroups={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView("groups"); setActiveItem("People"); setBreadcrumb(["The Grid", "People"]) }}/>
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
-    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)}/>
+    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)} filteredOffice={filteredOfficeForPeople} onOfficeFilterClear={() => setFilteredOfficeForPeople(null)} initialView={initialPeopleView} onInitialViewConsumed={() => setInitialPeopleView(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)} filteredClient={projectsClientFilter} onClientFilterClear={() => setProjectsClientFilter(null)} filteredRateCard={projectsRateCardFilter} onRateCardFilterClear={() => setProjectsRateCardFilter(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} projects={projects} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects") }}/>
