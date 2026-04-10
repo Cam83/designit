@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, cloneElement } from "react"
 import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
-  FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
+  FolderOpen, Building, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
   CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
 } from "lucide-react"
@@ -672,7 +672,7 @@ const officeItemsMyTime = [
   { name: "Log team", icon: <LogTeamIcon/> },
 ]
 const dataHubItems = [
-  { name: "Org design", icon: <OfficeIcon/> },
+  { name: "Company", icon: <Building size={16} strokeWidth={1.5}/> },
   { name: "People", icon: <Users size={16} strokeWidth={1}/> },
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
@@ -5202,7 +5202,7 @@ export default function App() {
   s = getStyles(t)
 
   function renderMain() {
-    if (activeItem === "Org design") return <OrgStructurePage people={people} contractors={contractors} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} onDeliveryTeamsChange={setDeliveryTeams} groups={groups} onGroupsChange={setGroups} roles={roles} deptPeopleCounts={deptPeopleCounts} onNavigateToPeople={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView(null); setActiveItem("People"); setBreadcrumb(["Data centre", "People"]) }}/>
+    if (activeItem === "Company") return <OrgStructurePage people={people} contractors={contractors} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} onDeliveryTeamsChange={setDeliveryTeams} groups={groups} onGroupsChange={setGroups} roles={roles} deptPeopleCounts={deptPeopleCounts} onNavigateToPeople={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView(null); setActiveItem("People"); setBreadcrumb(["Data centre", "People"]) }}/>
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} departments={departments} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} groups={groups} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)} filteredOffice={filteredOfficeForPeople} onOfficeFilterClear={() => setFilteredOfficeForPeople(null)} initialView={initialPeopleView} onInitialViewConsumed={() => setInitialPeopleView(null)}/>
     if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
