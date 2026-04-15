@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ChevronRight, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ChevronRight, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin, Globe, Folder
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
@@ -730,8 +730,13 @@ const dataHubItems = [
   { name: "Brands", icon: <Pyramid size={16} strokeWidth={1}/> },
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
+const REGIONS = [
+  { name: "Americas", offices: ["New York", "Seattle"] },
+  { name: "EMEA", offices: ["Copenhagen", "London", "Madrid", "Munich", "Oslo", "Tel Aviv"] },
+  { name: "APAC", offices: ["Bengaluru", "Sydney"] },
+]
 const LOCATIONS_INIT = [
-  { name: "Global", icon: <OfficeIcon/>, expanded: false, items: globalSidebarItems },
+  { name: "Global", icon: <Globe size={16} strokeWidth={1}/>, expanded: false, items: globalSidebarItems },
   { name: "Bengaluru", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Copenhagen", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "London", icon: <OfficeIcon/>, expanded: false, items: officeItems },
@@ -1175,9 +1180,13 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
     return () => document.removeEventListener("click", handleClick)
   }, [officeKebabOpen])
 
+  const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set())
   function setActive(name: any, bc: any) { onActiveItemChange(name); onBreadcrumbChange(bc || [name]) }
-  function toggleLoc(i: any) {
-    setLocs((prev: any) => prev.map((l: any, idx: any) => idx === i ? { ...l, expanded: !l.expanded } : { ...l, expanded: false, children: l.children?.map((c: any) => ({ ...c, expanded: false })) }))
+  function toggleLoc(name: string) {
+    setLocs((prev: any) => prev.map((l: any) => l.name === name ? { ...l, expanded: !l.expanded } : { ...l, expanded: false }))
+  }
+  function toggleRegion(name: string) {
+    setExpandedRegions(prev => { const next = new Set(prev); if (next.has(name)) next.delete(name); else next.add(name); return next })
   }
 
   const navItemStyle = (active: any) => ({
@@ -1270,59 +1279,116 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           ))
         ) : (
           <>
-            {locs.map((loc, i) => (
-            <div key={loc.name} style={{ marginTop: i > 0 ? 2 : 0 }}>
-              {!showFullNav ? (
-                <HoverBtn onClick={() => { toggleLoc(i) }}
-                  style={{ ...navItemStyle(false), justifyContent: "center" }}>
+            {/* Collapsed: flat icon list */}
+            {!showFullNav && locs.map((loc: any, i: number) => (
+              <div key={loc.name} style={{ marginTop: i > 0 ? 2 : 0 }}>
+                <HoverBtn onClick={() => toggleLoc(loc.name)} style={{ ...navItemStyle(false), justifyContent: "center" }}>
                   <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
                 </HoverBtn>
-              ) : (
-                <div style={{ position: "relative" }}
-                  onMouseEnter={() => setOfficeHovered(loc.name)}
-                  onMouseLeave={() => { setOfficeHovered(null) }}>
-                  <HoverBtn onClick={() => toggleLoc(i)}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      {(officeHovered === loc.name || officeKebabOpen === loc.name) && (
-                        <span
-                          onClick={(e: any) => { e.stopPropagation(); setOfficeKebabOpen(officeKebabOpen === loc.name ? null : loc.name) }}
-                          style={{ ...s.iconBtn, width: 20, height: 20, color: t.mutedFg, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6 }}>
-                          <MoreVertical size={13} strokeWidth={1}/>
-                        </span>
+              </div>
+            ))}
+            {/* Expanded: Global + region folders */}
+            {showFullNav && (() => {
+              const globalLoc = locs.find((l: any) => l.name === "Global")
+              return (
+                <>
+                  {/* Global */}
+                  {globalLoc && (
+                    <div style={{ marginBottom: 2 }}>
+                      <div style={{ position: "relative" }}
+                        onMouseEnter={() => setOfficeHovered("Global")}
+                        onMouseLeave={() => setOfficeHovered(null)}>
+                        <HoverBtn onClick={() => toggleLoc("Global")}
+                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ color: t.fgAlpha70 }}>{globalLoc.icon}</span>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Global</span>
+                          </div>
+                          <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: globalLoc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+                        </HoverBtn>
+                      </div>
+                      {globalLoc.items && (
+                        <Collapsible expanded={globalLoc.expanded}>
+                          <div style={{ marginTop: 2 }}>
+                            {globalLoc.items.filter((item: any) => item.name !== "Project tracker" || showProjectTracker).map((item: any) => (
+                              <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Global", item.name])}
+                                style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 32 }}>
+                                {item.icon}{item.name}
+                              </HoverBtn>
+                            ))}
+                          </div>
+                        </Collapsible>
                       )}
-                      <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
-                    </div>
-                  </HoverBtn>
-                  {officeKebabOpen === loc.name && (
-                    <div style={{ ...s.dropdown, left: "auto", right: 0, top: "100%", minWidth: 150 }}>
-                      <HoverBtn
-                        onClick={() => { onSettingsOffice?.(loc.name); setOfficeKebabOpen(null) }}
-                        style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" as const }}>
-                        <Settings size={13} strokeWidth={1}/> Office settings
-                      </HoverBtn>
                     </div>
                   )}
-                </div>
-              )}
-              {showFullNav && loc.items && (
-                <Collapsible expanded={loc.expanded}>
-                  <div style={{ marginTop: 2 }}>
-                    {loc.items.filter((item: any) => item.name !== "Project tracker" || showProjectTracker).map((item: any) => (
-                      <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, item.name])}
-                        style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 32 }}>
-                        {item.icon}{item.name}
-                      </HoverBtn>
-                    ))}
-                  </div>
-                </Collapsible>
-              )}
-            </div>
-          ))}
+                  {/* Region folders */}
+                  {REGIONS.map((region: any) => {
+                    const regionLocs = locs.filter((l: any) => region.offices.includes(l.name))
+                    const isExpanded = expandedRegions.has(region.name)
+                    return (
+                      <div key={region.name} style={{ marginTop: 2 }}>
+                        <HoverBtn onClick={() => toggleRegion(region.name)}
+                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ color: t.fgAlpha70 }}><Folder size={16} strokeWidth={1}/></span>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{region.name}</span>
+                          </div>
+                          <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: isExpanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+                        </HoverBtn>
+                        <Collapsible expanded={isExpanded}>
+                          <div style={{ marginLeft: 8, marginTop: 2, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
+                            {regionLocs.map((loc: any) => (
+                              <div key={loc.name} style={{ marginTop: 2 }}>
+                                <div style={{ position: "relative" }}
+                                  onMouseEnter={() => setOfficeHovered(loc.name)}
+                                  onMouseLeave={() => setOfficeHovered(null)}>
+                                  <HoverBtn onClick={() => toggleLoc(loc.name)}
+                                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px 6px 16px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                      <span style={{ color: t.fgAlpha70 }}>{loc.icon}</span>
+                                      <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>{loc.name}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                      {(officeHovered === loc.name || officeKebabOpen === loc.name) && (
+                                        <span onClick={(e: any) => { e.stopPropagation(); setOfficeKebabOpen(officeKebabOpen === loc.name ? null : loc.name) }}
+                                          style={{ ...s.iconBtn, width: 20, height: 20, color: t.mutedFg, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6 }}>
+                                          <MoreVertical size={13} strokeWidth={1}/>
+                                        </span>
+                                      )}
+                                      <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
+                                    </div>
+                                  </HoverBtn>
+                                  {officeKebabOpen === loc.name && (
+                                    <div style={{ ...s.dropdown, left: "auto", right: 0, top: "100%", minWidth: 150 }}>
+                                      <HoverBtn onClick={() => { onSettingsOffice?.(loc.name); setOfficeKebabOpen(null) }}
+                                        style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 10px", borderRadius: 5, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 13, textAlign: "left" as const }}>
+                                        <Settings size={13} strokeWidth={1}/> Office settings
+                                      </HoverBtn>
+                                    </div>
+                                  )}
+                                </div>
+                                {loc.items && (
+                                  <Collapsible expanded={loc.expanded}>
+                                    <div style={{ marginTop: 2 }}>
+                                      {loc.items.filter((item: any) => item.name !== "Project tracker" || showProjectTracker).map((item: any) => (
+                                        <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, item.name])}
+                                          style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 48 }}>
+                                          {item.icon}{item.name}
+                                        </HoverBtn>
+                                      ))}
+                                    </div>
+                                  </Collapsible>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </Collapsible>
+                      </div>
+                    )
+                  })}
+                </>
+              )
+            })()}
           </>
         )}
 
