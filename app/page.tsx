@@ -5,7 +5,7 @@ import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
   FolderOpen, Building, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ChevronRight, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
@@ -183,8 +183,8 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
     return x
   }
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
-      <div style={{ position: "relative" }}>
+    <div style={{ flex: 1, overflow: "auto", padding: `0 ${paddingX}px` }}>
+      <div style={{ position: "relative", minWidth: "max-content" }}>
         <div ref={headerRef} style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
@@ -633,6 +633,8 @@ function getBusinessUnitProjects() {
         const sampleNotes = globalIdx % 2 === 0
           ? SAMPLE_NOTES_POOL[globalIdx % SAMPLE_NOTES_POOL.length]
           : undefined
+        const hoursScheduled = [600,700,800,900][Math.floor(Math.random() * 4)]
+        const totalHoursAtCompletion = Math.round(hoursScheduled * (2.8 + Math.random() * 0.4) / 50) * 50
         allProjects.push({
           name: proj.title,
           code: `${(unit.name.split(" ").pop() ?? unit.name).toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
@@ -646,6 +648,10 @@ function getBusinessUnitProjects() {
           office: offices[Math.floor(Math.random() * offices.length)],
           unit: unit.name,
           health: ["on-track","at-risk","off-track"][Math.floor(Math.random() * 3)],
+          projectComplete: [0,10,20,30,40,50,60,70,80,90,100][Math.floor(Math.random() * 11)],
+          scheduledBillable: (Math.floor(Math.random() * 31) + 50) * 1000,
+          hoursScheduled,
+          totalHoursAtCompletion,
           notes: sampleNotes,
         })
       })
@@ -672,7 +678,7 @@ const officeItemsMyTime = [
   { name: "Log team", icon: <LogTeamIcon/> },
 ]
 const dataHubItems = [
-  { name: "Company", icon: <Building size={16} strokeWidth={1.5}/> },
+  { name: "Company", icon: <Building size={16} strokeWidth={1}/> },
   { name: "People", icon: <Users size={16} strokeWidth={1}/> },
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
@@ -682,7 +688,7 @@ const dataHubItems = [
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
-  { name: "Global", icon: <OfficeIcon/>, expanded: true, items: globalSidebarItems },
+  { name: "Global", icon: <OfficeIcon/>, expanded: false, items: globalSidebarItems },
   { name: "Beaverton HQ", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Hilversum", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Shanghai", icon: <OfficeIcon/>, expanded: false, items: officeItems },
@@ -1877,95 +1883,127 @@ function NotesPanel({ project, currentUser, onClose, onUpdate }: any) {
   )
 }
 
-const PT_COLS_CONFIG = [
-  { key: "name",      label: "Project", flex: "1.5fr" },
-  { key: "notes",     label: "Notes",   flex: "240px" },
-  { key: "health",    label: "Health",  flex: "120px" },
-  { key: "client",    label: "Client",  flex: "1fr" },
-  { key: "stage",     label: "Stage",   flex: "0.6fr" },
-  { key: "margin",    label: "Margin",  flex: "0.8fr" },
-  { key: "budget",    label: "Budget",  flex: "1fr" },
-  { key: "startDate", label: "Start",   flex: "1fr" },
-  { key: "endDate",   label: "End",     flex: "1fr" },
-  { key: "owner",     label: "Owner",   flex: "0.8fr" },
-]
 
 function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
   const [showModal, setShowModal] = useState(false)
-  const [colOrder, setColOrder] = useState(PT_COLS_CONFIG.map(c => c.key))
-  const [dragKey, setDragKey] = useState(null)
-  const [dropKey, setDropKey] = useState(null)
-  const [notesIdx, setNotesIdx] = useState(null)
+  const [notesIdx, setNotesIdx] = useState<number|null>(null)
+  const [monthOffset, setMonthOffset] = useState(0)
+  const [tableView, setTableView] = useState("all")
   const currentUser = people[1]?.name || "Amy Santiago"
 
-  const cols = colOrder.map((k: any) => PT_COLS_CONFIG.find(c => c.key === k)!)
-  const gridCols = cols.map(c => c.flex).join(" ")
+  const monthRange = useMemo(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + monthOffset
+    const start = new Date(year, month, 1)
+    const end = new Date(year, month + 1, 0)
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    return { start: fmt(start), end: fmt(end) }
+  }, [monthOffset])
 
-  function onDragStart(key: any) { setDragKey(key) }
-  function onDragOver(e: any, key: any) { e.preventDefault(); setDropKey(key) }
-  function onDrop(key: any) {
-    if (!dragKey || dragKey === key) { setDragKey(null); setDropKey(null); return }
-    const order = [...colOrder]
-    const from = order.indexOf(dragKey)
-    const to = order.indexOf(key)
-    order.splice(from, 1)
-    order.splice(to, 0, dragKey)
-    setColOrder(order)
-    setDragKey(null)
-    setDropKey(null)
-  }
-
-  function renderCell(col: any, p: any, i: any) {
-    const k = col.key
-    switch (k) {
-      case "name":      return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, fontWeight:500, color:t.fg }}><InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background:"transparent" }}/></span>
-      case "client":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{clients[p.clientId]?.name}</span>
-      case "stage":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:10, height:10, borderRadius:"50%", background:(STAGE_COLORS as any)[p.stage] }}/></span>
-      case "margin":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{p.margin}%</span>
-      case "budget":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>${p.budget.toLocaleString()}</span>
-      case "startDate": return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.startDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
-      case "endDate":   return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.endDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
-      case "owner":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg }}>{people[p.ownerId]?.name.charAt(0) || "?"}</div></span>
-      case "health":    return <span key={k} style={{ display:"flex", alignItems:"center" }}><HealthDropdown value={p.health || "on-track"} onChange={(v: any) => { const u=[...projects]; u[i].health=v; onProjectsChange(u) }}/></span>
-      case "notes":     return <span key={k} style={{ display:"flex", alignItems:"flex-start", paddingTop:4 }}><NotesCell notes={p.notes} onClick={() => setNotesIdx(i)}/></span>
-      default:          return null
-    }
-  }
+  const columns = useMemo(() => [
+    { accessorKey: "name", header: "Project", size: 240,
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
+          <InlineEdit value={row.original.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].name=v; onProjectsChange(u) }} style={{ background: "transparent", fontWeight: 500 }}/>
+        </span>
+      )},
+    { accessorKey: "clientId", header: "Client", size: 150,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{clients[row.original.clientId]?.name || "—"}</span> },
+    { id: "health", header: "Health", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <HealthDropdown value={row.original.health || "on-track"} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].health=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { id: "projectComplete", header: "Project completion (%)", size: 160, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <ProjectCompleteDropdown value={row.original.projectComplete ?? null} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].projectComplete=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { id: "notes", header: "Notes", size: 220, enableResizing: false, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => { e.stopPropagation(); setNotesIdx(projects.indexOf(row.original)) }} style={{ display: "flex", alignItems: "flex-start" }}>
+          <NotesCell notes={row.original.notes} onClick={() => setNotesIdx(projects.indexOf(row.original))}/>
+        </span>
+      )},
+    { id: "stage", header: "Stage", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: (STAGE_COLORS as any)[row.original.stage], flexShrink: 0 }}/>
+          <span style={{ fontSize: 12, color: t.secondaryFg, textTransform: "capitalize" }}>{row.original.stage}</span>
+        </span>
+      )},
+    { accessorKey: "budget", header: "Budget", size: 120,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>${row.original.budget?.toLocaleString()}</span> },
+    { accessorKey: "scheduledBillable", header: "Scheduled billable", size: 150,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.scheduledBillable != null ? `$${row.original.scheduledBillable.toLocaleString()}` : "—"}</span> },
+    { accessorKey: "margin", header: "Margin", size: 180,
+      cell: ({ row }: any) => {
+        const pct = row.original.margin
+        const val = Math.round((pct / 100) * (row.original.budget ?? 0))
+        return <span style={{ fontSize: 13, color: t.fg }}>{pct}% <span style={{ color: t.mutedFg }}>/</span> {val.toLocaleString()}</span>
+      }},
+    { id: "planAccuracy", header: "Plan accuracy", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <PlanAccuracyDropdown value={row.original.planAccuracy ?? null} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].planAccuracy=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { accessorKey: "hoursScheduled", header: "Hours scheduled", size: 140,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.hoursScheduled != null ? `${row.original.hoursScheduled.toLocaleString()}h` : "—"}</span> },
+    { accessorKey: "totalHoursAtCompletion", header: "Total hours at completion", size: 210,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.totalHoursAtCompletion != null ? row.original.totalHoursAtCompletion.toLocaleString() : "—"}</span> },
+    { accessorKey: "startDate", header: "Start", size: 90,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.secondaryFg }}>{new Date(row.original.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> },
+    { accessorKey: "endDate", header: "End", size: 90,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.secondaryFg }}>{new Date(row.original.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> },
+    { id: "owner", header: "Owner", size: 44, enableResizing: false, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <div style={{ width: 26, height: 26, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
+          {people[row.original.ownerId]?.name.charAt(0) || "?"}
+        </div>
+      )},
+  ], [projects, onProjectsChange, clients, people])
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
     <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
-          <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
+            <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", border: `1px solid ${t.border}`, borderRadius: 7, overflow: "hidden" }}>
+              <HoverBtn onClick={() => setMonthOffset(o => o - 1)} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 24, borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", borderRight: `1px solid ${t.border}` }}>
+                <ChevronLeft size={12} strokeWidth={1.5}/>
+              </HoverBtn>
+              <HoverBtn onClick={() => setMonthOffset(o => o + 1)} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 24, borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer" }}>
+                <ChevronRight size={12} strokeWidth={1.5}/>
+              </HoverBtn>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 7, border: `1px solid ${t.border}`, cursor: "pointer" }}>
+              <span style={{ fontSize: 12, color: t.mutedFg }}>This month</span>
+              <span style={{ fontSize: 12, color: t.fg, fontWeight: 500 }}>{monthRange.start} – {monthRange.end}</span>
+              <ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
+            </div>
+            <div style={{ width: 1, height: 16, background: t.fgAlpha20 }}/>
+            {[["all","All"],["recognised","Revenue recognition"]].map(([v,l]) => (
+              <TabBtn key={v} active={tableView === v} onClick={() => setTableView(v)} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+                <Circle size={10} strokeWidth={1} style={{ fill: tableView === v ? t.fg : "none" }}/>{l}
+              </TabBtn>
+            ))}
+          </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
           <button onClick={() => setShowModal(true)} style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0", gap: 8 }}>
-          {cols.map(col => (
-            <span key={col.key}
-              draggable
-              onDragStart={() => onDragStart(col.key)}
-              onDragOver={e => onDragOver(e, col.key)}
-              onDrop={() => onDrop(col.key)}
-              onDragEnd={() => { setDragKey(null); setDropKey(null) }}
-              style={{ fontSize:12, fontWeight:500, color: dropKey === col.key ? t.fg : t.mutedFg, cursor:"grab", userSelect:"none", display:"flex", alignItems:"center", gap:4, borderLeft: dropKey === col.key ? `2px solid ${t.fg}` : "2px solid transparent", paddingLeft: 2, transition:"border-color 0.1s, color 0.1s", opacity: dragKey === col.key ? 0.4 : 1 }}>
-              {col.label}
-            </span>
-          ))}
-        </div>
-        {projects.map((p: any, i: any) => (
-          <HoverRow key={i} selected={false} onClick={() => {}}
-            style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "default", gap: 8, transition: "background 0.1s" }}>
-            {cols.map(col => renderCell(col, p, i))}
-          </HoverRow>
-        ))}
-      </div>
+      <DataTable columns={columns} data={projects} onRowClick={(_p: any, i: number) => setNotesIdx(i)}/>
       {showModal && <AddProjectModal people={people} clients={clients} onAdd={(p: any) => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
     </div>
     {notesIdx !== null && projects[notesIdx] && (
@@ -2071,6 +2109,74 @@ const HEALTH_OPTIONS = [
   { value: "at-risk",   label: "At Risk",   color: "#f59e0b" },
   { value: "off-track", label: "Off Track", color: "#ef4444" },
 ]
+
+const PLAN_ACCURACY_OPTIONS = [0,10,20,30,40,50,60,70,80,90,100]
+
+function ProjectCompleteDropdown({ value, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const [inputVal, setInputVal] = useState("")
+  const display = value == null ? "—" : `${value}%`
+  function commitInput() {
+    const n = parseInt(inputVal, 10)
+    if (!isNaN(n)) { onChange(Math.min(100, Math.max(0, n))); setOpen(false); setInputVal("") }
+  }
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
+          style={{ display:"flex", alignItems:"center", gap:4, height:24, padding:"0 8px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", cursor:"pointer", fontSize:12, fontWeight:500, color: t.fg }}>
+          {display}
+          <ChevronDown size={10} strokeWidth={1}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width:120 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:4, padding:"4px 8px 6px", borderBottom:`1px solid ${t.border}` }}>
+          <input
+            type="number" min={0} max={100} placeholder="0–100"
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") commitInput() }}
+            onClick={e => e.stopPropagation()}
+            style={{ width:"100%", fontSize:12, background:t.muted, border:`1px solid ${t.border}`, borderRadius:4, padding:"3px 6px", color:t.fg, outline:"none", fontFamily:"inherit" }}
+          />
+          <button onClick={(e) => { e.stopPropagation(); commitInput() }} style={{ fontSize:11, background:t.fgAlpha10, border:"none", borderRadius:4, padding:"3px 6px", color:t.fg, cursor:"pointer", whiteSpace:"nowrap" }}>Set</button>
+        </div>
+        <div style={{ maxHeight:180, overflowY:"auto" }}>
+          {PLAN_ACCURACY_OPTIONS.map(v => (
+            <button key={v} onClick={(e: any) => { e.stopPropagation(); onChange(v); setOpen(false) }} style={s.dropdownItem(v === value)}>
+              <span style={{ flex:1 }}>{v}%</span>
+              {v === value && <Check size={11} strokeWidth={1}/>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </DropdownWrapper>
+  )
+}
+
+function PlanAccuracyDropdown({ value, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const display = value == null ? "—" : `${value}%`
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
+          style={{ display:"flex", alignItems:"center", gap:4, height:24, padding:"0 8px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", cursor:"pointer", fontSize:12, fontWeight:500, color: t.fg }}>
+          {display}
+          <ChevronDown size={10} strokeWidth={1}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width:100 }}>
+        {PLAN_ACCURACY_OPTIONS.map(v => (
+          <button key={v} onClick={(e: any) => { e.stopPropagation(); onChange(v); setOpen(false) }} style={s.dropdownItem(v === value)}>
+            <span style={{ flex:1 }}>{v}%</span>
+            {v === value && <Check size={11} strokeWidth={1}/>}
+          </button>
+        ))}
+      </div>
+    </DropdownWrapper>
+  )
+}
 
 function HealthDropdown({ value, onChange }: any) {
   const [open, setOpen] = useState(false)
@@ -4908,43 +5014,6 @@ function OrgStructurePage({ people, contractors, departments, onDepartmentsChang
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
-      {showNewGroupTypeModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, padding: 24, width: 340 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: t.fg, marginBottom: 16 }}>Create group type</h3>
-            <input
-              autoFocus
-              value={newGroupTypeName}
-              onChange={e => setNewGroupTypeName(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter" && newGroupTypeName.trim()) {
-                  const id = `custom-${Date.now()}`
-                  setCustomGroupTypes(prev => [...prev, { id, name: newGroupTypeName.trim(), items: [] }])
-                  setTab(id)
-                  setSelectedIdx(null)
-                  setNewGroupTypeName("")
-                  setShowNewGroupTypeModal(false)
-                }
-                if (e.key === "Escape") { setNewGroupTypeName(""); setShowNewGroupTypeModal(false) }
-              }}
-              placeholder="e.g. Practice areas"
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, fontSize: 13, outline: "none", boxSizing: "border-box" as const, marginBottom: 16 }}
-            />
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <HoverBtn onClick={() => { setNewGroupTypeName(""); setShowNewGroupTypeModal(false) }} style={{ ...s.outlineBtn }}>Cancel</HoverBtn>
-              <HoverBtn onClick={() => {
-                if (!newGroupTypeName.trim()) return
-                const id = `custom-${Date.now()}`
-                setCustomGroupTypes(prev => [...prev, { id, name: newGroupTypeName.trim(), items: [] }])
-                setTab(id)
-                setSelectedIdx(null)
-                setNewGroupTypeName("")
-                setShowNewGroupTypeModal(false)
-              }} style={{ ...s.outlineBtn, background: t.accent, color: t.fg, border: "none" }}>Create</HoverBtn>
-            </div>
-          </div>
-        </div>
-      )}
       {showModal && <AddDepartmentModal onAdd={(item: any) => {
         if (tab === "departments") onDepartmentsChange([...departments, item])
         else if (tab === "delivery-teams") onDeliveryTeamsChange([...deliveryTeams, item])
@@ -4964,19 +5033,16 @@ function OrgStructurePage({ people, contractors, departments, onDepartmentsChang
               </TabBtn>
             ))}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 6px" }}/>
-            {[["groups","Groups"],["delivery-teams","Delivery teams"]].map(([v,l]) => (
+            {[["delivery-teams","Delivery teams"],["groups","Groups"]].map(([v,l]) => (
               <TabBtn key={v} active={tab === v} onClick={() => { setTab(v); setSelectedIdx(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
                 <Circle size={10} strokeWidth={1} style={{ fill: tab === v ? t.fg : "none" }}/>{l}
               </TabBtn>
             ))}
-            {(tab === "delivery-teams") && <HoverBtn onClick={() => setTeamSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>}
-            {(tab === "groups") && <HoverBtn onClick={() => setGroupSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>}
             {customGroupTypes.map(cg => (
               <TabBtn key={cg.id} active={tab === cg.id} onClick={() => { setTab(cg.id); setSelectedIdx(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
                 <Circle size={10} strokeWidth={1} style={{ fill: tab === cg.id ? t.fg : "none" }}/>{cg.name}
               </TabBtn>
             ))}
-            <HoverBtn onClick={() => setShowNewGroupTypeModal(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
           </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
@@ -5050,6 +5116,7 @@ function OrgStructurePage({ people, contractors, departments, onDepartmentsChang
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
               <Tabs active="active" onChange={() => {}} tabs={[{ label: `${deliveryTeams.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setTeamSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
             </div>
             <DataTable
               columns={[
@@ -5066,6 +5133,7 @@ function OrgStructurePage({ people, contractors, departments, onDepartmentsChang
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
               <Tabs active="active" onChange={() => {}} tabs={[{ label: `${groups.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setGroupSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
             </div>
             <DataTable
               columns={[
@@ -5121,16 +5189,68 @@ function OrgStructurePage({ people, contractors, departments, onDepartmentsChang
           <DetailGrid items={[{ label: "Active people", value: deptPeopleCounts[selectedIdx!] ?? 0 }, { label: "Status", value: "Active" }]}/>
         </Sheet>
       )}
-      {selectedTeam && (
-        <Sheet title={selectedTeam.name} subtitle={`${deliveryTeamCounts[selectedIdx!] ?? 0} members`} onClose={() => setSelectedIdx(null)}>
-          <DetailGrid items={[{ label: "Members", value: deliveryTeamCounts[selectedIdx!] ?? 0 }, { label: "Status", value: "Active" }]}/>
-        </Sheet>
-      )}
-      {selectedGroup && (
-        <Sheet title={selectedGroup.name} subtitle={`${groupCounts[selectedIdx!] ?? 0} members`} onClose={() => setSelectedIdx(null)}>
-          <DetailGrid items={[{ label: "Members", value: groupCounts[selectedIdx!] ?? 0 }, { label: "Status", value: "Active" }]}/>
-        </Sheet>
-      )}
+      {selectedTeam && (() => {
+        const teamIdx = deliveryTeams.indexOf(selectedTeam)
+        const members = allPeople.filter((p: any) => (p.deliveryTeamIds || []).includes(teamIdx))
+        return (
+          <Sheet title={selectedTeam.name} subtitle={`${members.length} members`} onClose={() => setSelectedIdx(null)}>
+            <DetailGrid items={[{ label: "Members", value: members.length }, { label: "Status", value: "Active" }]}/>
+            <div style={{ marginTop: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>People</h3>
+              {members.length > 0 && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, paddingBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Name</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Role</span>
+                  </div>
+                  {members.map((p: any) => (
+                    <div key={p.name} style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, alignItems: "center", borderTop: `1px solid ${t.border}`, padding: "8px 0" }}>
+                      <span style={{ fontSize: 13, color: t.fg }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: t.mutedFg }}>{roles[p.roleId]?.name ?? "—"}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div style={{ paddingTop: 12 }}>
+                <HoverBtn style={{ display: "flex", alignItems: "center", gap: 6, height: 28, padding: "0 10px", borderRadius: 6, border: `1px dashed ${t.border}`, background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12 }}>
+                  <Plus size={12} strokeWidth={1}/>Add people
+                </HoverBtn>
+              </div>
+            </div>
+          </Sheet>
+        )
+      })()}
+      {selectedGroup && (() => {
+        const groupIdx = groups.indexOf(selectedGroup)
+        const members = allPeople.filter((p: any) => (p.groupIds || []).includes(groupIdx))
+        return (
+          <Sheet title={selectedGroup.name} subtitle={`${members.length} members`} onClose={() => setSelectedIdx(null)}>
+            <DetailGrid items={[{ label: "Members", value: members.length }, { label: "Status", value: "Active" }]}/>
+            <div style={{ marginTop: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>People</h3>
+              {members.length > 0 && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, paddingBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Name</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Role</span>
+                  </div>
+                  {members.map((p: any) => (
+                    <div key={p.name} style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, alignItems: "center", borderTop: `1px solid ${t.border}`, padding: "8px 0" }}>
+                      <span style={{ fontSize: 13, color: t.fg }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: t.mutedFg }}>{roles[p.roleId]?.name ?? "—"}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div style={{ paddingTop: 12 }}>
+                <HoverBtn style={{ display: "flex", alignItems: "center", gap: 6, height: 28, padding: "0 10px", borderRadius: 6, border: `1px dashed ${t.border}`, background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12 }}>
+                  <Plus size={12} strokeWidth={1}/>Add people
+                </HoverBtn>
+              </div>
+            </div>
+          </Sheet>
+        )
+      })()}
       {selectedCustomItem && (
         <Sheet title={selectedCustomItem.name} subtitle={activeCustomType?.name} onClose={() => setSelectedIdx(null)}>
           <DetailGrid items={[{ label: "Members", value: 0 }, { label: "Status", value: "Active" }]}/>
@@ -5205,7 +5325,7 @@ export default function App() {
     if (activeItem === "Company") return <OrgStructurePage people={people} contractors={contractors} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} onDeliveryTeamsChange={setDeliveryTeams} groups={groups} onGroupsChange={setGroups} roles={roles} deptPeopleCounts={deptPeopleCounts} onNavigateToPeople={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView(null); setActiveItem("People"); setBreadcrumb(["Data centre", "People"]) }}/>
     if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} departments={departments} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
     if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} groups={groups} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)} filteredOffice={filteredOfficeForPeople} onOfficeFilterClear={() => setFilteredOfficeForPeople(null)} initialView={initialPeopleView} onInitialViewConsumed={() => setInitialPeopleView(null)}/>
-    if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
+    if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)} filteredClient={projectsClientFilter} onClientFilterClear={() => setProjectsClientFilter(null)} filteredRateCard={projectsRateCardFilter} onRateCardFilterClear={() => setProjectsRateCardFilter(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} projects={projects} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects") }}/>
     if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }} projects={projects} onNavigateToProjects={(clientName: string, rateCardName: string) => { setProjectsClientFilter(null); setProjectsRateCardFilter({ clientName, rateCardName }); setActiveItem("Projects"); setBreadcrumb(["Data centre", "Projects"]) }}/>
