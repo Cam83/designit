@@ -412,7 +412,7 @@ const INITIAL_GROUPS = [{ name: "Leadership" }, { name: "AI working group" }, { 
 const INITIAL_PEOPLE = [
   { name: "Jake Peralta", roleId: 0, departmentId: 0, office: "New York", deliveryTeamIds: [0], groupIds: [0, 2] },
   { name: "Amy Santiago", roleId: 1, departmentId: 0, office: "New York", deliveryTeamIds: [1], groupIds: [0] },
-  { name: "Rosa Diaz", roleId: 2, departmentId: 1, office: "Melbourne", deliveryTeamIds: [2], groupIds: [1] },
+  { name: "Rosa Diaz", roleId: 2, departmentId: 1, office: "Munich", deliveryTeamIds: [2], groupIds: [1] },
   { name: "Terry Jeffords", roleId: 3, departmentId: 2, office: "Sydney", deliveryTeamIds: [0], groupIds: [0, 1] },
   { name: "Charles Boyle", roleId: 1, departmentId: 0, office: "New York", deliveryTeamIds: [1], groupIds: [] },
   { name: "Michael Hitchcock", roleId: 0, departmentId: 1, office: "London", deliveryTeamIds: [3], groupIds: [2] },
@@ -420,32 +420,32 @@ const INITIAL_PEOPLE = [
   { name: "Rachel Green", roleId: 0, departmentId: 0, office: "Sydney", deliveryTeamIds: [2], groupIds: [1, 2] },
   { name: "Monica Geller", roleId: 1, departmentId: 1, office: "London", deliveryTeamIds: [0], groupIds: [0] },
   { name: "Phoebe Buffay", roleId: 2, departmentId: 2, office: "New York", deliveryTeamIds: [], groupIds: [1] },
-  { name: "Joey Tribbiani", roleId: 3, departmentId: 0, office: "Melbourne", deliveryTeamIds: [1], groupIds: [] },
+  { name: "Joey Tribbiani", roleId: 3, departmentId: 0, office: "Munich", deliveryTeamIds: [1], groupIds: [] },
   { name: "Chandler Bing", roleId: 0, departmentId: 1, office: "Sydney", deliveryTeamIds: [2], groupIds: [0, 1] },
   { name: "Ross Geller", roleId: 1, departmentId: 2, office: "London", deliveryTeamIds: [3], groupIds: [2] },
   { name: "Gunther", roleId: 2, departmentId: 1, office: "New York", deliveryTeamIds: [], groupIds: [0] },
   { name: "Janice Litman", roleId: 3, departmentId: 2, office: "New York", deliveryTeamIds: [1], groupIds: [1, 2] },
   // Parks and Recreation
-  { name: "Leslie Knope", roleId: 7, departmentId: 3, office: "Beaverton HQ", deliveryTeamIds: [0], groupIds: [0] },
-  { name: "Ben Wyatt", roleId: 3, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [0, 2], groupIds: [0, 1] },
-  { name: "Ann Perkins", roleId: 8, departmentId: 0, office: "Hilversum", deliveryTeamIds: [1], groupIds: [2] },
-  { name: "Chris Traeger", roleId: 7, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [0], groupIds: [0] },
+  { name: "Leslie Knope", roleId: 7, departmentId: 3, office: "Oslo", deliveryTeamIds: [0], groupIds: [0] },
+  { name: "Ben Wyatt", roleId: 3, departmentId: 2, office: "Oslo", deliveryTeamIds: [0, 2], groupIds: [0, 1] },
+  { name: "Ann Perkins", roleId: 8, departmentId: 0, office: "Copenhagen", deliveryTeamIds: [1], groupIds: [2] },
+  { name: "Chris Traeger", roleId: 7, departmentId: 2, office: "Oslo", deliveryTeamIds: [0], groupIds: [0] },
   { name: "Tom Haverford", roleId: 10, departmentId: 3, office: "New York", deliveryTeamIds: [3], groupIds: [1] },
-  { name: "April Ludgate", roleId: 3, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [2], groupIds: [] },
+  { name: "April Ludgate", roleId: 3, departmentId: 2, office: "Oslo", deliveryTeamIds: [2], groupIds: [] },
   { name: "Andy Dwyer", roleId: 9, departmentId: 0, office: "London", deliveryTeamIds: [3], groupIds: [2] },
-  { name: "Ron Swanson", roleId: 7, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [], groupIds: [0] },
-  { name: "Jerry Gergich", roleId: 11, departmentId: 3, office: "Beaverton HQ", deliveryTeamIds: [1], groupIds: [] },
-  { name: "Donna Meagle", roleId: 6, departmentId: 3, office: "Beaverton HQ", deliveryTeamIds: [0], groupIds: [0, 2] },
-  { name: "Craig Middlebrooks", roleId: 3, departmentId: 2, office: "Hilversum", deliveryTeamIds: [2], groupIds: [2] },
-  { name: "Mark Brendanawicz", roleId: 4, departmentId: 0, office: "Shanghai", deliveryTeamIds: [3], groupIds: [] },
+  { name: "Ron Swanson", roleId: 7, departmentId: 2, office: "Oslo", deliveryTeamIds: [], groupIds: [0] },
+  { name: "Jerry Gergich", roleId: 11, departmentId: 3, office: "Oslo", deliveryTeamIds: [1], groupIds: [] },
+  { name: "Donna Meagle", roleId: 6, departmentId: 3, office: "Oslo", deliveryTeamIds: [0], groupIds: [0, 2] },
+  { name: "Craig Middlebrooks", roleId: 3, departmentId: 2, office: "Copenhagen", deliveryTeamIds: [2], groupIds: [2] },
+  { name: "Mark Brendanawicz", roleId: 4, departmentId: 0, office: "Bengaluru", deliveryTeamIds: [3], groupIds: [] },
   { name: "Dave Sanderson", roleId: 5, departmentId: 3, office: "New York", deliveryTeamIds: [1], groupIds: [1] },
   { name: "Jennifer Barkley", roleId: 6, departmentId: 3, office: "New York", deliveryTeamIds: [0], groupIds: [0] },
-  { name: "Ethel Beavers", roleId: 11, departmentId: 3, office: "Beaverton HQ", deliveryTeamIds: [], groupIds: [] },
+  { name: "Ethel Beavers", roleId: 11, departmentId: 3, office: "Oslo", deliveryTeamIds: [], groupIds: [] },
   { name: "Jean-Ralphio Saperstein", roleId: 6, departmentId: 3, office: "New York", deliveryTeamIds: [3], groupIds: [1, 2] },
   { name: "Mona Lisa Saperstein", roleId: 10, departmentId: 3, office: "New York", deliveryTeamIds: [3], groupIds: [1] },
-  { name: "Shauna Malwae-Tweep", roleId: 5, departmentId: 3, office: "Hilversum", deliveryTeamIds: [1], groupIds: [2] },
-  { name: "Bobby Newport", roleId: 6, departmentId: 3, office: "Shanghai", deliveryTeamIds: [0], groupIds: [] },
-  { name: "Councilman Jamm", roleId: 3, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [2], groupIds: [0] },
+  { name: "Shauna Malwae-Tweep", roleId: 5, departmentId: 3, office: "Copenhagen", deliveryTeamIds: [1], groupIds: [2] },
+  { name: "Bobby Newport", roleId: 6, departmentId: 3, office: "Bengaluru", deliveryTeamIds: [0], groupIds: [] },
+  { name: "Councilman Jamm", roleId: 3, departmentId: 2, office: "Oslo", deliveryTeamIds: [2], groupIds: [0] },
   // More Friends
   { name: "Richard Burke", roleId: 7, departmentId: 0, office: "New York", deliveryTeamIds: [], groupIds: [0] },
   { name: "Emily Waltham", roleId: 3, departmentId: 2, office: "London", deliveryTeamIds: [2], groupIds: [] },
@@ -460,41 +460,41 @@ const INITIAL_PEOPLE = [
   // More Brooklyn Nine-Nine
   { name: "Doug Judy", roleId: 6, departmentId: 3, office: "New York", deliveryTeamIds: [3], groupIds: [1] },
   { name: "Teddy Wells", roleId: 3, departmentId: 2, office: "New York", deliveryTeamIds: [0], groupIds: [] },
-  { name: "Sophia Perez", roleId: 8, departmentId: 0, office: "Shanghai", deliveryTeamIds: [1], groupIds: [2] },
-  { name: "Bill Fontaine", roleId: 2, departmentId: 1, office: "Hilversum", deliveryTeamIds: [2], groupIds: [] },
+  { name: "Sophia Perez", roleId: 8, departmentId: 0, office: "Bengaluru", deliveryTeamIds: [1], groupIds: [2] },
+  { name: "Bill Fontaine", roleId: 2, departmentId: 1, office: "Copenhagen", deliveryTeamIds: [2], groupIds: [] },
   { name: "Marcus Henderson", roleId: 2, departmentId: 1, office: "New York", deliveryTeamIds: [2], groupIds: [1] },
   { name: "Debbie Fogle", roleId: 11, departmentId: 3, office: "New York", deliveryTeamIds: [1], groupIds: [2] },
   { name: "Keith Ferguson", roleId: 0, departmentId: 0, office: "Sydney", deliveryTeamIds: [3], groupIds: [] },
   { name: "Scully Junior", roleId: 0, departmentId: 1, office: "New York", deliveryTeamIds: [3], groupIds: [] },
-  { name: "Lohank", roleId: 5, departmentId: 3, office: "Shanghai", deliveryTeamIds: [0], groupIds: [1] },
-  { name: "Vulture Pembroke", roleId: 3, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [0], groupIds: [0] },
+  { name: "Lohank", roleId: 5, departmentId: 3, office: "Bengaluru", deliveryTeamIds: [0], groupIds: [1] },
+  { name: "Vulture Pembroke", roleId: 3, departmentId: 2, office: "Oslo", deliveryTeamIds: [0], groupIds: [0] },
   // Mixed — Parks, Friends, B99
-  { name: "Orin", roleId: 9, departmentId: 0, office: "Hilversum", deliveryTeamIds: [3], groupIds: [] },
-  { name: "Kyle", roleId: 0, departmentId: 1, office: "Beaverton HQ", deliveryTeamIds: [2], groupIds: [] },
+  { name: "Orin", roleId: 9, departmentId: 0, office: "Copenhagen", deliveryTeamIds: [3], groupIds: [] },
+  { name: "Kyle", roleId: 0, departmentId: 1, office: "Oslo", deliveryTeamIds: [2], groupIds: [] },
   { name: "Susan Bunch", roleId: 8, departmentId: 1, office: "London", deliveryTeamIds: [1], groupIds: [2] },
   { name: "Mike Hannigan", roleId: 4, departmentId: 0, office: "New York", deliveryTeamIds: [2], groupIds: [0] },
   { name: "Mindy Hunter", roleId: 10, departmentId: 3, office: "New York", deliveryTeamIds: [1], groupIds: [] },
-  { name: "David (Phoebe's guy)", roleId: 2, departmentId: 1, office: "Hilversum", deliveryTeamIds: [2], groupIds: [1] },
+  { name: "David (Phoebe's guy)", roleId: 2, departmentId: 1, office: "Copenhagen", deliveryTeamIds: [2], groupIds: [1] },
   { name: "Pete Becker", roleId: 4, departmentId: 0, office: "Sydney", deliveryTeamIds: [3], groupIds: [] },
-  { name: "Sandy Richards", roleId: 5, departmentId: 3, office: "Shanghai", deliveryTeamIds: [0], groupIds: [2] },
-  { name: "Ken Hotate", roleId: 7, departmentId: 2, office: "Beaverton HQ", deliveryTeamIds: [], groupIds: [0] },
+  { name: "Sandy Richards", roleId: 5, departmentId: 3, office: "Bengaluru", deliveryTeamIds: [0], groupIds: [2] },
+  { name: "Ken Hotate", roleId: 7, departmentId: 2, office: "Oslo", deliveryTeamIds: [], groupIds: [0] },
 ]
 const INITIAL_CONTRACTORS = [
   { name: "Raymond Holt", roleId: 3, departmentId: 2, office: "London" },
   { name: "Madeline Wuntch", roleId: 2, departmentId: 1, office: "Sydney" },
-  { name: "Kevin Cozner", roleId: 0, departmentId: 0, office: "Melbourne" },
+  { name: "Kevin Cozner", roleId: 0, departmentId: 0, office: "Munich" },
   { name: "Adrian Pimento", roleId: 2, departmentId: 0, office: "New York" },
-  { name: "Gina Linetti", roleId: 3, departmentId: 1, office: "Melbourne" },
+  { name: "Gina Linetti", roleId: 3, departmentId: 1, office: "Munich" },
   { name: "Nikolaj Boyle", roleId: 0, departmentId: 0, office: "Sydney" },
   { name: "Mike Hannigan", roleId: 2, departmentId: 1, office: "New York" },
   { name: "Darth Vader", roleId: 0, departmentId: 1, office: "London" },
   { name: "Luke Skywalker", roleId: 1, departmentId: 2, office: "Sydney" },
-  { name: "Han Solo", roleId: 3, departmentId: 1, office: "Melbourne" },
+  { name: "Han Solo", roleId: 3, departmentId: 1, office: "Munich" },
 ]
 const INITIAL_PROJECTS: any[] = []
 
 const INITIAL_CLIENTS_DATA = [{ name: "Agency rack rate" }, { name: "Reebok" }, { name: "Adidas" }]
-const ALL_OFFICES = ["Global", "Beaverton HQ", "Hilversum", "Shanghai", "New York", "London", "Sydney"]
+const ALL_OFFICES = ["Global", "Bengaluru", "Copenhagen", "London", "Madrid", "Munich", "New York", "Oslo", "Seattle", "Sydney", "Tel Aviv"]
 const STAGE_COLORS = { planning: "#f59e0b", active: "#10b981", completed: "#6b7280", "on-hold": "#ef4444" }
 const CURRENCIES = ["USD","AUD","GBP","EUR","CAD","NZD","SGD","JPY"]
 
@@ -545,7 +545,7 @@ const CLIENTS_FULL = [
   { name: "LinkedIn", rateCardName: "Premium rates, 2026", projects: 8, office: "London", contact: { name: "Priya Nair", email: "priya.nair@linkedin.com" }, owner: "Terry Jeffords", access: "edit", crmUrl: "https://crm.internal/clients/linkedin", rateCards: [
     { title: "Premium rates, 2026", currency: "USD", offices: "all", notes: "Premium tier agreed following contract renewal in Q4 2025.", effectiveFrom: "2026-01-01", linkedClients: ["Google", "Verizon"], linkedRoles: [{roleId:0,billRate:170},{roleId:1,billRate:215},{roleId:2,billRate:190},{roleId:3,billRate:220},{roleId:4,billRate:205},{roleId:5,billRate:185}] },
   ]},
-  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, office: "Beaverton HQ", contact: { name: "Jordan Kim", email: "j.kim@nike.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
+  { name: "Nike", rateCardName: "Standard rates, 2026", projects: 10, office: "Oslo", contact: { name: "Jordan Kim", email: "j.kim@nike.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
     { title: "Standard rates, 2026", currency: "USD", offices: "all", notes: "", effectiveFrom: "", linkedRoles: [{roleId:0,billRate:165},{roleId:1,billRate:220},{roleId:2,billRate:190},{roleId:3,billRate:225},{roleId:4,billRate:210},{roleId:5,billRate:190}] },
   ]},
   { name: "Toyota", rateCardName: "Standard rates, 2026", projects: 10, office: "Sydney", contact: { name: "Ken Watanabe", email: "k.watanabe@toyota.com" }, owner: "Monica Geller", access: "", crmUrl: "", rateCards: [
@@ -666,7 +666,7 @@ const SAMPLE_NOTES_POOL = [
 
 function getBusinessUnitProjects() {
   const stageMap: Record<string, string> = { "Active": "active", "In Progress": "active", "Planning": "planning" }
-  const offices = ["Global", "Beaverton HQ", "Hilversum", "Shanghai", "New York", "London", "Sydney"]
+  const offices = ["Global", "Bengaluru", "Copenhagen", "London", "Madrid", "Munich", "New York", "Oslo", "Seattle", "Sydney", "Tel Aviv"]
   const allProjects: any[] = []
 
   BUSINESS_UNITS_FULL.forEach((unit, unitIdx) => {
@@ -732,12 +732,16 @@ const dataHubItems = [
 ]
 const LOCATIONS_INIT = [
   { name: "Global", icon: <OfficeIcon/>, expanded: false, items: globalSidebarItems },
-  { name: "Beaverton HQ", icon: <OfficeIcon/>, expanded: false, items: officeItems },
-  { name: "Hilversum", icon: <OfficeIcon/>, expanded: false, items: officeItems },
-  { name: "Shanghai", icon: <OfficeIcon/>, expanded: false, items: officeItems },
-  { name: "New York", icon: <OfficeIcon/>, expanded: false, items: officeItemsMyTime },
+  { name: "Bengaluru", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Copenhagen", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "London", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Madrid", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Munich", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "New York", icon: <OfficeIcon/>, expanded: false, items: officeItemsMyTime },
+  { name: "Oslo", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Seattle", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Sydney", icon: <OfficeIcon/>, expanded: false, items: officeItems },
+  { name: "Tel Aviv", icon: <OfficeIcon/>, expanded: false, items: officeItems },
 ]
 
 // ── Shared UI ──
@@ -929,7 +933,7 @@ function AddPersonModal({ roles, departments, onAdd, onClose, type = "employee" 
   const [office, setOffice] = useState("New York")
   const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
-  const officeOpts = ["New York", "London", "Sydney", "Melbourne", "Austin", "Los Angeles", "San Francisco", "Chicago", "Tokyo", "Singapore", "Berlin", "Paris", "Madrid"]
+  const officeOpts = ALL_OFFICES.filter(o => o !== "Global")
   function submit() {
     const n = name.trim()
     if (!n) return
@@ -1022,7 +1026,7 @@ function AddProjectModal({ people, clients, onAdd, onClose }: any) {
   const [office, setOffice] = useState("New York")
   const nameRef = useRef<HTMLInputElement>(null)
   useEffect(() => { nameRef.current?.focus() }, [])
-  const officeOpts = ["New York", "London", "Sydney", "Melbourne"]
+  const officeOpts = ALL_OFFICES.filter(o => o !== "Global")
   const inp = { width: "100%", fontSize: 13, color: t.fg, background: t.muted, border: `1px solid ${t.border}`, borderRadius: 6, padding: "8px 12px", outline: "none", fontFamily: "inherit" }
   function submit() {
     const n = name.trim()
@@ -1126,7 +1130,7 @@ function NotificationsPanel({ onClose, floating, navHoverOpen }: { onClose: () =
 }
 
 // ── Sidebar ──
-function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick, showFloatAgent, onFloatAgentToggle }: any) {
+function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChange, themeMode, onThemeChange, visibleDataHubItems, onVisibleDataHubItemsChange, collapsed, onToggleCollapsed, notificationsOpen, onNotificationsToggle, onHoverChange, onSettingsOffice, hasSavedDashboard, onSavedDashboardClick, showFloatAgent, onFloatAgentToggle, showSkillsGraph, onSkillsGraphToggle, showTalentGraph, onTalentGraphToggle, showProjectGraph, onProjectGraphToggle, showProjectTracker, onProjectTrackerToggle }: any) {
   const [locs, setLocs] = useState(LOCATIONS_INIT)
   const [dataHubExp, setDataHubExp] = useState(true)
   const [dataHubSettingsOpen, setDataHubSettingsOpen] = useState(false)
@@ -1259,7 +1263,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
         )}
 
         {version === "single" ? (
-          officeItems.map(item => (
+          officeItems.filter(item => item.name !== "Project tracker" || showProjectTracker).map(item => (
             <HoverBtn key={item.name} onClick={() => setActive(item.name, null)} style={navItemStyle(activeItem === item.name)}>
               {item.icon}{showFullNav && item.name}
             </HoverBtn>
@@ -1308,7 +1312,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               {showFullNav && loc.items && (
                 <Collapsible expanded={loc.expanded}>
                   <div style={{ marginTop: 2 }}>
-                    {loc.items.map(item => (
+                    {loc.items.filter((item: any) => item.name !== "Project tracker" || showProjectTracker).map((item: any) => (
                       <HoverBtn key={item.name} onClick={() => setActive(item.name, [loc.name, item.name])}
                         style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 32 }}>
                         {item.icon}{item.name}
@@ -1322,29 +1326,35 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           </>
         )}
 
-        {/* Skills Graph — primary nav item */}
-        <div style={{ marginTop: 24 }}>
-          <HoverBtn onClick={() => setActive("Skills graph", ["Skills graph"])}
-            style={{ ...navItemStyle(activeItem === "Skills graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
-            <Star size={16} strokeWidth={1}/>{showFullNav && "Skills graph"}
-          </HoverBtn>
-        </div>
+        {/* Skills Graph — hidden by default, toggle via Shift+K */}
+        {showSkillsGraph && (
+          <div style={{ marginTop: 24 }}>
+            <HoverBtn onClick={() => setActive("Skills graph", ["Skills graph"])}
+              style={{ ...navItemStyle(activeItem === "Skills graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+              <Star size={16} strokeWidth={1}/>{showFullNav && "Skills graph"}
+            </HoverBtn>
+          </div>
+        )}
 
-        {/* Talent Graph — primary nav item */}
-        <div style={{ marginTop: 4 }}>
-          <HoverBtn onClick={() => setActive("Talent graph", ["Talent graph"])}
-            style={{ ...navItemStyle(activeItem === "Talent graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
-            <Share2 size={16} strokeWidth={1}/>{showFullNav && "Talent graph"}
-          </HoverBtn>
-        </div>
+        {/* Talent Graph — hidden by default, toggle via Shift+K */}
+        {showTalentGraph && (
+          <div style={{ marginTop: 4 }}>
+            <HoverBtn onClick={() => setActive("Talent graph", ["Talent graph"])}
+              style={{ ...navItemStyle(activeItem === "Talent graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+              <Share2 size={16} strokeWidth={1}/>{showFullNav && "Talent graph"}
+            </HoverBtn>
+          </div>
+        )}
 
-        {/* Project Graph — primary nav item */}
-        <div style={{ marginTop: 4 }}>
-          <HoverBtn onClick={() => setActive("Project graph", ["Project graph"])}
-            style={{ ...navItemStyle(activeItem === "Project graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
-            <GitFork size={16} strokeWidth={1}/>{showFullNav && "Project graph"}
-          </HoverBtn>
-        </div>
+        {/* Project Graph — hidden by default, toggle via Shift+K */}
+        {showProjectGraph && (
+          <div style={{ marginTop: 4 }}>
+            <HoverBtn onClick={() => setActive("Project graph", ["Project graph"])}
+              style={{ ...navItemStyle(activeItem === "Project graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+              <GitFork size={16} strokeWidth={1}/>{showFullNav && "Project graph"}
+            </HoverBtn>
+          </div>
+        )}
 
         <div style={{ marginTop: 8 }}>
           {!showFullNav ? (
@@ -1368,6 +1378,22 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                 <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg, borderBottom: `1px solid ${t.border}`, marginBottom: 4 }}>
                   <input type="checkbox" checked={showFloatAgent} onChange={e => onFloatAgentToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
                   Float Agent
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                  <input type="checkbox" checked={showSkillsGraph} onChange={e => onSkillsGraphToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Skills graph
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                  <input type="checkbox" checked={showTalentGraph} onChange={e => onTalentGraphToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Talent graph
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
+                  <input type="checkbox" checked={showProjectGraph} onChange={e => onProjectGraphToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Project graph
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg, borderBottom: `1px solid ${t.border}`, marginBottom: 4 }}>
+                  <input type="checkbox" checked={showProjectTracker} onChange={e => onProjectTrackerToggle?.(e.target.checked)} style={{ cursor: "pointer", accentColor: t.mutedFg }}/>
+                  Project tracker
                 </label>
                 {dataHubItems.map(item => (
                   <label key={item.name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13, color: t.fg }}>
@@ -5356,6 +5382,10 @@ export default function App() {
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
   const [showFloatAgent, setShowFloatAgent] = useState(false)
+  const [showSkillsGraph, setShowSkillsGraph] = useState(false)
+  const [showTalentGraph, setShowTalentGraph] = useState(false)
+  const [showProjectGraph, setShowProjectGraph] = useState(false)
+  const [showProjectTracker, setShowProjectTracker] = useState(false)
 
   const deptPeopleCounts: Record<number, number> = {}
   people.forEach((p: any) => { deptPeopleCounts[p.departmentId] = (deptPeopleCounts[p.departmentId] || 0) + 1 })
@@ -5392,7 +5422,7 @@ export default function App() {
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:t.bg, color:t.fg, fontFamily:"var(--font-sans), -apple-system, sans-serif" }}>
       {activeItem !== "Settings" && <>
-        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }} showFloatAgent={showFloatAgent} onFloatAgentToggle={setShowFloatAgent}/>
+        <SidebarNav version={version} activeItem={activeItem} onActiveItemChange={setActiveItem} onBreadcrumbChange={setBreadcrumb} themeMode={themeMode} onThemeChange={setThemeMode} visibleDataHubItems={visibleDataHubItems} onVisibleDataHubItemsChange={setVisibleDataHubItems} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(c => !c)} notificationsOpen={notificationsOpen} onNotificationsToggle={() => setNotificationsOpen(o => !o)} onHoverChange={setNavHoverOpen} onSettingsOffice={(name: string | null) => { setSettingsOfficeTarget(name); setActiveItem("Settings"); setBreadcrumb(["Settings"]) }} hasSavedDashboard={savedDashboardCards.length > 0} onSavedDashboardClick={() => { setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }} showFloatAgent={showFloatAgent} onFloatAgentToggle={setShowFloatAgent} showSkillsGraph={showSkillsGraph} onSkillsGraphToggle={setShowSkillsGraph} showTalentGraph={showTalentGraph} onTalentGraphToggle={setShowTalentGraph} showProjectGraph={showProjectGraph} onProjectGraphToggle={setShowProjectGraph} showProjectTracker={showProjectTracker} onProjectTrackerToggle={setShowProjectTracker}/>
         {notificationsOpen && <NotificationsPanel floating={sidebarCollapsed} navHoverOpen={navHoverOpen} onClose={() => setNotificationsOpen(false)}/>}
       </>}
       <main style={{ ...s.main, position:"relative" as const, paddingLeft: activeItem !== "Settings" && sidebarCollapsed ? 36 : 0, transition: "padding-left 0.2s ease" }}>
