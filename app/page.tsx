@@ -3,14 +3,15 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, cloneElement } from "react"
 import {
   ChevronDown, Gauge, BarChart3, Clock, Users, Database,
-  FolderOpen, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
+  FolderOpen, Building, Building2, ChefHat, HelpCircle, Bell, Settings, Layers,
   Plus, RefreshCw, Settings2, Check, X, Circle, UserPlus, ArrowRightLeft,
-  CalendarClock, Briefcase, DollarSign, ChevronLeft, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp
+  CalendarClock, Briefcase, DollarSign, ChevronLeft, ChevronRight, ListFilter, Sun, Moon, MoreVertical, Pyramid, PanelLeftClose, PanelLeftOpen, Bot, ArrowUp, Share2, GitFork, Star, Search, MapPin
 } from "lucide-react"
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, Area, BarChart, Bar } from "recharts"
 import { HoverBtn as CamHoverBtn, TabBtn } from "@cam-ui/components"
 function HoverBtn(props: any) { return <CamHoverBtn accentColor={t.accent} {...props} /> }
+import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from "d3-force"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/components/ui/tag"
 import { SettingsPage } from "@/app/settings-page"
@@ -89,6 +90,10 @@ const floatDarkTheme = {
 let t = blackTheme
 
 const getStyles = (theme: any) => ({
+  /** Small section / panel labels — title case in content, never forced uppercase */
+  caseTitle: { fontSize: 11, fontWeight: 600, color: theme.mutedFg, letterSpacing: "0.08em", fontFamily: "var(--font-sans), sans-serif" },
+  caseTitleCompact: { fontSize: 11, fontWeight: 600, color: theme.mutedFg, letterSpacing: "0.05em", fontFamily: "var(--font-sans), sans-serif" },
+  caseTitleXs: { fontSize: 10, fontWeight: 600, color: theme.mutedFg, letterSpacing: "0.5px" },
   sidebar: { width: 260, borderTop: "none", borderBottom: "none", borderLeft: "none", borderRight: `1px solid ${theme.sidebarBorder}`, background: theme.sidebar, display: "flex", flexDirection: "column" as const, height: "100vh", flexShrink: 0 },
   main: { flex: 1, display: "flex", flexDirection: "column" as const, background: theme.bg, overflow: "hidden", minWidth: 0 },
   iconBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", color: theme.secondaryFg, cursor: "pointer" },
@@ -178,8 +183,8 @@ function DataTable({ columns, data, onRowClick, isRowSelected, paddingX = 24, em
     return x
   }
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: `0 ${paddingX}px` }}>
-      <div style={{ position: "relative" }}>
+    <div style={{ flex: 1, overflow: "auto", padding: `0 ${paddingX}px` }}>
+      <div style={{ position: "relative", minWidth: "max-content" }}>
         <div ref={headerRef} style={{ display: "grid", gridTemplateColumns: gridTemplate, borderBottom: `1px solid ${t.border}`, padding: "8px 0" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <RowCheckbox checked={allSelected} indeterminate={someSelected} onClick={toggleAll} />
@@ -388,17 +393,17 @@ function OfficeIcon() {
 
 // ── Data ──
 const INITIAL_ROLES = [
-  { name: "Designer", costRate: 120, activePeople: 3, unassigned: 1 },
-  { name: "Senior Designer", costRate: 160, activePeople: 5, unassigned: 0 },
-  { name: "Developer", costRate: 140, activePeople: 8, unassigned: 2 },
-  { name: "Project Manager", costRate: 130, activePeople: 4, unassigned: 0 },
-  { name: "Art Director", costRate: 155, activePeople: 3, unassigned: 1 },
-  { name: "Copywriter", costRate: 110, activePeople: 4, unassigned: 0 },
-  { name: "Account Executive", costRate: 125, activePeople: 6, unassigned: 1 },
-  { name: "Creative Director", costRate: 180, activePeople: 2, unassigned: 0 },
-  { name: "UX/UI Designer", costRate: 135, activePeople: 5, unassigned: 2 },
+  { name: "Designer", costRate: 120, activePeople: 3, unassigned: 1, departmentId: 0 },
+  { name: "Senior Designer", costRate: 160, activePeople: 5, unassigned: 0, departmentId: 0 },
+  { name: "Developer", costRate: 140, activePeople: 8, unassigned: 2, departmentId: 1 },
+  { name: "Project Manager", costRate: 130, activePeople: 4, unassigned: 0, departmentId: 2 },
+  { name: "Art Director", costRate: 155, activePeople: 3, unassigned: 1, departmentId: 0 },
+  { name: "Copywriter", costRate: 110, activePeople: 4, unassigned: 0, departmentId: 3 },
+  { name: "Account Executive", costRate: 125, activePeople: 6, unassigned: 1, departmentId: 3 },
+  { name: "Creative Director", costRate: 180, activePeople: 2, unassigned: 0, departmentId: 0 },
+  { name: "UX/UI Designer", costRate: 135, activePeople: 5, unassigned: 2, departmentId: 0 },
   { name: "Motion Designer", costRate: 145, activePeople: 2, unassigned: 0 },
-  { name: "Brand Strategist", costRate: 150, activePeople: 3, unassigned: 1 },
+  { name: "Brand Strategist", costRate: 150, activePeople: 3, unassigned: 1, departmentId: 3 },
   { name: "Social Media Manager", costRate: 105, activePeople: 4, unassigned: 0 },
 ]
 const INITIAL_DEPARTMENTS = [{ name: "Design" }, { name: "Engineering" }, { name: "Operations" }, { name: "Marketing" }]
@@ -671,6 +676,8 @@ function getBusinessUnitProjects() {
         const sampleNotes = globalIdx % 2 === 0
           ? SAMPLE_NOTES_POOL[globalIdx % SAMPLE_NOTES_POOL.length]
           : undefined
+        const hoursScheduled = [600,700,800,900][Math.floor(Math.random() * 4)]
+        const totalHoursAtCompletion = Math.round(hoursScheduled * (2.8 + Math.random() * 0.4) / 50) * 50
         allProjects.push({
           name: proj.title,
           code: `${(unit.name.split(" ").pop() ?? unit.name).toUpperCase()}-${String(idx + 1).padStart(3, "0")}`,
@@ -684,6 +691,10 @@ function getBusinessUnitProjects() {
           office: offices[Math.floor(Math.random() * offices.length)],
           unit: unit.name,
           health: ["on-track","at-risk","off-track"][Math.floor(Math.random() * 3)],
+          projectComplete: [0,10,20,30,40,50,60,70,80,90,100][Math.floor(Math.random() * 11)],
+          scheduledBillable: (Math.floor(Math.random() * 31) + 50) * 1000,
+          hoursScheduled,
+          totalHoursAtCompletion,
           notes: sampleNotes,
         })
       })
@@ -710,6 +721,7 @@ const officeItemsMyTime = [
   { name: "Log team", icon: <LogTeamIcon/> },
 ]
 const dataHubItems = [
+  { name: "Company", icon: <Building size={16} strokeWidth={1}/> },
   { name: "People", icon: <Users size={16} strokeWidth={1}/> },
   { name: "Roles", icon: <ChefHat size={16} strokeWidth={1}/> },
   { name: "Projects", icon: <FolderOpen size={16} strokeWidth={1}/> },
@@ -719,7 +731,7 @@ const dataHubItems = [
   { name: "Activity log", icon: <Clock size={16} strokeWidth={1}/> },
 ]
 const LOCATIONS_INIT = [
-  { name: "Global", icon: <OfficeIcon/>, expanded: true, items: globalSidebarItems },
+  { name: "Global", icon: <OfficeIcon/>, expanded: false, items: globalSidebarItems },
   { name: "Beaverton HQ", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Hilversum", icon: <OfficeIcon/>, expanded: false, items: officeItems },
   { name: "Shanghai", icon: <OfficeIcon/>, expanded: false, items: officeItems },
@@ -1273,11 +1285,11 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                       {(officeHovered === loc.name || officeKebabOpen === loc.name) && (
-                        <HoverBtn
+                        <span
                           onClick={(e: any) => { e.stopPropagation(); setOfficeKebabOpen(officeKebabOpen === loc.name ? null : loc.name) }}
-                          style={{ ...s.iconBtn, width: 20, height: 20, color: t.mutedFg }}>
+                          style={{ ...s.iconBtn, width: 20, height: 20, color: t.mutedFg, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6 }}>
                           <MoreVertical size={13} strokeWidth={1}/>
-                        </HoverBtn>
+                        </span>
                       )}
                       <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: loc.expanded ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
                     </div>
@@ -1310,7 +1322,31 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           </>
         )}
 
-        <div style={{ marginTop: 16 }}>
+        {/* Skills Graph — primary nav item */}
+        <div style={{ marginTop: 24 }}>
+          <HoverBtn onClick={() => setActive("Skills graph", ["Skills graph"])}
+            style={{ ...navItemStyle(activeItem === "Skills graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+            <Star size={16} strokeWidth={1}/>{showFullNav && "Skills graph"}
+          </HoverBtn>
+        </div>
+
+        {/* Talent Graph — primary nav item */}
+        <div style={{ marginTop: 4 }}>
+          <HoverBtn onClick={() => setActive("Talent graph", ["Talent graph"])}
+            style={{ ...navItemStyle(activeItem === "Talent graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+            <Share2 size={16} strokeWidth={1}/>{showFullNav && "Talent graph"}
+          </HoverBtn>
+        </div>
+
+        {/* Project Graph — primary nav item */}
+        <div style={{ marginTop: 4 }}>
+          <HoverBtn onClick={() => setActive("Project graph", ["Project graph"])}
+            style={{ ...navItemStyle(activeItem === "Project graph"), justifyContent: showFullNav ? "flex-start" : "center" }}>
+            <GitFork size={16} strokeWidth={1}/>{showFullNav && "Project graph"}
+          </HoverBtn>
+        </div>
+
+        <div style={{ marginTop: 8 }}>
           {!showFullNav ? (
             <HoverBtn style={{ ...navItemStyle(false), justifyContent: "center" }}>
               <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
@@ -1320,7 +1356,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ color: t.secondaryFg }}><Database size={16} strokeWidth={1}/></span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>The Grid</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: t.fg }}>Data centre</span>
               </div>
               <ChevronDown size={13} strokeWidth={1} color={t.sidebarFg} style={{ transform: dataHubExp ? "none" : "rotate(-180deg)", transition: "transform 0.2s" }}/>
             </HoverBtn>
@@ -1350,7 +1386,7 @@ function SidebarNav({ version, activeItem, onActiveItemChange, onBreadcrumbChang
           <Collapsible expanded={showFullNav && dataHubExp}>
             <div style={{ marginLeft: 18, marginTop: 8, borderLeft: `1px solid rgba(168,168,168,0.25)` }}>
               {dataHubItems.filter(item => visibleDataHubItems.has(item.name)).map(item => (
-                <HoverBtn key={item.name} onClick={() => setActive(item.name, ["The Grid", item.name])}
+                <HoverBtn key={item.name} onClick={() => setActive(item.name, ["Data centre", item.name])}
                   style={{ ...navItemStyle(activeItem === item.name), paddingTop: 6, paddingBottom: 6, paddingRight: 8, paddingLeft: 16 }}>
                   <span style={{ display: "flex", width: 16, flexShrink: 0, justifyContent: "center" }}>{item.icon}</span>{item.name}
                 </HoverBtn>
@@ -1414,6 +1450,30 @@ function RoleSelector({ roleId, roles, onChange }: any) {
         {roles.map((r: any, i: any) => (
           <button key={i} onClick={(e: any) => { e.stopPropagation(); onChange(i); setOpen(false) }} style={s.dropdownItem(i === roleId)}>
             {r.name} {i === roleId && <Check size={11} strokeWidth={1}/>}
+          </button>
+        ))}
+      </div>
+    </DropdownWrapper>
+  )
+}
+
+const ACCESS_LEVELS = ["Member", "Admin", "Resource Manager", "Project Manager"]
+
+function AccessSelector({ value, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const trig = { display: "inline-flex" as const, alignItems: "center" as const, gap: 4, padding: "2px 8px 2px 8px", borderRadius: 4, background: "transparent", border: "none", color: t.fg, fontSize: 13, cursor: "pointer" }
+  const current = value || "Member"
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={trig}>
+          {current}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width: 180 }}>
+        {ACCESS_LEVELS.map((level: string) => (
+          <button key={level} onClick={(e: any) => { e.stopPropagation(); onChange(level); setOpen(false) }} style={s.dropdownItem(level === current)}>
+            {level} {level === current && <Check size={11} strokeWidth={1}/>}
           </button>
         ))}
       </div>
@@ -1580,7 +1640,7 @@ function GroupSelector({ groupIds, groups, mode, onChange }: any) {
 }
 
 // ── Pages ──
-function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole }: any) {
+function RolesAndRates({ roles, onRolesChange, people, departments, onNavigateToPeopleByRole }: any) {
   const [tab, setTab] = useState("active")
   const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -1590,6 +1650,32 @@ function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole 
   const display = tab === "archived" ? [] : roles
   const rolesColumns = useMemo(() => [
     { accessorKey: "name", header: "Role", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, name: v} : r))} style={{ background: "transparent" }}/></span> },
+    { accessorKey: "departmentId", header: "Department", size: 168, cell: ({ row }: any) => {
+      const [open, setOpen] = useState(false)
+      const deptId = row.original.departmentId ?? null
+      const deptName = deptId !== null ? departments[deptId]?.name : null
+      return (
+        <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
+          <DropdownWrapper open={open} setOpen={setOpen}
+            trigger={
+              <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, background: "transparent", border: "none", color: deptName ? t.fg : t.mutedFg, fontSize: 13, cursor: "pointer" }}>
+                {deptName ?? "No department"}<ChevronDown size={11} strokeWidth={1} color={t.mutedFg}/>
+              </HoverBtn>
+            }>
+            <div style={{ ...s.dropdown, width: 200 }}>
+              <button onClick={(e: any) => { e.stopPropagation(); onRolesChange(roles.map((r: any) => r === row.original ? {...r, departmentId: null} : r)); setOpen(false) }} style={s.dropdownItem(deptId === null)}>
+                No department {deptId === null && <Check size={11} strokeWidth={1}/>}
+              </button>
+              {(departments ?? []).map((d: any, i: number) => (
+                <button key={i} onClick={(e: any) => { e.stopPropagation(); onRolesChange(roles.map((r: any) => r === row.original ? {...r, departmentId: i} : r)); setOpen(false) }} style={s.dropdownItem(i === deptId)}>
+                  {d.name} {i === deptId && <Check size={11} strokeWidth={1}/>}
+                </button>
+              ))}
+            </div>
+          </DropdownWrapper>
+        </span>
+      )
+    }},
     { accessorKey: "costRate", header: "Cost rate", size: 140, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEditRate value={row.original.costRate} onChange={(v: any) => onRolesChange(roles.map((r: any) => r === row.original ? {...r, costRate: v} : r))}/></span> },
     { accessorKey: "activePeople", header: "Active people", size: 140, cell: ({ row }: any) => {
       const count = filteredPeople.filter((p: any) => p.roleId === roles.indexOf(row.original)).length
@@ -1636,164 +1722,94 @@ function RolesAndRates({ roles, onRolesChange, people, onNavigateToPeopleByRole 
   )
 }
 
-function People({ roles, departments, onDepartmentsChange, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear, filteredRole, onRoleFilterClear }: any) {
+function People({ roles, departments, onDepartmentsChange, deliveryTeams, groups, people, onPeopleChange, contractors, onContractorsChange, deptPeopleCounts, filteredBusinessUnit, onFilterClear, filteredRole, onRoleFilterClear, filteredOffice, onOfficeFilterClear, initialView, onInitialViewConsumed }: any) {
   const [tab, setTab] = useState("active")
   const [view, setView] = useState("employees")
   const [selectedPerson, setSelectedPerson] = useState<number|null>(null)
   const [selectedDept, setSelectedDept] = useState<number|null>(null)
   const [selectedDeliveryTeam, setSelectedDeliveryTeam] = useState<number|null>(null)
   const [selectedGroup, setSelectedGroup] = useState<number|null>(null)
-  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
-  const [showModal, setShowModal] = useState(false)
-  const [deliveryTeams, setDeliveryTeams] = useState(INITIAL_DELIVERY_TEAMS)
-  const [groups, setGroups] = useState(INITIAL_GROUPS)
-  const [deliveryTeamMode, setDeliveryTeamMode] = useState<"single"|"multiple">("single")
-  const [groupMode, setGroupMode] = useState<"single"|"multiple">("single")
-  const [teamSettingsOpen, setTeamSettingsOpen] = useState(false)
-  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
-  const [filteredDepartment, setFilteredDepartment] = useState<string|null>(null)
-  const [filteredDeliveryTeam, setFilteredDeliveryTeam] = useState<string|null>(null)
-  const [filteredGroup, setFilteredGroup] = useState<string|null>(null)
+  const [selectedOffices, setSelectedOffices] = useState(() => filteredOffice ? [filteredOffice] : [...ALL_OFFICES])
 
-  const isGroupView = view === "departments" || view === "delivery-teams" || view === "groups"
-  const current = view === "employees" ? people : view === "contractors" ? contractors : people
+  useEffect(() => {
+    if (filteredOffice) setSelectedOffices([filteredOffice])
+    else setSelectedOffices([...ALL_OFFICES])
+  }, [filteredOffice])
+
+  useEffect(() => {
+    if (initialView) { setView(initialView); onInitialViewConsumed?.() }
+  }, [initialView])
+  const [showModal, setShowModal] = useState(false)
+  const [deliveryTeamMode] = useState<"single"|"multiple">("single")
+  const [groupMode] = useState<"single"|"multiple">("single")
+
+  const current = view === "employees" ? people : view === "contractors" ? contractors : view === "all" ? [...people, ...contractors] : people
   const setCurrent = view === "employees" ? onPeopleChange : view === "contractors" ? onContractorsChange : onPeopleChange
   const isAll = selectedOffices.length === ALL_OFFICES.length
   const filtered = isAll ? current : current.filter((p: any) => selectedOffices.includes(p.office))
   const roleFiltered = filteredRole ? filtered.filter((p: any) => roles[p.roleId]?.name === filteredRole) : filtered
-  const deptFiltered = filteredDepartment ? roleFiltered.filter((p: any) => departments[p.departmentId]?.name === filteredDepartment) : roleFiltered
-  const teamFiltered = filteredDeliveryTeam ? deptFiltered.filter((p: any) => (p.deliveryTeamIds || []).some((id: number) => deliveryTeams[id]?.name === filteredDeliveryTeam)) : deptFiltered
-  const groupFiltered = filteredGroup ? teamFiltered.filter((p: any) => (p.groupIds || []).some((id: number) => groups[id]?.name === filteredGroup)) : teamFiltered
-  const display = tab === "archived" ? [] : groupFiltered
+  const display = tab === "archived" ? [] : roleFiltered
 
   function handleAdd(person: any) {
     if (view === "employees") onPeopleChange([...people, person])
     else if (view === "contractors") onContractorsChange([...contractors, person])
-    else if (view === "delivery-teams") setDeliveryTeams((prev: any) => [...prev, person])
-    else if (view === "groups") setGroups((prev: any) => [...prev, person])
-    else onDepartmentsChange([...departments, person])
   }
-
-  const allPeople = [...people, ...contractors]
-  const deliveryTeamCounts = deliveryTeams.map((_: any, i: number) => allPeople.filter((p: any) => (p.deliveryTeamIds || []).includes(i)).length)
-  const groupCounts = groups.map((_: any, i: number) => allPeople.filter((p: any) => (p.groupIds || []).includes(i)).length)
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
-      {showModal && !isGroupView && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
-      {showModal && isGroupView && <AddDepartmentModal onAdd={handleAdd} onClose={() => setShowModal(false)}/>}
-      {teamSettingsOpen && <TeamSettingsModal type="delivery-teams" mode={deliveryTeamMode} onSave={(m: any) => setDeliveryTeamMode(m)} onClose={() => setTeamSettingsOpen(false)}/>}
-      {groupSettingsOpen && <TeamSettingsModal type="groups" mode={groupMode} onSave={(m: any) => setGroupMode(m)} onClose={() => setGroupSettingsOpen(false)}/>}
+      {showModal && <AddPersonModal roles={roles} departments={departments} onAdd={handleAdd} onClose={() => setShowModal(false)} type={view === "contractors" ? "contractor" : "employee"}/>}
       <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
         <SectionHeader
-          count={view === "departments" ? departments.length : view === "delivery-teams" ? deliveryTeams.length : view === "groups" ? groups.length : groupFiltered.length}
-          label={view === "departments" ? "Departments" : view === "delivery-teams" ? "Delivery teams" : view === "groups" ? "Groups" : view === "employees" ? "Employees" : "Contractors"}
-          filterField={filteredRole ? "Role" : filteredDepartment ? "Department" : filteredDeliveryTeam ? "Delivery team" : filteredGroup ? "Group" : undefined}
-          filterValue={filteredRole ?? filteredDepartment ?? filteredDeliveryTeam ?? filteredGroup}
-          onClearFilter={filteredRole ? onRoleFilterClear : filteredDepartment ? () => setFilteredDepartment(null) : filteredDeliveryTeam ? () => setFilteredDeliveryTeam(null) : filteredGroup ? () => setFilteredGroup(null) : undefined}
+          count={display.length}
+          label={view === "employees" ? "Employees" : view === "contractors" ? "Contractors" : "People"}
+          filterField={filteredRole ? "Role" : undefined}
+          filterValue={filteredRole ?? undefined}
+          onClearFilter={filteredRole ? onRoleFilterClear : undefined}
           onAdd={() => setShowModal(true)}/>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+            <OfficeFilter selected={selectedOffices} onChange={(val: any) => { setSelectedOffices(val); if (onOfficeFilterClear) onOfficeFilterClear() }}/>
+            {filteredOffice && (
+              <HoverBtn onClick={onOfficeFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
+                ✕ {filteredOffice}
+              </HoverBtn>
+            )}
             {filteredBusinessUnit && (
               <HoverBtn onClick={onFilterClear} style={{ ...s.pillBtn(true), background: t.muted, color: t.fg, padding: "4px 8px", fontSize: 12 }}>
                 ✕ {filteredBusinessUnit}
               </HoverBtn>
             )}
             <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
-            {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
+            {[["all","All"],["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
               <TabBtn key={v} active={view === v} onClick={() => { setView(v); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
                 <Circle size={10} strokeWidth={1} style={{ fill: view === v ? t.fg : "none" }}/>{l}
               </TabBtn>
             ))}
-            <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
-            <TabBtn active={view === "departments"} onClick={() => { setView("departments"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
-              <Circle size={10} strokeWidth={1} style={{ fill: view === "departments" ? t.fg : "none" }}/>Departments
-            </TabBtn>
-            <TabBtn active={view === "delivery-teams"} onClick={() => { setView("delivery-teams"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
-              <Circle size={10} strokeWidth={1} style={{ fill: view === "delivery-teams" ? t.fg : "none" }}/>Delivery teams
-            </TabBtn>
-            <TabBtn active={view === "groups"} onClick={() => { setView("groups"); setSelectedPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
-              <Circle size={10} strokeWidth={1} style={{ fill: view === "groups" ? t.fg : "none" }}/>Groups
-            </TabBtn>
           </div>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
 
-        {!isGroupView ? (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Name", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { accessorKey: "roleId", header: "Role", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><RoleSelector roleId={row.original.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, roleId: v} : x))}/></span> },
-                { accessorKey: "departmentId", header: "Department", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeptSelector departmentId={row.original.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, departmentId: v} : x))}/></span> },
-                { accessorKey: "deliveryTeamIds", header: "Delivery team", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeliveryTeamSelector teamIds={row.original.deliveryTeamIds || []} teams={deliveryTeams} mode={deliveryTeamMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, deliveryTeamIds: v} : x))}/></span> },
-                { accessorKey: "groupIds", header: "Group", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><GroupSelector groupIds={row.original.groupIds || []} groups={groups} mode={groupMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, groupIds: v} : x))}/></span> },
-                { accessorKey: "office", header: "Office", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.office}</span> },
-              ]}
-              data={display}
-              onRowClick={(_: any, idx: number) => setSelectedPerson(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedPerson}
-              emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived people</p></div>}
-            />
-          </>
-        ) : view === "departments" ? (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${departments.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => { const count = deptPeopleCounts[departments.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredDepartment(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
-              ]}
-              data={departments}
-              onRowClick={(_: any, idx: number) => setSelectedDept(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedDept}
-            />
-          </>
-        ) : view === "delivery-teams" ? (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${deliveryTeams.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
-              <HoverBtn onClick={() => setTeamSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setDeliveryTeams(deliveryTeams.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => deliveryTeamCounts[i] ?? 0, cell: ({ row }: any) => { const count = deliveryTeamCounts[deliveryTeams.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredDeliveryTeam(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
-              ]}
-              data={deliveryTeams}
-              onRowClick={(_: any, idx: number) => setSelectedDeliveryTeam(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedDeliveryTeam}
-            />
-          </>
-        ) : (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
-              <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
-              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${groups.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
-              <HoverBtn onClick={() => setGroupSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
-            </div>
-            <DataTable
-              columns={[
-                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setGroups(groups.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
-                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => groupCounts[i] ?? 0, cell: ({ row }: any) => { const count = groupCounts[groups.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setFilteredGroup(row.original.name); setView("employees") }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
-              ]}
-              data={groups}
-              onRowClick={(_: any, idx: number) => setSelectedGroup(idx)}
-              isRowSelected={(_: any, idx: number) => idx === selectedGroup}
-            />
-          </>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+          <HoverBtn style={{ ...s.iconBtn, width: 24, height: 24 }}><Plus size={13} strokeWidth={1} color={t.secondaryFg}/></HoverBtn>
+          <Tabs active={tab} onChange={setTab} tabs={[{ label: `${filtered.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+        </div>
+        <DataTable
+          columns={[
+            { accessorKey: "name", header: "Name", size: 280, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+            { accessorKey: "roleId", header: "Role", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><RoleSelector roleId={row.original.roleId} roles={roles} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, roleId: v} : x))}/></span> },
+            { accessorKey: "access", header: "Access", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><AccessSelector value={row.original.access} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, access: v} : x))}/></span> },
+            { accessorKey: "departmentId", header: "Department", size: 168, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeptSelector departmentId={row.original.departmentId} departments={departments} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, departmentId: v} : x))}/></span> },
+            { accessorKey: "deliveryTeamIds", header: "Delivery team", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><DeliveryTeamSelector teamIds={row.original.deliveryTeamIds || []} teams={deliveryTeams} mode={deliveryTeamMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, deliveryTeamIds: v} : x))}/></span> },
+            { accessorKey: "groupIds", header: "Group", size: 160, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><GroupSelector groupIds={row.original.groupIds || []} groups={groups} mode={groupMode} onChange={(v: any) => setCurrent(current.map((x: any) => x === row.original ? {...x, groupIds: v} : x))}/></span> },
+            { accessorKey: "office", header: "Office", size: 140, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.office}</span> },
+          ]}
+          data={display}
+          onRowClick={(_: any, idx: number) => setSelectedPerson(idx)}
+          isRowSelected={(_: any, idx: number) => idx === selectedPerson}
+          emptyNode={tab === "archived" && <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><p style={{ fontSize: 13, color: t.mutedFg }}>No archived people</p></div>}
+        />
       </div>
-      {(view === "employees" || view === "contractors") && selectedPerson !== null && current[selectedPerson] && (
+      {selectedPerson !== null && current[selectedPerson] && (
         <Sheet title={current[selectedPerson].name} subtitle={`${roles[current[selectedPerson].roleId]?.name} · ${current[selectedPerson].office}`} onClose={() => setSelectedPerson(null)}>
           <DetailGrid items={[
             { label: "Department", value: departments[current[selectedPerson].departmentId]?.name },
@@ -1803,21 +1819,6 @@ function People({ roles, departments, onDepartmentsChange, people, onPeopleChang
           ]}/>
           <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>Activity log</h3>
           <ActivityTimeline entries={(PERSON_ACTIVITY as any)[current[selectedPerson].name] || []}/>
-        </Sheet>
-      )}
-      {view === "departments" && selectedDept !== null && departments[selectedDept] && (
-        <Sheet title={departments[selectedDept].name} subtitle={`${deptPeopleCounts[selectedDept] ?? 0} active people`} onClose={() => setSelectedDept(null)}>
-          <DetailGrid items={[{ label: "Active people", value: deptPeopleCounts[selectedDept] ?? 0 }, { label: "Status", value: "Active" }]}/>
-        </Sheet>
-      )}
-      {view === "delivery-teams" && selectedDeliveryTeam !== null && deliveryTeams[selectedDeliveryTeam] && (
-        <Sheet title={deliveryTeams[selectedDeliveryTeam].name} subtitle={`${deliveryTeamCounts[selectedDeliveryTeam] ?? 0} members`} onClose={() => setSelectedDeliveryTeam(null)}>
-          <DetailGrid items={[{ label: "Members", value: deliveryTeamCounts[selectedDeliveryTeam] ?? 0 }, { label: "Status", value: "Active" }]}/>
-        </Sheet>
-      )}
-      {view === "groups" && selectedGroup !== null && groups[selectedGroup] && (
-        <Sheet title={groups[selectedGroup].name} subtitle={`${groupCounts[selectedGroup] ?? 0} members`} onClose={() => setSelectedGroup(null)}>
-          <DetailGrid items={[{ label: "Members", value: groupCounts[selectedGroup] ?? 0 }, { label: "Status", value: "Active" }]}/>
         </Sheet>
       )}
     </div>
@@ -1925,95 +1926,127 @@ function NotesPanel({ project, currentUser, onClose, onUpdate }: any) {
   )
 }
 
-const PT_COLS_CONFIG = [
-  { key: "name",      label: "Project", flex: "1.5fr" },
-  { key: "notes",     label: "Notes",   flex: "240px" },
-  { key: "health",    label: "Health",  flex: "120px" },
-  { key: "client",    label: "Client",  flex: "1fr" },
-  { key: "stage",     label: "Stage",   flex: "0.6fr" },
-  { key: "margin",    label: "Margin",  flex: "0.8fr" },
-  { key: "budget",    label: "Budget",  flex: "1fr" },
-  { key: "startDate", label: "Start",   flex: "1fr" },
-  { key: "endDate",   label: "End",     flex: "1fr" },
-  { key: "owner",     label: "Owner",   flex: "0.8fr" },
-]
 
 function ProjectTracker({ projects, onProjectsChange, people, clients }: any) {
   const [showModal, setShowModal] = useState(false)
-  const [colOrder, setColOrder] = useState(PT_COLS_CONFIG.map(c => c.key))
-  const [dragKey, setDragKey] = useState(null)
-  const [dropKey, setDropKey] = useState(null)
-  const [notesIdx, setNotesIdx] = useState(null)
+  const [notesIdx, setNotesIdx] = useState<number|null>(null)
+  const [monthOffset, setMonthOffset] = useState(0)
+  const [tableView, setTableView] = useState("all")
   const currentUser = people[1]?.name || "Amy Santiago"
 
-  const cols = colOrder.map((k: any) => PT_COLS_CONFIG.find(c => c.key === k)!)
-  const gridCols = cols.map(c => c.flex).join(" ")
+  const monthRange = useMemo(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + monthOffset
+    const start = new Date(year, month, 1)
+    const end = new Date(year, month + 1, 0)
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    return { start: fmt(start), end: fmt(end) }
+  }, [monthOffset])
 
-  function onDragStart(key: any) { setDragKey(key) }
-  function onDragOver(e: any, key: any) { e.preventDefault(); setDropKey(key) }
-  function onDrop(key: any) {
-    if (!dragKey || dragKey === key) { setDragKey(null); setDropKey(null); return }
-    const order = [...colOrder]
-    const from = order.indexOf(dragKey)
-    const to = order.indexOf(key)
-    order.splice(from, 1)
-    order.splice(to, 0, dragKey)
-    setColOrder(order)
-    setDragKey(null)
-    setDropKey(null)
-  }
-
-  function renderCell(col: any, p: any, i: any) {
-    const k = col.key
-    switch (k) {
-      case "name":      return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, fontWeight:500, color:t.fg }}><InlineEdit value={p.name} onChange={(v: any) => { const u=[...projects]; u[i].name=v; onProjectsChange(u) }} style={{ background:"transparent" }}/></span>
-      case "client":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{clients[p.clientId]?.name}</span>
-      case "stage":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:10, height:10, borderRadius:"50%", background:(STAGE_COLORS as any)[p.stage] }}/></span>
-      case "margin":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>{p.margin}%</span>
-      case "budget":    return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.fg }}>${p.budget.toLocaleString()}</span>
-      case "startDate": return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.startDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
-      case "endDate":   return <span key={k} style={{ display:"flex", alignItems:"center", fontSize:13, color:t.secondaryFg }}>{new Date(p.endDate).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</span>
-      case "owner":     return <span key={k} style={{ display:"flex", alignItems:"center" }}><div style={{ width:24, height:24, borderRadius:"50%", background:t.muted, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:600, color:t.fg }}>{people[p.ownerId]?.name.charAt(0) || "?"}</div></span>
-      case "health":    return <span key={k} style={{ display:"flex", alignItems:"center" }}><HealthDropdown value={p.health || "on-track"} onChange={(v: any) => { const u=[...projects]; u[i].health=v; onProjectsChange(u) }}/></span>
-      case "notes":     return <span key={k} style={{ display:"flex", alignItems:"flex-start", paddingTop:4 }}><NotesCell notes={p.notes} onClick={() => setNotesIdx(i)}/></span>
-      default:          return null
-    }
-  }
+  const columns = useMemo(() => [
+    { accessorKey: "name", header: "Project", size: 240,
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
+          <InlineEdit value={row.original.name} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].name=v; onProjectsChange(u) }} style={{ background: "transparent", fontWeight: 500 }}/>
+        </span>
+      )},
+    { accessorKey: "clientId", header: "Client", size: 150,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{clients[row.original.clientId]?.name || "—"}</span> },
+    { id: "health", header: "Health", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <HealthDropdown value={row.original.health || "on-track"} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].health=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { id: "projectComplete", header: "Project completion (%)", size: 160, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <ProjectCompleteDropdown value={row.original.projectComplete ?? null} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].projectComplete=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { id: "notes", header: "Notes", size: 220, enableResizing: false, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => { e.stopPropagation(); setNotesIdx(projects.indexOf(row.original)) }} style={{ display: "flex", alignItems: "flex-start" }}>
+          <NotesCell notes={row.original.notes} onClick={() => setNotesIdx(projects.indexOf(row.original))}/>
+        </span>
+      )},
+    { id: "stage", header: "Stage", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: (STAGE_COLORS as any)[row.original.stage], flexShrink: 0 }}/>
+          <span style={{ fontSize: 12, color: t.secondaryFg, textTransform: "capitalize" }}>{row.original.stage}</span>
+        </span>
+      )},
+    { accessorKey: "budget", header: "Budget", size: 120,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>${row.original.budget?.toLocaleString()}</span> },
+    { accessorKey: "scheduledBillable", header: "Scheduled billable", size: 150,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.scheduledBillable != null ? `$${row.original.scheduledBillable.toLocaleString()}` : "—"}</span> },
+    { accessorKey: "margin", header: "Margin", size: 180,
+      cell: ({ row }: any) => {
+        const pct = row.original.margin
+        const val = Math.round((pct / 100) * (row.original.budget ?? 0))
+        return <span style={{ fontSize: 13, color: t.fg }}>{pct}% <span style={{ color: t.mutedFg }}>/</span> {val.toLocaleString()}</span>
+      }},
+    { id: "planAccuracy", header: "Plan accuracy", size: 130, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <span onClick={e => e.stopPropagation()}>
+          <PlanAccuracyDropdown value={row.original.planAccuracy ?? null} onChange={(v: any) => { const u=[...projects]; u[projects.indexOf(row.original)].planAccuracy=v; onProjectsChange(u) }}/>
+        </span>
+      )},
+    { accessorKey: "hoursScheduled", header: "Hours scheduled", size: 140,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.hoursScheduled != null ? `${row.original.hoursScheduled.toLocaleString()}h` : "—"}</span> },
+    { accessorKey: "totalHoursAtCompletion", header: "Total hours at completion", size: 210,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original.totalHoursAtCompletion != null ? row.original.totalHoursAtCompletion.toLocaleString() : "—"}</span> },
+    { accessorKey: "startDate", header: "Start", size: 90,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.secondaryFg }}>{new Date(row.original.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> },
+    { accessorKey: "endDate", header: "End", size: 90,
+      cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.secondaryFg }}>{new Date(row.original.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> },
+    { id: "owner", header: "Owner", size: 44, enableResizing: false, accessorFn: () => "",
+      cell: ({ row }: any) => (
+        <div style={{ width: 26, height: 26, borderRadius: "50%", background: t.muted, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: t.fg }}>
+          {people[row.original.ownerId]?.name.charAt(0) || "?"}
+        </div>
+      )},
+  ], [projects, onProjectsChange, clients, people])
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
     <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden", background: t.bg }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "20px 24px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
-          <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 600, color: t.fg }}>{projects.length} Projects</h1>
+            <HoverBtn style={s.outlineBtn}><ListFilter size={11} strokeWidth={1}/>Filter</HoverBtn>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", border: `1px solid ${t.border}`, borderRadius: 7, overflow: "hidden" }}>
+              <HoverBtn onClick={() => setMonthOffset(o => o - 1)} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 24, borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer", borderRight: `1px solid ${t.border}` }}>
+                <ChevronLeft size={12} strokeWidth={1.5}/>
+              </HoverBtn>
+              <HoverBtn onClick={() => setMonthOffset(o => o + 1)} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 24, borderRadius: 0, border: "none", background: "transparent", color: t.secondaryFg, cursor: "pointer" }}>
+                <ChevronRight size={12} strokeWidth={1.5}/>
+              </HoverBtn>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 7, border: `1px solid ${t.border}`, cursor: "pointer" }}>
+              <span style={{ fontSize: 12, color: t.mutedFg }}>This month</span>
+              <span style={{ fontSize: 12, color: t.fg, fontWeight: 500 }}>{monthRange.start} – {monthRange.end}</span>
+              <ChevronDown size={11} strokeWidth={1.5} color={t.mutedFg}/>
+            </div>
+            <div style={{ width: 1, height: 16, background: t.fgAlpha20 }}/>
+            {[["all","All"],["recognised","Revenue recognition"]].map(([v,l]) => (
+              <TabBtn key={v} active={tableView === v} onClick={() => setTableView(v)} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+                <Circle size={10} strokeWidth={1} style={{ fill: tableView === v ? t.fg : "none" }}/>{l}
+              </TabBtn>
+            ))}
+          </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
           <button onClick={() => setShowModal(true)} style={s.primaryBtn}><Plus size={16} strokeWidth={1}/></button>
           <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "8px 0", gap: 8 }}>
-          {cols.map(col => (
-            <span key={col.key}
-              draggable
-              onDragStart={() => onDragStart(col.key)}
-              onDragOver={e => onDragOver(e, col.key)}
-              onDrop={() => onDrop(col.key)}
-              onDragEnd={() => { setDragKey(null); setDropKey(null) }}
-              style={{ fontSize:12, fontWeight:500, color: dropKey === col.key ? t.fg : t.mutedFg, cursor:"grab", userSelect:"none", display:"flex", alignItems:"center", gap:4, borderLeft: dropKey === col.key ? `2px solid ${t.fg}` : "2px solid transparent", paddingLeft: 2, transition:"border-color 0.1s, color 0.1s", opacity: dragKey === col.key ? 0.4 : 1 }}>
-              {col.label}
-            </span>
-          ))}
-        </div>
-        {projects.map((p: any, i: any) => (
-          <HoverRow key={i} selected={false} onClick={() => {}}
-            style={{ display: "grid", gridTemplateColumns: gridCols, borderBottom: `1px solid ${t.border}`, padding: "10px 0", cursor: "default", gap: 8, transition: "background 0.1s" }}>
-            {cols.map(col => renderCell(col, p, i))}
-          </HoverRow>
-        ))}
-      </div>
+      <DataTable columns={columns} data={projects} onRowClick={(_p: any, i: number) => setNotesIdx(i)}/>
       {showModal && <AddProjectModal people={people} clients={clients} onAdd={(p: any) => onProjectsChange([...projects, p])} onClose={() => setShowModal(false)}/>}
     </div>
     {notesIdx !== null && projects[notesIdx] && (
@@ -2119,6 +2152,74 @@ const HEALTH_OPTIONS = [
   { value: "at-risk",   label: "At Risk",   color: "#f59e0b" },
   { value: "off-track", label: "Off Track", color: "#ef4444" },
 ]
+
+const PLAN_ACCURACY_OPTIONS = [0,10,20,30,40,50,60,70,80,90,100]
+
+function ProjectCompleteDropdown({ value, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const [inputVal, setInputVal] = useState("")
+  const display = value == null ? "—" : `${value}%`
+  function commitInput() {
+    const n = parseInt(inputVal, 10)
+    if (!isNaN(n)) { onChange(Math.min(100, Math.max(0, n))); setOpen(false); setInputVal("") }
+  }
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
+          style={{ display:"flex", alignItems:"center", gap:4, height:24, padding:"0 8px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", cursor:"pointer", fontSize:12, fontWeight:500, color: t.fg }}>
+          {display}
+          <ChevronDown size={10} strokeWidth={1}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width:120 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:4, padding:"4px 8px 6px", borderBottom:`1px solid ${t.border}` }}>
+          <input
+            type="number" min={0} max={100} placeholder="0–100"
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") commitInput() }}
+            onClick={e => e.stopPropagation()}
+            style={{ width:"100%", fontSize:12, background:t.muted, border:`1px solid ${t.border}`, borderRadius:4, padding:"3px 6px", color:t.fg, outline:"none", fontFamily:"inherit" }}
+          />
+          <button onClick={(e) => { e.stopPropagation(); commitInput() }} style={{ fontSize:11, background:t.fgAlpha10, border:"none", borderRadius:4, padding:"3px 6px", color:t.fg, cursor:"pointer", whiteSpace:"nowrap" }}>Set</button>
+        </div>
+        <div style={{ maxHeight:180, overflowY:"auto" }}>
+          {PLAN_ACCURACY_OPTIONS.map(v => (
+            <button key={v} onClick={(e: any) => { e.stopPropagation(); onChange(v); setOpen(false) }} style={s.dropdownItem(v === value)}>
+              <span style={{ flex:1 }}>{v}%</span>
+              {v === value && <Check size={11} strokeWidth={1}/>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </DropdownWrapper>
+  )
+}
+
+function PlanAccuracyDropdown({ value, onChange }: any) {
+  const [open, setOpen] = useState(false)
+  const display = value == null ? "—" : `${value}%`
+  return (
+    <DropdownWrapper open={open} setOpen={setOpen}
+      trigger={
+        <HoverBtn onClick={(e: any) => { e.stopPropagation(); setOpen(!open) }}
+          style={{ display:"flex", alignItems:"center", gap:4, height:24, padding:"0 8px", borderRadius:6, border:`1px solid ${t.border}`, background:"transparent", cursor:"pointer", fontSize:12, fontWeight:500, color: t.fg }}>
+          {display}
+          <ChevronDown size={10} strokeWidth={1}/>
+        </HoverBtn>
+      }>
+      <div style={{ ...s.dropdown, width:100 }}>
+        {PLAN_ACCURACY_OPTIONS.map(v => (
+          <button key={v} onClick={(e: any) => { e.stopPropagation(); onChange(v); setOpen(false) }} style={s.dropdownItem(v === value)}>
+            <span style={{ flex:1 }}>{v}%</span>
+            {v === value && <Check size={11} strokeWidth={1}/>}
+          </button>
+        ))}
+      </div>
+    </DropdownWrapper>
+  )
+}
 
 function HealthDropdown({ value, onChange }: any) {
   const [open, setOpen] = useState(false)
@@ -3189,7 +3290,7 @@ function ProjectDetailCard({ project, clientName, people, config }: { project: a
       </div>
 
       <div style={{ padding: "12px 20px 4px" }}>
-        <p style={{ fontSize: 10, fontWeight: 600, color: t.mutedFg, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Concerns</p>
+        <p style={{ ...s.caseTitleXs, margin: "0 0 8px" }}>Concerns</p>
       </div>
       {concerns.map((c, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 20px", borderTop: `1px solid ${t.border}` }}>
@@ -3454,6 +3555,1754 @@ function PlaceholderView({ title, breadcrumb }: any) {
   )
 }
 
+// ── Talent Graph ──
+const TALENT_SKILLS_MAP: Record<string, string[]> = {
+  "Designer": ["Design", "Figma", "Branding"],
+  "Senior Designer": ["Design", "Figma", "Art Direction"],
+  "Developer": ["Engineering", "React", "TypeScript"],
+  "Project Manager": ["Planning", "Delivery", "Agile"],
+  "Art Director": ["Art Direction", "Visual Design", "Creative"],
+  "Copywriter": ["Copywriting", "Content", "Brand Voice"],
+  "Account Executive": ["Client Relations", "Sales", "Strategy"],
+  "Creative Director": ["Creative", "Leadership", "Brand"],
+  "UX/UI Designer": ["UX", "UI", "Research", "Figma"],
+  "Motion Designer": ["Motion", "After Effects", "Animation"],
+  "Brand Strategist": ["Strategy", "Brand", "Research"],
+  "Social Media Manager": ["Social", "Content", "Analytics"],
+}
+const TALENT_CLIENTS = ["Google", "Nike", "Patagonia", "LinkedIn", "Toyota", "Verizon"]
+const TALENT_CATS = ["fashion", "sport", "tech", "auto", "retail", "finance"]
+
+type TGNode = { id: number, name: string, initials: string, role: string, dept: string, x: number, y: number, fx?: number | null, fy?: number | null }
+type TGLink = { source: number | TGNode, target: number | TGNode, strength: number }
+
+function TalentGraphView({ people, roles, departments }: any) {
+  const nodeDefs = useMemo(() => people.map((p: any, i: number) => {
+    const parts = p.name.trim().split(/\s+/)
+    const initials = (parts[0][0] + (parts[parts.length - 1]?.[0] ?? "")).toUpperCase()
+    return { id: i, name: p.name, initials, role: roles[p.roleId]?.name ?? "", dept: departments[p.departmentId]?.name ?? "" }
+  }), [people, roles, departments])
+
+  const edgeDefs = useMemo(() => {
+    const result: { source: number, target: number, strength: number }[] = []
+    for (let i = 0; i < people.length; i++) {
+      for (let j = i + 1; j < people.length; j++) {
+        const a = people[i], b = people[j]
+        let score = 0
+        for (const tid of (a.deliveryTeamIds ?? [])) { if ((b.deliveryTeamIds ?? []).includes(tid)) score += 3 }
+        for (const gid of (a.groupIds ?? [])) { if ((b.groupIds ?? []).includes(gid)) score += 2 }
+        if (a.departmentId === b.departmentId) score += 1
+        if (score >= 2) result.push({ source: i, target: j, strength: Math.min(score, 10) })
+      }
+    }
+    return result
+  }, [people])
+
+  const d3NodesRef = useRef<TGNode[]>([])
+  const d3LinksRef = useRef<TGLink[]>([])
+  const simRef = useRef<any>(null)
+  const frameRef = useRef(0)
+  const [renderTick, setRenderTick] = useState(0)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ w: 680, h: 480 })
+  const dragRef = useRef<{ nodeId: number, startX: number, startY: number, moved: boolean } | null>(null)
+  const [zoom, setZoom] = useState(1)
+  const [search, setSearch] = useState("")
+  const [selected, setSelected] = useState<number | null>(null)
+
+  // Measure container
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      setDims({ w: width, h: height })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // Build + run d3-force simulation synchronously, then freeze
+  useEffect(() => {
+    const { w, h } = dims
+    // Seed in a circle so repulsion forces have non-zero distances to work from
+    const r0 = Math.min(w, h) * 0.32
+    const d3Nodes: TGNode[] = nodeDefs.map((n, i) => ({
+      ...n,
+      x: w / 2 + Math.cos((i / nodeDefs.length) * Math.PI * 2) * r0,
+      y: h / 2 + Math.sin((i / nodeDefs.length) * Math.PI * 2) * r0,
+    }))
+    const d3Links: TGLink[] = edgeDefs.map(e => ({ ...e }))
+
+    const sim = forceSimulation<TGNode>(d3Nodes)
+      .force("link", forceLink<TGNode, TGLink>(d3Links).id(d => d.id).distance(100).strength(d => (d as any).strength * 0.05))
+      .force("charge", forceManyBody().strength(-320))
+      .force("center", forceCenter(w / 2, h / 2).strength(0.8))
+      .force("collide", forceCollide(36))
+      .stop()
+
+    // Run to completion synchronously — no animation on mount
+    sim.tick(500)
+
+    d3NodesRef.current = d3Nodes
+    d3LinksRef.current = d3Links
+    simRef.current = sim
+    cancelAnimationFrame(frameRef.current)
+    frameRef.current = 0
+    setRenderTick(c => c + 1)
+
+    return () => { sim.stop(); cancelAnimationFrame(frameRef.current); frameRef.current = 0 }
+  }, [nodeDefs, edgeDefs, dims])
+
+  // RAF loop — only runs during drag
+  function startDragLoop() {
+    if (frameRef.current) return
+    const sim = simRef.current
+    if (!sim) return
+    function loop() {
+      setRenderTick(c => c + 1)
+      if (sim.alpha() > sim.alphaMin()) {
+        frameRef.current = requestAnimationFrame(loop)
+      } else {
+        sim.stop()
+        frameRef.current = 0
+        setRenderTick(c => c + 1)
+      }
+    }
+    frameRef.current = requestAnimationFrame(loop)
+  }
+
+  function onNodeMouseDown(e: React.MouseEvent, nodeId: number) {
+    e.stopPropagation()
+    dragRef.current = { nodeId, startX: e.clientX, startY: e.clientY, moved: false }
+  }
+  function onSvgMouseMove(e: React.MouseEvent<SVGSVGElement>) {
+    if (!dragRef.current) return
+    const { nodeId } = dragRef.current
+    const dx = e.clientX - dragRef.current.startX, dy = e.clientY - dragRef.current.startY
+    if (!dragRef.current.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      dragRef.current.moved = true
+      // Fix this node's position and reheat simulation
+      const n = d3NodesRef.current[nodeId]
+      if (n) { n.fx = n.x; n.fy = n.y }
+      simRef.current?.alphaTarget(0.3).restart()
+      startDragLoop()
+    }
+    if (!dragRef.current.moved) return
+    const rect = svgRef.current!.getBoundingClientRect()
+    const n = d3NodesRef.current[nodeId]
+    if (n) { n.fx = (e.clientX - rect.left) / zoom; n.fy = (e.clientY - rect.top) / zoom }
+    setRenderTick(c => c + 1)
+  }
+  function onNodeMouseUp(nodeId: number) {
+    if (!dragRef.current) return
+    if (!dragRef.current.moved) {
+      setSelected(s => s === nodeId ? null : nodeId)
+    } else {
+      // Release fix — let node settle
+      const n = d3NodesRef.current[nodeId]
+      if (n) { n.fx = null; n.fy = null }
+      simRef.current?.alphaTarget(0)
+    }
+    dragRef.current = null
+  }
+  function onSvgMouseUp() {
+    if (!dragRef.current) return
+    const n = d3NodesRef.current[dragRef.current.nodeId]
+    if (n) { n.fx = null; n.fy = null }
+    simRef.current?.alphaTarget(0)
+    dragRef.current = null
+  }
+
+  const [agentInput, setAgentInput] = useState("")
+  const [agentFilter, setAgentFilter] = useState<{ response: string, matchIds: Set<number> } | null>(null)
+  const agentInputRef = useRef<HTMLInputElement>(null)
+
+  function runQuery(raw: string) {
+    const q = raw.toLowerCase().trim()
+    if (!q) return
+
+    // Helper: build match set from predicate
+    const match = (pred: (p: any, i: number) => boolean) =>
+      new Set<number>(people.map((_: any, i: number) => i).filter((i: number) => pred(people[i], i)))
+
+    // 1. Client names
+    for (const client of TALENT_CLIENTS) {
+      if (q.includes(client.toLowerCase())) {
+        const ids = match((_: any, i: number) => [0,1,2].map(o => TALENT_CLIENTS[(i + o * 7) % 6]).includes(client))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people who have worked with ${client}` })
+        return
+      }
+    }
+    // 2. Roles
+    for (const [ri, role] of roles.entries()) {
+      if (q.includes(role.name.toLowerCase())) {
+        const ids = match((p: any) => p.roleId === ri)
+        setAgentFilter({ matchIds: ids, response: `${ids.size} ${role.name}${ids.size !== 1 ? "s" : ""}` })
+        return
+      }
+    }
+    // 3. Departments
+    for (const [di, dept] of departments.entries()) {
+      if (q.includes(dept.name.toLowerCase())) {
+        const ids = match((p: any) => p.departmentId === di)
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people in ${dept.name}` })
+        return
+      }
+    }
+    // 4. Delivery teams
+    const teamNames = ["acquisition", "retention", "core", "creative studio"]
+    for (const [ti, teamName] of teamNames.entries()) {
+      if (q.includes(teamName)) {
+        const ids = match((p: any) => (p.deliveryTeamIds ?? []).includes(ti))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people on the ${teamName.charAt(0).toUpperCase() + teamName.slice(1)} team` })
+        return
+      }
+    }
+    // 5. Groups
+    const groupNames = ["leadership", "ai working group", "hiring committee"]
+    for (const [gi, groupName] of groupNames.entries()) {
+      if (q.includes(groupName)) {
+        const ids = match((p: any) => (p.groupIds ?? []).includes(gi))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people in ${groupName.charAt(0).toUpperCase() + groupName.slice(1)}` })
+        return
+      }
+    }
+    // 6. Offices
+    const officeKeywords = ["new york", "london", "sydney", "beaverton", "hilversum", "shanghai", "melbourne"]
+    for (const kw of officeKeywords) {
+      if (q.includes(kw)) {
+        const ids = match((p: any) => p.office.toLowerCase().includes(kw))
+        setAgentFilter({ matchIds: ids, response: `${ids.size} people based in ${kw.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}` })
+        return
+      }
+    }
+    // 7. Person name — show their network
+    for (const [pi, person] of people.entries()) {
+      const first = person.name.split(" ")[0].toLowerCase()
+      if (q.includes(first) || q.includes(person.name.toLowerCase())) {
+        const nbrs = new Set(edgeDefs.filter((e: any) => e.source === pi || e.target === pi).map((e: any) => e.source === pi ? e.target : e.source))
+        const ids = new Set([pi, ...nbrs])
+        setAgentFilter({ matchIds: ids, response: `${person.name.split(" ")[0]} and ${nbrs.size} connections` })
+        return
+      }
+    }
+    // No match
+    setAgentFilter({ matchIds: new Set(people.map((_: any, i: number) => i)), response: `Showing all ${people.length} people` })
+  }
+
+  const searchLower = search.toLowerCase()
+  const strongBonds = edgeDefs.filter(e => e.strength >= 6).length
+  const avgStr = edgeDefs.length > 0 ? (edgeDefs.reduce((s, e) => s + e.strength, 0) / edgeDefs.length).toFixed(1) : "0"
+
+  // Neighbour set for selection highlighting
+  const neighbourIds = useMemo(() => {
+    if (selected === null) return new Set<number>()
+    return new Set(edgeDefs.filter(e => e.source === selected || e.target === selected).map(e => e.source === selected ? e.target : e.source))
+  }, [selected, edgeDefs])
+
+  const selPerson = selected !== null ? (() => {
+    const n = d3NodesRef.current[selected] ?? nodeDefs[selected]
+    const skills = TALENT_SKILLS_MAP[n?.role ?? ""] ?? ["Creative", "Strategy"]
+    const cl = [0, 1, 2].map(o => TALENT_CLIENTS[(selected + o * 7) % 6])
+    const cats = [0, 1].map(o => TALENT_CATS[(selected + o * 5) % 6])
+    const workedWith = [...neighbourIds].slice(0, 5).map(id => people[id]?.name.split(" ")[0]).filter(Boolean)
+    return { name: n?.name, role: n?.role, dept: n?.dept, skills, clients: cl, categories: cats, workedWith }
+  })() : null
+
+  const GTag = ({ label }: { label: string }) => (
+    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: t.fgAlpha10, color: t.fg, fontFamily: "var(--font-sans), sans-serif", whiteSpace: "nowrap" as const }}>{label}</span>
+  )
+
+  const hasSelection = selected !== null
+  const agentActive = agentFilter !== null
+
+  return (
+    <div style={{ flex: 1, display: "flex", overflow: "hidden", background: t.bg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, overflow: "hidden", padding: "24px 0 24px 28px" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, margin: "0 0 4px", fontFamily: "var(--font-sans), sans-serif" }}>Talent Visualization</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, margin: "0 0 16px", fontFamily: "var(--font-sans), sans-serif" }}>Click nodes for details, drag to rearrange.</p>
+        <div ref={containerRef} style={{ flex: 1, position: "relative" as const, overflow: "hidden", minHeight: 0 }}>
+          {/* Toolbar */}
+          <div style={{ position: "absolute" as const, top: 12, left: 12, right: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 10 }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search: 'fashion, ux' or 'nike'"
+              style={{ flex: "0 0 230px", height: 32, borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.fg, fontSize: 13, padding: "0 10px", fontFamily: "var(--font-sans), sans-serif", outline: "none" }} />
+            <button style={{ height: 32, padding: "0 12px", borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Settings2 size={13} strokeWidth={1.5} /> Weights <ChevronDown size={12} strokeWidth={1.5} />
+            </button>
+            <div style={{ flex: 1 }} />
+            {[{ label: "+", action: () => setZoom(z => Math.min(2, +(z + 0.15).toFixed(2))) },
+              { label: "−", action: () => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2))) },
+              { label: <RefreshCw size={13} strokeWidth={1.5} />, action: () => setZoom(1) }].map(({ label, action }, i) => (
+              <button key={i} onClick={action}
+                style={{ width: 32, height: 32, borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* SVG fills container via absolute positioning */}
+          <svg ref={svgRef} style={{ position: "absolute" as const, inset: 0, width: "100%", height: "100%", display: "block" }}
+            onMouseMove={onSvgMouseMove} onMouseUp={onSvgMouseUp} onMouseLeave={onSvgMouseUp}>
+            <g transform={`translate(${dims.w / 2 * (1 - zoom)},${dims.h / 2 * (1 - zoom)}) scale(${zoom})`}>
+              {/* Deselect background */}
+              <rect x={-9999} y={-9999} width={99999} height={99999} fill="transparent" onClick={() => setSelected(null)} />
+              {/* Edges — d3-force mutates source/target to node objects, read positions directly */}
+              {d3LinksRef.current.map((e, i) => {
+                const a = e.source as TGNode
+                const b = e.target as TGNode
+                if (a.x == null || b.x == null) return null
+                const srcId = a.id, tgtId = b.id
+                const agentVisible = !agentActive || (agentFilter!.matchIds.has(srcId) && agentFilter!.matchIds.has(tgtId))
+                const isConnected = hasSelection && (srcId === selected || tgtId === selected)
+                const edgeOpacity = !agentVisible ? 0.03 : hasSelection ? (isConnected ? 0.85 : 0.06) : (edgeDefs[i]?.strength >= 6 ? 0.55 : 0.25)
+                return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                  stroke={isConnected ? t.fg : t.border}
+                  strokeDasharray={isConnected ? undefined : "4 3"}
+                  strokeWidth={isConnected ? 2 : edgeDefs[i]?.strength >= 6 ? 1.5 : 1}
+                  opacity={edgeOpacity}
+                  style={{ pointerEvents: "none" as const }} />
+              })}
+              {/* Nodes */}
+              {d3NodesRef.current.map((n) => {
+                if (n.x == null) return null
+                const searchMatch = !searchLower || n.name.toLowerCase().includes(searchLower) || n.role.toLowerCase().includes(searchLower)
+                const isSel = selected === n.id
+                const isNeighbour = neighbourIds.has(n.id)
+                const agentMatch = !agentActive || agentFilter!.matchIds.has(n.id)
+                const dimmed = !agentMatch || (agentMatch && hasSelection && !isSel && !isNeighbour) || (!agentActive && !!searchLower && !searchMatch)
+                return (
+                  <g key={n.id} style={{ cursor: "pointer" }} opacity={dimmed ? 0.15 : 1}
+                    onMouseDown={ev => { ev.stopPropagation(); onNodeMouseDown(ev, n.id) }}
+                    onMouseUp={ev => { ev.stopPropagation(); onNodeMouseUp(n.id) }}
+                    onClick={ev => ev.stopPropagation()}>
+                    {isSel && <circle cx={n.x} cy={n.y} r={27} fill="none" stroke={t.fg} strokeWidth={2} opacity={0.3} />}
+                    <circle cx={n.x} cy={n.y} r={22} fill={t.fg} />
+                    <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="central"
+                      fill={t.bg} fontSize={11} fontWeight={600}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.initials}
+                    </text>
+                    <text x={n.x} y={n.y + 32} textAnchor="middle" fill={t.fg} fontSize={11}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.name.split(" ")[0]}
+                    </text>
+                  </g>
+                )
+              })}
+            </g>
+          </svg>
+          {/* Agent input */}
+          <div style={{ position: "absolute" as const, bottom: 16, left: 16, right: 16, zIndex: 10 }}>
+            {agentFilter && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: t.fg, color: t.bg, fontSize: 12, fontFamily: "var(--font-sans), sans-serif", fontWeight: 500 }}>
+                  <Share2 size={11} strokeWidth={2} />
+                  {agentFilter.response}
+                  <button onClick={() => { setAgentFilter(null); setAgentInput("") }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: t.bg, opacity: 0.6, padding: 0, display: "flex", alignItems: "center", marginLeft: 2 }}>
+                    <X size={12} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            )}
+            <form onSubmit={ev => { ev.preventDefault(); runQuery(agentInput); setAgentInput("") }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, padding: "8px 12px", boxShadow: `0 2px 12px rgba(0,0,0,0.12)` }}>
+              <input ref={agentInputRef} value={agentInput} onChange={e => setAgentInput(e.target.value)}
+                placeholder="Ask about connections… e.g. 'who worked on Nike' or 'show leadership'"
+                style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }} />
+              <button type="submit" disabled={!agentInput.trim()}
+                style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: agentInput.trim() ? t.fg : t.fgAlpha10, color: agentInput.trim() ? t.bg : t.mutedFg, cursor: agentInput.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                <ArrowUp size={13} strokeWidth={2} />
+              </button>
+            </form>
+          </div>
+          {/* Footer stats */}
+          <div style={{ position: "absolute" as const, bottom: 88, right: 16, display: "flex", gap: 12 }}>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Users size={12} strokeWidth={1.5} /> {agentActive ? `${agentFilter!.matchIds.size}/` : ""}{people.length} People
+            </span>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Share2 size={12} strokeWidth={1.5} /> {edgeDefs.length} Connections
+            </span>
+          </div>
+        </div>
+      </div>
+      {/* Right sidebar */}
+      <div style={{ width: 288, flexShrink: 0, overflowY: "auto" as const, padding: "24px 24px 24px 16px", display: "flex", flexDirection: "column" as const, gap: 12 }}>
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 14px", fontFamily: "var(--font-sans), sans-serif" }}>Network Stats</h3>
+          {([["Total People", people.length], ["Connections", edgeDefs.length], ["Avg Strength", `${avgStr}/10`], ["Strong Bonds", strongBonds]] as [string, any][]).map(([label, val]) => (
+            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: `1px solid ${t.fgAlpha06}` }}>
+              <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 12px", fontFamily: "var(--font-sans), sans-serif" }}>Selected Person</h3>
+          {selPerson ? (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{selPerson.name}</div>
+                <div style={{ fontSize: 12, color: t.mutedFg, marginTop: 2, fontFamily: "var(--font-sans), sans-serif" }}>{selPerson.role}</div>
+                <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{selPerson.dept}</div>
+              </div>
+              {([["Skills", selPerson.skills], ["Clients", selPerson.clients], ["Categories", selPerson.categories], ["Worked With", selPerson.workedWith]] as [string, string[]][]).map(([label, items]) => (
+                <div key={label} style={{ marginBottom: 10 }}>
+                  <div style={{ ...s.caseTitleCompact, marginBottom: 5 }}>{label}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>{items.map((item: string) => <GTag key={item} label={item} />)}</div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p style={{ fontSize: 12, color: t.mutedFg, margin: 0, fontFamily: "var(--font-sans), sans-serif" }}>Click a node to view details</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Project Graph ──
+const STAGE_COLOR: Record<string, string> = { active: "#10b981", planning: "#f59e0b", "on-hold": "#ef4444", completed: "#6b7280" }
+const HEALTH_COLOR: Record<string, string> = { "on-track": "#10b981", "at-risk": "#f59e0b", "off-track": "#ef4444" }
+
+type PGNode = { id: number, name: string, initials: string, stage: string, health: string, budget: number, unit: string, clientId: number, ownerId: number, office: string, code: string, x: number, y: number, fx?: number | null, fy?: number | null }
+type PGLink = { source: number | PGNode, target: number | PGNode, strength: number }
+
+function ProjectGraphView({ projects, roles, people, clientsFull }: any) {
+  const nodeDefs = useMemo(() => projects.map((p: any, i: number) => {
+    const parts = p.name.trim().split(/\s+/)
+    const initials = ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? parts[0]?.[1] ?? "")).toUpperCase()
+    return { id: i, name: p.name, initials, stage: p.stage, health: p.health, budget: p.budget, unit: p.unit, clientId: p.clientId, ownerId: p.ownerId, office: p.office, code: p.code }
+  }), [projects])
+
+  const edgeDefs = useMemo(() => {
+    const buRoles = new Map<string, Set<number>>()
+    BUSINESS_UNITS_FULL.forEach(bu => {
+      const s = new Set<number>(); bu.departments.forEach((d: any) => d.linkedRoles.forEach((lr: any) => s.add(lr.roleId))); buRoles.set(bu.name, s)
+    })
+    const result: { source: number, target: number, strength: number }[] = []
+    for (let i = 0; i < projects.length; i++) {
+      for (let j = i + 1; j < projects.length; j++) {
+        const a = projects[i], b = projects[j]; let score = 0
+        if (a.unit === b.unit) score += 4
+        if (a.clientId === b.clientId) score += 3
+        if (a.ownerId === b.ownerId) score += 3
+        const aR = buRoles.get(a.unit) ?? new Set(), bR = buRoles.get(b.unit) ?? new Set()
+        if ([...aR].filter(r => bR.has(r)).length >= 4) score += 2
+        if (score >= 3) result.push({ source: i, target: j, strength: Math.min(score, 10) })
+      }
+    }
+    return result
+  }, [projects])
+
+  const d3NodesRef = useRef<PGNode[]>([])
+  const d3LinksRef = useRef<PGLink[]>([])
+  const simRef = useRef<any>(null)
+  const frameRef = useRef(0)
+  const [, setRenderTick] = useState(0)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ w: 680, h: 480 })
+  const dragRef = useRef<{ nodeId: number, startX: number, startY: number, moved: boolean } | null>(null)
+  const [zoom, setZoom] = useState(1)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [agentInput, setAgentInput] = useState("")
+  const [agentFilter, setAgentFilter] = useState<{ response: string, matchIds: Set<number> } | null>(null)
+  const startLoopRef = useRef<() => void>(() => {})
+
+  useEffect(() => {
+    const el = containerRef.current; if (!el) return
+    const ro = new ResizeObserver(([e]) => setDims({ w: e.contentRect.width, h: e.contentRect.height }))
+    ro.observe(el); return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const { w, h } = dims
+    const r0 = Math.min(w, h) * 0.32
+    const d3Nodes: PGNode[] = nodeDefs.map((n: any, i: number) => ({
+      ...n, x: w / 2 + Math.cos((i / nodeDefs.length) * Math.PI * 2) * r0, y: h / 2 + Math.sin((i / nodeDefs.length) * Math.PI * 2) * r0,
+    }))
+    const d3Links: PGLink[] = edgeDefs.map((e: any) => ({ ...e }))
+    const sim = forceSimulation<PGNode>(d3Nodes)
+      .force("link", forceLink<PGNode, PGLink>(d3Links).id(d => d.id).distance(100).strength((d: any) => d.strength * 0.05))
+      .force("charge", forceManyBody().strength(-320))
+      .force("center", forceCenter(w / 2, h / 2).strength(0.8))
+      .force("collide", forceCollide(36))
+      .stop()
+    sim.tick(500)
+    d3NodesRef.current = d3Nodes; d3LinksRef.current = d3Links; simRef.current = sim
+    cancelAnimationFrame(frameRef.current); frameRef.current = 0; setRenderTick(c => c + 1)
+    function startLoop() {
+      if (frameRef.current) return
+      function loop() {
+        setRenderTick(c => c + 1)
+        if (sim.alpha() > sim.alphaMin()) { frameRef.current = requestAnimationFrame(loop) }
+        else { sim.stop(); frameRef.current = 0; setRenderTick(c => c + 1) }
+      }
+      frameRef.current = requestAnimationFrame(loop)
+    }
+    startLoopRef.current = startLoop
+    return () => { sim.stop(); cancelAnimationFrame(frameRef.current); frameRef.current = 0 }
+  }, [nodeDefs, edgeDefs, dims])
+
+  function onNodeMouseDown(e: React.MouseEvent, nodeId: number) { e.stopPropagation(); dragRef.current = { nodeId, startX: e.clientX, startY: e.clientY, moved: false } }
+  function onSvgMouseMove(e: React.MouseEvent<SVGSVGElement>) {
+    if (!dragRef.current) return
+    const { nodeId } = dragRef.current
+    const dx = e.clientX - dragRef.current.startX, dy = e.clientY - dragRef.current.startY
+    if (!dragRef.current.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      dragRef.current.moved = true
+      const n = d3NodesRef.current[nodeId]; if (n) { n.fx = n.x; n.fy = n.y }
+      simRef.current?.alphaTarget(0.3).restart(); startLoopRef.current()
+    }
+    if (!dragRef.current.moved) return
+    const rect = svgRef.current!.getBoundingClientRect()
+    const n = d3NodesRef.current[nodeId]; if (n) { n.fx = (e.clientX - rect.left) / zoom; n.fy = (e.clientY - rect.top) / zoom }
+    setRenderTick(c => c + 1)
+  }
+  function onNodeMouseUp(nodeId: number) {
+    if (!dragRef.current) return
+    if (!dragRef.current.moved) setSelected(s => s === nodeId ? null : nodeId)
+    else { const n = d3NodesRef.current[nodeId]; if (n) { n.fx = null; n.fy = null }; simRef.current?.alphaTarget(0) }
+    dragRef.current = null
+  }
+  function onSvgMouseUp() {
+    if (!dragRef.current) return
+    const n = d3NodesRef.current[dragRef.current.nodeId]; if (n) { n.fx = null; n.fy = null }
+    simRef.current?.alphaTarget(0); dragRef.current = null
+  }
+
+  function runQuery(raw: string) {
+    const q = raw.toLowerCase().trim()
+    const match = (pred: (p: any) => boolean) => new Set<number>(projects.map((_: any, i: number) => i).filter((i: number) => pred(projects[i])))
+    // Stage
+    if (q.includes("active") && !q.includes("at")) { const ids = match(p => p.stage === "active"); setAgentFilter({ matchIds: ids, response: `${ids.size} active projects` }); return }
+    if (q.includes("planning")) { const ids = match(p => p.stage === "planning"); setAgentFilter({ matchIds: ids, response: `${ids.size} projects in planning` }); return }
+    if (q.includes("on hold") || q.includes("on-hold")) { const ids = match(p => p.stage === "on-hold"); setAgentFilter({ matchIds: ids, response: `${ids.size} projects on hold` }); return }
+    // Health
+    if (q.includes("at risk") || q.includes("at-risk")) { const ids = match(p => p.health === "at-risk"); setAgentFilter({ matchIds: ids, response: `${ids.size} at-risk projects` }); return }
+    if (q.includes("off track") || q.includes("off-track")) { const ids = match(p => p.health === "off-track"); setAgentFilter({ matchIds: ids, response: `${ids.size} off-track projects` }); return }
+    if (q.includes("on track")) { const ids = match(p => p.health === "on-track"); setAgentFilter({ matchIds: ids, response: `${ids.size} on-track projects` }); return }
+    // Business units
+    for (const bu of BUSINESS_UNITS_FULL) {
+      if (q.includes(bu.name.toLowerCase())) { const ids = match(p => p.unit === bu.name); setAgentFilter({ matchIds: ids, response: `${ids.size} ${bu.name} projects` }); return }
+    }
+    // Clients
+    for (const [ci, client] of (clientsFull as any[]).entries()) {
+      if (q.includes(client.name.toLowerCase())) { const ids = match(p => p.clientId === ci); setAgentFilter({ matchIds: ids, response: `${ids.size} projects for ${client.name}` }); return }
+    }
+    // Owner/PM
+    for (const [pi, person] of (people as any[]).entries()) {
+      const first = person.name.split(" ")[0].toLowerCase()
+      if (q.includes(first)) { const ids = match(p => p.ownerId === pi); if (ids.size > 0) { setAgentFilter({ matchIds: ids, response: `${ids.size} projects owned by ${person.name.split(" ")[0]}` }); return } }
+    }
+    // Roles
+    for (const [ri, role] of (roles as any[]).entries()) {
+      if (q.includes(role.name.toLowerCase())) {
+        const buSet = new Set(BUSINESS_UNITS_FULL.filter(bu => bu.departments.some((d: any) => d.linkedRoles.some((lr: any) => lr.roleId === ri))).map(bu => bu.name))
+        const ids = match(p => buSet.has(p.unit)); setAgentFilter({ matchIds: ids, response: `${ids.size} projects using ${role.name}s` }); return
+      }
+    }
+    // Office
+    for (const kw of ["new york", "london", "sydney", "beaverton", "hilversum", "shanghai", "global"]) {
+      if (q.includes(kw)) { const ids = match(p => p.office.toLowerCase().includes(kw)); setAgentFilter({ matchIds: ids, response: `${ids.size} projects in ${kw}` }); return }
+    }
+    // Budget threshold: "over 200k" / "above 300k"
+    const bm = q.match(/(\d+)k/)
+    if (bm) {
+      const threshold = parseInt(bm[1]) * 1000
+      const over = q.includes("over") || q.includes("above") || q.includes("more")
+      const ids = match(p => over ? p.budget >= threshold : p.budget <= threshold)
+      setAgentFilter({ matchIds: ids, response: `${ids.size} projects ${over ? "over" : "under"} $${bm[1]}k` }); return
+    }
+    setAgentFilter({ matchIds: new Set(projects.map((_: any, i: number) => i)), response: `Showing all ${projects.length} projects` })
+  }
+
+  const hasSelection = selected !== null
+  const agentActive = agentFilter !== null
+  const activeCount = projects.filter((p: any) => p.stage === "active").length
+  const atRiskCount = projects.filter((p: any) => p.health === "at-risk").length
+  const totalBudget = projects.reduce((s: number, p: any) => s + (p.budget || 0), 0)
+  const fmt = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : `$${(n / 1000).toFixed(0)}K`
+
+  const neighbourIds = useMemo(() => {
+    if (selected === null) return new Set<number>()
+    return new Set(edgeDefs.filter(e => e.source === selected || e.target === selected).map(e => e.source === selected ? e.target : e.source))
+  }, [selected, edgeDefs])
+
+  const selProject = selected !== null ? (() => {
+    const p = projects[selected]
+    const bu = BUSINESS_UNITS_FULL.find(b => b.name === p.unit)
+    const buProject = bu?.projectsList?.find((bp: any) => bp.title === p.name)
+    const buRoleIds = new Set<number>(); bu?.departments.forEach((d: any) => d.linkedRoles.forEach((lr: any) => buRoleIds.add(lr.roleId)))
+    return {
+      name: p.name, code: p.code, stage: p.stage, health: p.health, unit: p.unit,
+      client: clientsFull[p.clientId]?.name ?? "—", owner: people[p.ownerId]?.name ?? "—",
+      budget: p.budget, office: p.office, teamSize: buProject?.team ?? "—",
+      roles: [...buRoleIds].slice(0, 4).map((id: number) => roles[id]?.name).filter(Boolean),
+      connections: neighbourIds.size,
+    }
+  })() : null
+
+  const PTag = ({ label }: { label: string }) => (
+    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: t.fgAlpha10, color: t.fg, fontFamily: "var(--font-sans), sans-serif", whiteSpace: "nowrap" as const }}>{label}</span>
+  )
+
+  return (
+    <div style={{ flex: 1, display: "flex", overflow: "hidden", background: t.bg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, overflow: "hidden", padding: "24px 0 24px 28px" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: t.fg, margin: "0 0 4px", fontFamily: "var(--font-sans), sans-serif" }}>Project Graph</h2>
+        <p style={{ fontSize: 13, color: t.mutedFg, margin: "0 0 16px", fontFamily: "var(--font-sans), sans-serif" }}>Click nodes for details, drag to rearrange. Edges = shared team, client, or PM.</p>
+        <div ref={containerRef} style={{ flex: 1, position: "relative" as const, overflow: "hidden", minHeight: 0 }}>
+          {/* Toolbar */}
+          <div style={{ position: "absolute" as const, top: 12, left: 12, right: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 10 }}>
+            {/* Stage legend */}
+            {(["active","planning","on-hold"] as const).map(s => (
+              <button key={s} onClick={() => { const ids = new Set<number>(projects.map((_: any, i: number) => i).filter((i: number) => projects[i].stage === s)); setAgentFilter({ matchIds: ids, response: `${ids.size} ${s} projects` }) }}
+                style={{ height: 28, padding: "0 10px", borderRadius: 100, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-sans), sans-serif" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: STAGE_COLOR[s], display: "inline-block", flexShrink: 0 }} />
+                {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
+              </button>
+            ))}
+            <div style={{ flex: 1 }} />
+            {[{ label: "+", action: () => setZoom(z => Math.min(2, +(z + 0.15).toFixed(2))) },
+              { label: "−", action: () => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2))) },
+              { label: <RefreshCw size={13} strokeWidth={1.5} />, action: () => setZoom(1) }].map(({ label, action }, i) => (
+              <button key={i} onClick={action} style={{ width: 32, height: 32, borderRadius: 6, border: `1px solid ${t.border}`, background: t.bg, color: t.mutedFg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontFamily: "var(--font-sans), sans-serif" }}>{label}</button>
+            ))}
+          </div>
+          {/* SVG */}
+          <svg ref={svgRef} style={{ position: "absolute" as const, inset: 0, width: "100%", height: "100%", display: "block" }}
+            onMouseMove={onSvgMouseMove} onMouseUp={onSvgMouseUp} onMouseLeave={onSvgMouseUp}>
+            <g transform={`translate(${dims.w / 2 * (1 - zoom)},${dims.h / 2 * (1 - zoom)}) scale(${zoom})`}>
+              <rect x={-9999} y={-9999} width={99999} height={99999} fill="transparent" onClick={() => setSelected(null)} />
+              {d3LinksRef.current.map((e, i) => {
+                const a = e.source as PGNode, b = e.target as PGNode
+                if (a.x == null || b.x == null) return null
+                const agentVis = !agentActive || (agentFilter!.matchIds.has(a.id) && agentFilter!.matchIds.has(b.id))
+                const isConn = hasSelection && (a.id === selected || b.id === selected)
+                const op = !agentVis ? 0.03 : hasSelection ? (isConn ? 0.85 : 0.06) : (edgeDefs[i]?.strength >= 6 ? 0.55 : 0.25)
+                return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                  stroke={isConn ? t.fg : t.border} strokeDasharray={isConn ? undefined : "4 3"}
+                  strokeWidth={isConn ? 2 : 1} opacity={op} style={{ pointerEvents: "none" as const }} />
+              })}
+              {d3NodesRef.current.map(n => {
+                if (n.x == null) return null
+                const isSel = selected === n.id
+                const isNeighbour = neighbourIds.has(n.id)
+                const agentMatch = !agentActive || agentFilter!.matchIds.has(n.id)
+                const dimmed = !agentMatch || (agentMatch && hasSelection && !isSel && !isNeighbour)
+                const stageCol = STAGE_COLOR[n.stage] ?? t.fg
+                return (
+                  <g key={n.id} style={{ cursor: "pointer" }} opacity={dimmed ? 0.12 : 1}
+                    onMouseDown={ev => { ev.stopPropagation(); onNodeMouseDown(ev, n.id) }}
+                    onMouseUp={ev => { ev.stopPropagation(); onNodeMouseUp(n.id) }}
+                    onClick={ev => ev.stopPropagation()}>
+                    {/* Stage ring */}
+                    <circle cx={n.x} cy={n.y} r={25} fill="none" stroke={stageCol} strokeWidth={isSel ? 2.5 : 1.5} opacity={isSel ? 1 : 0.7} />
+                    <circle cx={n.x} cy={n.y} r={21} fill={t.fg} />
+                    <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="central"
+                      fill={t.bg} fontSize={10} fontWeight={600}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.initials}
+                    </text>
+                    <text x={n.x} y={n.y + 34} textAnchor="middle" fill={t.fg} fontSize={10}
+                      style={{ userSelect: "none" as const, pointerEvents: "none" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+                      {n.name.split(" ")[0]}
+                    </text>
+                  </g>
+                )
+              })}
+            </g>
+          </svg>
+          {/* Agent input */}
+          <div style={{ position: "absolute" as const, bottom: 16, left: 16, right: 16, zIndex: 10 }}>
+            {agentFilter && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: t.fg, color: t.bg, fontSize: 12, fontFamily: "var(--font-sans), sans-serif", fontWeight: 500 }}>
+                  <Layers size={11} strokeWidth={2} />{agentFilter.response}
+                  <button onClick={() => { setAgentFilter(null); setAgentInput("") }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: t.bg, opacity: 0.6, padding: 0, display: "flex", alignItems: "center", marginLeft: 2 }}>
+                    <X size={12} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            )}
+            <form onSubmit={ev => { ev.preventDefault(); runQuery(agentInput); setAgentInput("") }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, padding: "8px 12px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }}>
+              <input value={agentInput} onChange={e => setAgentInput(e.target.value)}
+                placeholder="Ask about projects… e.g. 'show at-risk' or 'Jordan projects' or 'over 300k'"
+                style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }} />
+              <button type="submit" disabled={!agentInput.trim()}
+                style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: agentInput.trim() ? t.fg : t.fgAlpha10, color: agentInput.trim() ? t.bg : t.mutedFg, cursor: agentInput.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                <ArrowUp size={13} strokeWidth={2} />
+              </button>
+            </form>
+          </div>
+          {/* Footer */}
+          <div style={{ position: "absolute" as const, bottom: 88, right: 16, display: "flex", gap: 12 }}>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Layers size={12} strokeWidth={1.5} /> {agentActive ? `${agentFilter!.matchIds.size}/` : ""}{projects.length} Projects
+            </span>
+            <span style={{ fontSize: 12, color: t.mutedFg, display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-sans), sans-serif" }}>
+              <Share2 size={12} strokeWidth={1.5} /> {edgeDefs.length} Links
+            </span>
+          </div>
+        </div>
+      </div>
+      {/* Right sidebar */}
+      <div style={{ width: 288, flexShrink: 0, overflowY: "auto" as const, padding: "24px 24px 24px 16px", display: "flex", flexDirection: "column" as const, gap: 12 }}>
+        {/* Graph Stats */}
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 14px", fontFamily: "var(--font-sans), sans-serif" }}>Graph Stats</h3>
+          {([["Total Projects", projects.length], ["Active", activeCount], ["At Risk", atRiskCount], ["Total Budget", fmt(totalBudget)]] as [string, any][]).map(([label, val]) => (
+            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: `1px solid ${t.fgAlpha06}` }}>
+              <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+            </div>
+          ))}
+        </div>
+        {/* Selected Project */}
+        <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, padding: "16px 18px", background: t.card }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: t.fg, margin: "0 0 12px", fontFamily: "var(--font-sans), sans-serif" }}>Selected Project</h3>
+          {selProject ? (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif", lineHeight: 1.3 }}>{selProject.name}</div>
+                <div style={{ fontSize: 12, color: t.mutedFg, marginTop: 3, fontFamily: "var(--font-sans), sans-serif" }}>{selProject.code} · {selProject.unit}</div>
+                <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" as const }}>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: STAGE_COLOR[selProject.stage] + "22", color: STAGE_COLOR[selProject.stage], fontWeight: 600, fontFamily: "var(--font-sans), sans-serif", border: `1px solid ${STAGE_COLOR[selProject.stage]}44` }}>
+                    {selProject.stage.charAt(0).toUpperCase() + selProject.stage.slice(1).replace("-", " ")}
+                  </span>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 100, background: HEALTH_COLOR[selProject.health] + "22", color: HEALTH_COLOR[selProject.health], fontWeight: 600, fontFamily: "var(--font-sans), sans-serif", border: `1px solid ${HEALTH_COLOR[selProject.health]}44` }}>
+                    {selProject.health.replace("-", " ")}
+                  </span>
+                </div>
+              </div>
+              {([["Client", selProject.client], ["Owner / PM", selProject.owner], ["Budget", fmt(selProject.budget)], ["Team size", selProject.teamSize], ["Office", selProject.office], ["Connections", selProject.connections]] as [string, any][]).map(([label, val]) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: `1px solid ${t.fgAlpha06}` }}>
+                  <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+                </div>
+              ))}
+              {selProject.roles.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ ...s.caseTitleCompact, marginBottom: 6 }}>Roles</div>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>{selProject.roles.map((r: string) => <PTag key={r} label={r} />)}</div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p style={{ fontSize: 12, color: t.mutedFg, margin: 0, fontFamily: "var(--font-sans), sans-serif" }}>Click a node to view details</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Skills Graph ──
+const SKILLS_CATEGORIES = [
+  { name: "Design", color: "#6366f1", skills: ["Brand Identity","Typography","Visual Design","Figma","Illustration","Art Direction","Motion Design","UI Design","UX Design","Prototyping","Icon Design","Design Systems","Print Design","Packaging"] },
+  { name: "Engineering", color: "#10b981", skills: ["React","TypeScript","Next.js","Node.js","GraphQL","CSS/SCSS","Web Accessibility","Performance","APIs","Testing","DevOps","Mobile Dev","CMS Integration","Analytics Tracking"] },
+  { name: "Marketing", color: "#f59e0b", skills: ["Campaign Strategy","Paid Media","SEO","Email Marketing","Growth Hacking","CRM","Marketing Automation","Influencer Marketing","Affiliate Marketing","A/B Testing","Conversion Rate Optimisation","Retention Marketing","Product Marketing","Go-to-Market"] },
+  { name: "Strategy", color: "#ec4899", skills: ["Brand Strategy","Audience Research","Competitive Analysis","Positioning","Messaging","Market Entry","Innovation Strategy","Business Development","Partnerships","Pricing Strategy","Customer Insights","Journey Mapping","Scenario Planning","OKR Facilitation"] },
+  { name: "Content", color: "#14b8a6", skills: ["Copywriting","Content Strategy","Storytelling","Social Media","Video Scripting","Editing","Blog Writing","Brand Voice","Tone of Voice","PR & Comms","Thought Leadership","Community Management","Podcast Production","Newsletter"] },
+  { name: "Production", color: "#f97316", skills: ["Video Production","Photography","Sound Design","Post-Production","Studio Management","Retouching","CGI / 3D","AR / VR","Event Production","Print Production","Trafficking","Asset Management","Localisation","QA"] },
+  { name: "Analytics", color: "#8b5cf6", skills: ["Data Visualisation","Reporting","Google Analytics","Tableau","SQL","Python","Media Mix Modelling","Attribution","Dashboard Building","Research & Insights","Forecasting","Tag Management","Data Strategy","Experimentation"] },
+]
+
+// Map each role to a category and skills for the Skills Graph
+const ROLE_SKILLS_EXTENDED: Record<string, { category: string, skills: string[] }> = {
+  "Designer":             { category: "Design",       skills: ["Visual Design","Figma","Brand Identity","Typography","Design Systems"] },
+  "Senior Designer":      { category: "Design",       skills: ["Art Direction","Visual Design","Figma","Design Systems","Prototyping"] },
+  "Developer":            { category: "Engineering",  skills: ["React","TypeScript","Next.js","APIs","CSS/SCSS","Performance"] },
+  "Project Manager":      { category: "Strategy",     skills: ["Brand Strategy","OKR Facilitation","Positioning","Journey Mapping"] },
+  "Art Director":         { category: "Design",       skills: ["Art Direction","Motion Design","Illustration","Icon Design","Brand Identity"] },
+  "Copywriter":           { category: "Content",      skills: ["Copywriting","Brand Voice","Tone of Voice","Content Strategy","Blog Writing"] },
+  "Account Executive":    { category: "Strategy",     skills: ["Business Development","Partnerships","Customer Insights","Competitive Analysis"] },
+  "Creative Director":    { category: "Design",       skills: ["Art Direction","Brand Identity","Design Systems","UI Design","Prototyping"] },
+  "UX/UI Designer":       { category: "Design",       skills: ["UX Design","UI Design","Prototyping","Figma","Research & Insights"] },
+  "Motion Designer":      { category: "Production",   skills: ["Motion Design","Video Production","CGI / 3D","AR / VR","Sound Design"] },
+  "Brand Strategist":     { category: "Strategy",     skills: ["Brand Strategy","Positioning","Messaging","Audience Research","Competitive Analysis"] },
+  "Social Media Manager": { category: "Content",      skills: ["Social Media","Content Strategy","Community Management","Newsletter","Storytelling"] },
+}
+
+const EXPERIENCE_INDUSTRIES = [
+  { name: "Automotive",      clients: ["Tesla", "Volvo", "Ford", "BMW", "Mercedes-Benz", "Audi"] },
+  { name: "Technology",      clients: ["Apple", "Google", "Microsoft", "Spotify", "Airbnb", "Salesforce"] },
+  { name: "Fashion",         clients: ["Nike", "Adidas", "Gucci", "Zara", "Levi's", "Burberry"] },
+  { name: "Food & Beverage", clients: ["Coca-Cola", "Heineken", "McDonald's", "Nespresso", "Red Bull", "Diageo"] },
+  { name: "Finance",         clients: ["Goldman Sachs", "Mastercard", "Revolut", "HSBC", "Barclays", "Amex"] },
+  { name: "Retail",          clients: ["Amazon", "IKEA", "Uniqlo", "Sephora", "eBay", "Zalando"] },
+]
+
+type SGNode = { id: string, type: "category" | "skill" | "person", label: string, sub: string, r: number, x: number, y: number, fx?: number | null, fy?: number | null }
+type SGLink = { source: string | SGNode, target: string | SGNode }
+
+function SkillsGraphView({ people: allEmployees, contractors: allContractors, roles }: any) {
+  const [view, setView] = useState<"categories" | "skills" | "people" | "person-skills">("categories")
+  const [selCat, setSelCat] = useState<string | null>(null)
+  const [selSkill, setSelSkill] = useState<string | null>(null)
+  const [selPerson, setSelPerson] = useState<any | null>(null)
+  const [hovered, setHovered] = useState<string | null>(null)
+  const [hoveredAt, setHoveredAt] = useState(0)
+  const [transitionStart, setTransitionStart] = useState(0)
+  const [selectedOffices, setSelectedOffices] = useState([...ALL_OFFICES])
+  const [graphMode, setGraphMode] = useState("skills")
+  const [peopleFilter, setPeopleFilter] = useState("employees")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [profilePerson, setProfilePerson] = useState<any | null>(null)
+  const peopleType = graphMode // alias used throughout experience/skills branching
+  const rawPeople = peopleFilter === "contractors" ? (allContractors ?? []) : allEmployees
+  const people = selectedOffices.length === ALL_OFFICES.length ? rawPeople : rawPeople.filter((p: any) => selectedOffices.includes(p.office))
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ w: 800, h: 600 })
+  const nodesRef = useRef<SGNode[]>([])
+  const linksRef = useRef<SGLink[]>([])
+  const simRef = useRef<any>(null)
+  const rafRef = useRef<number | null>(null)
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setDims({ w: e.contentRect.width, h: e.contentRect.height }))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  function getRoleData(person: any) {
+    const roleName = roles[person.roleId]?.name ?? ""
+    return ROLE_SKILLS_EXTENDED[roleName] ?? { category: "Strategy", skills: [] }
+  }
+
+  function getPersonClients(person: any): string[] {
+    const allClients = EXPERIENCE_INDUSTRIES.flatMap(ind => ind.clients)
+    let seed = person.name.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0)
+    const count = 2 + (seed % 3)
+    const indices = new Set<number>()
+    while (indices.size < count) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff
+      indices.add(seed % allClients.length)
+    }
+    return Array.from(indices).map(i => allClients[i])
+  }
+
+  // Parse natural language search into matched skill/experience tokens
+  const searchTokens: { type: "skill" | "industry" | "client", name: string }[] = []
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase()
+    for (const cat of SKILLS_CATEGORIES) {
+      for (const skill of cat.skills) {
+        if (q.includes(skill.toLowerCase()) && !searchTokens.find(t => t.name === skill)) {
+          searchTokens.push({ type: "skill", name: skill })
+        }
+      }
+    }
+    for (const ind of EXPERIENCE_INDUSTRIES) {
+      if (q.includes(ind.name.toLowerCase()) && !searchTokens.find(t => t.name === ind.name)) {
+        searchTokens.push({ type: "industry", name: ind.name })
+      }
+      for (const client of ind.clients) {
+        if (q.includes(client.toLowerCase()) && !searchTokens.find(t => t.name === client)) {
+          searchTokens.push({ type: "client", name: client })
+        }
+      }
+    }
+  }
+  const isSearchMode = searchTokens.length > 0
+
+  // Build nodes + links for current view
+  useEffect(() => {
+    const w = dims.w, h = dims.h
+    if (w < 10 || h < 10) return
+    simRef.current?.stop()
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+
+    let nodes: SGNode[] = []
+    let links: SGLink[] = []
+
+    if (isSearchMode) {
+      // Token nodes — skills on one side, experience on the other
+      const skillToks = searchTokens.filter(t => t.type === "skill")
+      const expToks = searchTokens.filter(t => t.type !== "skill")
+      const tokenNodes: SGNode[] = searchTokens.map((tok, i) => {
+        const isSkill = tok.type === "skill"
+        const angle = isSkill
+          ? (-Math.PI / 2) + (skillToks.indexOf(tok) - (skillToks.length - 1) / 2) * 0.6
+          : (Math.PI / 2) + (expToks.indexOf(tok) - (expToks.length - 1) / 2) * 0.6
+        const r0 = Math.min(w, h) * 0.28
+        return { id: `tok-${tok.name}`, type: "skill" as const, label: tok.name, sub: tok.type === "skill" ? "skill" : "experience", r: 30, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+      // Match people who satisfy ALL tokens
+      const matchingPeople = people.filter((p: any) => {
+        const rd = getRoleData(p); const pc = getPersonClients(p)
+        return searchTokens.every(tok => {
+          if (tok.type === "skill") return rd.skills.includes(tok.name)
+          if (tok.type === "client") return pc.includes(tok.name)
+          const ind = EXPERIENCE_INDUSTRIES.find(i => i.name === tok.name)
+          return ind ? ind.clients.some((c: string) => pc.includes(c)) : false
+        })
+      })
+      const personNodes: SGNode[] = matchingPeople.map((p: any, i: number) => {
+        const initials = p.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+        const angle = (i / Math.max(matchingPeople.length, 1)) * Math.PI * 2
+        return { id: p.name, type: "person" as const, label: initials, sub: roles[p.roleId]?.name ?? "", r: 22, x: w/2 + Math.cos(angle) * 80, y: h/2 + Math.sin(angle) * 80 }
+      })
+      nodes = [...tokenNodes, ...personNodes]
+      links = personNodes.flatMap(pn => {
+        const person = matchingPeople.find((p: any) => p.name === pn.id)
+        if (!person) return []
+        const rd = getRoleData(person); const pc = getPersonClients(person)
+        return searchTokens
+          .filter(tok => {
+            if (tok.type === "skill") return rd.skills.includes(tok.name)
+            if (tok.type === "client") return pc.includes(tok.name)
+            const ind = EXPERIENCE_INDUSTRIES.find(i => i.name === tok.name)
+            return ind ? ind.clients.some((c: string) => pc.includes(c)) : false
+          })
+          .map(tok => ({ source: `tok-${tok.name}`, target: pn.id }))
+      })
+    } else if (peopleType === "experience") {
+      // Experience mode: industries → clients → people
+      if (view === "categories") {
+        const counts = EXPERIENCE_INDUSTRIES.map(ind => people.filter((p: any) => getPersonClients(p).some((c: string) => ind.clients.includes(c))).length)
+        const maxCount = Math.max(...counts, 1)
+        nodes = EXPERIENCE_INDUSTRIES.map((ind, i) => {
+          const angle = (i / EXPERIENCE_INDUSTRIES.length) * Math.PI * 2 - Math.PI / 2
+          const r0 = Math.min(w, h) * 0.06
+          const r = 24 + (counts[i] / maxCount) * 32
+          return { id: ind.name, type: "category" as const, label: ind.name, sub: `${ind.clients.length} clients`, r, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+        })
+      } else if (view === "skills" && selCat) {
+        const indDef = EXPERIENCE_INDUSTRIES.find(i => i.name === selCat)!
+        const centerNode: SGNode = { id: selCat, type: "category", label: selCat, sub: "", r: 44, x: w/2, y: h/2 }
+        const clientNodes: SGNode[] = indDef.clients.map((client, i) => {
+          const count = people.filter((p: any) => getPersonClients(p).includes(client)).length
+          const angle = (i / indDef.clients.length) * Math.PI * 2
+          const r0 = Math.min(w, h) * 0.3
+          return { id: client, type: "skill" as const, label: client, sub: count > 0 ? `${count}` : "—", r: count > 0 ? 22 + count * 3 : 18, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+        })
+        nodes = [centerNode, ...clientNodes]
+        links = clientNodes.map(c => ({ source: selCat, target: c.id }))
+      } else if (view === "people" && selSkill) {
+        const matching = people.filter((p: any) => getPersonClients(p).includes(selSkill))
+        const centerNode: SGNode = { id: selSkill, type: "skill", label: selSkill, sub: `${matching.length} people`, r: 36, x: w/2, y: h/2 }
+        const personNodes: SGNode[] = matching.map((p: any, i: number) => {
+          const initials = p.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+          const angle = (i / Math.max(matching.length, 1)) * Math.PI * 2
+          const r0 = Math.min(w, h) * 0.28
+          return { id: p.name, type: "person" as const, label: initials, sub: roles[p.roleId]?.name ?? "", r: 22, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+        })
+        nodes = [centerNode, ...personNodes]
+        links = personNodes.map(n => ({ source: selSkill, target: n.id }))
+      }
+    } else if (view === "categories") {
+      const peopleCounts = SKILLS_CATEGORIES.map(cat => people.filter((p: any) => getRoleData(p).category === cat.name).length)
+      const maxPeople = Math.max(...peopleCounts, 1)
+      nodes = SKILLS_CATEGORIES.map((cat, i) => {
+        const angle = (i / SKILLS_CATEGORIES.length) * Math.PI * 2 - Math.PI / 2
+        const r0 = Math.min(w, h) * 0.06
+        const r = 24 + (peopleCounts[i] / maxPeople) * 32
+        return { id: cat.name, type: "category" as const, label: cat.name, sub: `${cat.skills.length} skills`, r, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+    } else if (view === "skills" && selCat) {
+      const catDef = SKILLS_CATEGORIES.find(c => c.name === selCat)!
+      const centerNode: SGNode = { id: selCat, type: "category", label: selCat, sub: "", r: 44, x: w/2, y: h/2 }
+      const skillNodes: SGNode[] = catDef.skills.map((skill, i) => {
+        const count = people.filter((p: any) => getRoleData(p).skills.includes(skill)).length
+        const angle = (i / catDef.skills.length) * Math.PI * 2
+        const r0 = Math.min(w, h) * 0.3
+        return { id: skill, type: "skill" as const, label: skill, sub: count > 0 ? `${count}` : "—", r: count > 0 ? 22 + count * 3 : 18, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+      nodes = [centerNode, ...skillNodes]
+      links = skillNodes.map(s => ({ source: selCat, target: s.id }))
+    } else if (view === "people" && selSkill) {
+      const matching = people.filter((p: any) => getRoleData(p).skills.includes(selSkill))
+      const centerNode: SGNode = { id: selSkill, type: "skill", label: selSkill, sub: `${matching.length} people`, r: 36, x: w/2, y: h/2 }
+      const personNodes: SGNode[] = matching.map((p: any, i: number) => {
+        const initials = p.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+        const angle = (i / matching.length) * Math.PI * 2
+        const r0 = Math.min(w, h) * 0.28
+        return { id: p.name, type: "person" as const, label: initials, sub: roles[p.roleId]?.name ?? "", r: 22, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+      nodes = [centerNode, ...personNodes]
+      links = personNodes.map(n => ({ source: selSkill, target: n.id }))
+    } else if (view === "person-skills" && selPerson) {
+      const roleData = getRoleData(selPerson)
+      const initials = selPerson.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+      const centerNode: SGNode = { id: selPerson.name, type: "person", label: initials, sub: roles[selPerson.roleId]?.name ?? "", r: 36, x: w/2, y: h/2 }
+      const skillNodes: SGNode[] = roleData.skills.map((skill: string, i: number) => {
+        const angle = (i / roleData.skills.length) * Math.PI * 2
+        const r0 = Math.min(w, h) * 0.28
+        return { id: `ps-${skill}`, type: "skill" as const, label: skill, sub: "", r: 20, x: w/2 + Math.cos(angle)*r0, y: h/2 + Math.sin(angle)*r0 }
+      })
+      nodes = [centerNode, ...skillNodes]
+      links = skillNodes.map(s => ({ source: selPerson.name, target: s.id }))
+    }
+
+    nodesRef.current = nodes
+    linksRef.current = links
+    setTransitionStart(Date.now())
+
+    const isCategory = view === "categories"
+
+    // For non-category views, start nodes at centre so they burst outward
+    if (!isCategory) {
+      nodes.forEach(n => { n.x = w/2 + (Math.random()-0.5)*40; n.y = h/2 + (Math.random()-0.5)*40 })
+    }
+
+    const sim = forceSimulation<SGNode>(nodes)
+      .force("link", forceLink<SGNode, SGLink>(links).id((d: any) => d.id).distance((d: any) => {
+        const s = d.source as SGNode, tg = d.target as SGNode
+        return s.r + tg.r + (isCategory ? 4 : 28)
+      }).strength(isCategory ? 0.3 : 0.9))
+      .force("charge", forceManyBody().strength(isCategory ? -80 : -350))
+      .force("center", forceCenter(w/2, h/2).strength(isCategory ? 1.5 : 0.4))
+      .force("collide", forceCollide<SGNode>((d) => d.r + (isCategory ? 1 : 12)))
+
+    simRef.current = sim
+
+    // For category view: run warm-up ticks for a tight settled start, then float
+    if (isCategory) sim.stop().tick(500).alphaTarget(0.35).alphaDecay(0.0008).velocityDecay(0.3).restart()
+    // For drill-down views: burst from centre with high alpha, decay to gentle drift
+    else sim.alpha(1).alphaTarget(0.01).alphaDecay(0.018).restart()
+
+    function loop() {
+      setTick(k => k + 1)
+      rafRef.current = requestAnimationFrame(loop)
+    }
+    rafRef.current = requestAnimationFrame(loop)
+
+    return () => {
+      sim.stop()
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [view, selCat, selSkill, selPerson?.name, dims.w, dims.h, people.length, graphMode, peopleFilter, searchQuery])
+
+  const nodes = nodesRef.current
+  const links = linksRef.current
+  const sidebarW = 260
+
+  function renderPersonRow(p: any) {
+    const initials = p.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+    const isSelected = profilePerson?.name === p.name
+    return (
+      <div key={p.name} onClick={() => setProfilePerson(prev => prev?.name === p.name ? null : p)}
+        style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, padding: "6px 8px", borderRadius: 6, cursor: "pointer", background: isSelected ? t.fgAlpha10 : "transparent", border: `1px solid ${isSelected ? t.border : "transparent"}`, transition: "background 0.15s" }}>
+        <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: t.fg, flexShrink: 0, fontFamily: "var(--font-sans), sans-serif" }}>{initials}</div>
+        <div>
+          <div style={{ fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{p.name}</div>
+          <div style={{ fontSize: 11, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{roles[p.roleId]?.name ?? ""}</div>
+        </div>
+      </div>
+    )
+  }
+
+  function renderSidebar() {
+    if (isSearchMode) {
+      const skillToks = searchTokens.filter(t => t.type === "skill")
+      const expToks = searchTokens.filter(t => t.type !== "skill")
+      const matchingPeople = people.filter((p: any) => {
+        const rd = getRoleData(p); const pc = getPersonClients(p)
+        return searchTokens.every(tok => {
+          if (tok.type === "skill") return rd.skills.includes(tok.name)
+          if (tok.type === "client") return pc.includes(tok.name)
+          const ind = EXPERIENCE_INDUSTRIES.find(i => i.name === tok.name)
+          return ind ? ind.clients.some((c: string) => pc.includes(c)) : false
+        })
+      })
+      return (
+        <>
+          <div style={{ ...s.caseTitle, marginBottom: 10 }}>Search filters</div>
+          {skillToks.length > 0 && <>
+            <div style={{ fontSize: 10, color: t.mutedFg, marginBottom: 6, fontFamily: "var(--font-sans), sans-serif" }}>Skills</div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginBottom: 12 }}>
+              {skillToks.map(tok => <span key={tok.name} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 99, border: `1px solid ${t.border}`, color: t.fg, background: t.fgAlpha10, fontFamily: "var(--font-sans), sans-serif" }}>{tok.name}</span>)}
+            </div>
+          </>}
+          {expToks.length > 0 && <>
+            <div style={{ fontSize: 10, color: t.mutedFg, marginBottom: 6, fontFamily: "var(--font-sans), sans-serif" }}>Experience</div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginBottom: 12 }}>
+              {expToks.map(tok => <span key={tok.name} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 99, border: `1px solid ${t.border}`, color: t.fg, background: t.fgAlpha10, fontFamily: "var(--font-sans), sans-serif" }}>{tok.name}</span>)}
+            </div>
+          </>}
+          <div style={{ borderTop: `1px solid ${t.border}`, margin: "8px 0 12px" }}/>
+          <div style={{ ...s.caseTitle, marginBottom: 10 }}>{matchingPeople.length} {matchingPeople.length === 1 ? "person" : "people"}</div>
+          {matchingPeople.length === 0
+            ? <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>No matches — try broadening your search</div>
+            : matchingPeople.map((p: any) => renderPersonRow(p))
+          }
+        </>
+      )
+    }
+    if (peopleType === "experience") {
+      if (view === "categories") {
+        const totalClients = EXPERIENCE_INDUSTRIES.reduce((s, i) => s + i.clients.length, 0)
+        return (
+          <>
+            <div style={{ ...s.caseTitle, marginBottom: 12 }}>Overview</div>
+            {[["Industries", EXPERIENCE_INDUSTRIES.length], ["Total Clients", totalClients], ["Total People", people.length]].map(([label, val]) => (
+              <div key={label as string} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+              </div>
+            ))}
+            <div style={{ borderTop: `1px solid ${t.border}`, margin: "16px 0" }}/>
+            <div style={{ ...s.caseTitle, marginBottom: 12 }}>By Industry</div>
+            {EXPERIENCE_INDUSTRIES.map(ind => {
+              const count = people.filter((p: any) => getPersonClients(p).some((c: string) => ind.clients.includes(c))).length
+              return (
+                <div key={ind.name} style={{ marginBottom: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                    <span style={{ fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{ind.name}</span>
+                    <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{count}</span>
+                  </div>
+                  <div style={{ height: 3, borderRadius: 2, background: t.border }}>
+                    <div style={{ height: 3, borderRadius: 2, background: t.fg, opacity: 0.5, width: people.length > 0 ? `${Math.round((count / people.length) * 100)}%` : "0%" }}/>
+                  </div>
+                </div>
+              )
+            })}
+          </>
+        )
+      }
+      if (view === "skills" && selCat) {
+        const indDef = EXPERIENCE_INDUSTRIES.find(i => i.name === selCat)!
+        const clientCounts = indDef.clients.map(c => ({ name: c, count: people.filter((p: any) => getPersonClients(p).includes(c)).length })).sort((a,b) => b.count - a.count)
+        const maxCount = Math.max(...clientCounts.map(c => c.count), 1)
+        return (
+          <>
+            <div style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 4, fontFamily: "var(--font-sans), sans-serif" }}>{selCat}</div>
+            <div style={{ fontSize: 11, color: t.mutedFg, marginBottom: 16, fontFamily: "var(--font-sans), sans-serif" }}>{indDef.clients.length} clients — click a node</div>
+            {clientCounts.map(c => (
+              <div key={c.name} style={{ marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                  <span style={{ fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{c.name}</span>
+                  <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{c.count}</span>
+                </div>
+                <div style={{ height: 3, borderRadius: 2, background: t.border }}>
+                  <div style={{ height: 3, borderRadius: 2, background: t.fg, opacity: 0.5, width: c.count > 0 ? `${Math.round((c.count / maxCount) * 100)}%` : "0%" }}/>
+                </div>
+              </div>
+            ))}
+          </>
+        )
+      }
+      if (view === "people" && selSkill) {
+        const matching = people.filter((p: any) => getPersonClients(p).includes(selSkill))
+        return (
+          <>
+            <div style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 4, fontFamily: "var(--font-sans), sans-serif" }}>{selSkill}</div>
+            <div style={{ ...s.caseTitle, marginBottom: 12 }}>{matching.length} People</div>
+            {matching.map((p: any) => renderPersonRow(p))}
+          </>
+        )
+      }
+      return null
+    }
+
+    if (view === "categories") {
+      const totalSkills = SKILLS_CATEGORIES.reduce((s, c) => s + c.skills.length, 0)
+      return (
+        <>
+          <div style={{ ...s.caseTitle, marginBottom: 12 }}>Overview</div>
+          {[["Categories", SKILLS_CATEGORIES.length], ["Total Skills", totalSkills], ["Total People", people.length]].map(([label, val]) => (
+            <div key={label as string} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{val}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${t.border}`, margin: "16px 0" }}/>
+          <div style={{ ...s.caseTitle, marginBottom: 12 }}>Headcount</div>
+          {SKILLS_CATEGORIES.map(cat => {
+            const count = people.filter((p: any) => getRoleData(p).category === cat.name).length
+            return (
+              <div key={cat.name} style={{ marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                  <span style={{ fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{cat.name}</span>
+                  <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{count}</span>
+                </div>
+                <div style={{ height: 3, borderRadius: 2, background: t.border }}>
+                  <div style={{ height: 3, borderRadius: 2, background: t.fg, opacity: 0.5, width: `${Math.round((count / people.length) * 100)}%` }}/>
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )
+    }
+    if (view === "skills" && selCat) {
+      const catDef = SKILLS_CATEGORIES.find(c => c.name === selCat)!
+      const skillCounts = catDef.skills.map(s => ({ name: s, count: people.filter((p: any) => getRoleData(p).skills.includes(s)).length })).sort((a,b) => b.count - a.count)
+      const maxCount = Math.max(...skillCounts.map(s => s.count), 1)
+      return (
+        <>
+          <div style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 4, fontFamily: "var(--font-sans), sans-serif" }}>{selCat}</div>
+          <div style={{ fontSize: 11, color: t.mutedFg, marginBottom: 16, fontFamily: "var(--font-sans), sans-serif" }}>{catDef.skills.length} skills — click a node</div>
+          {skillCounts.map(s => (
+            <div key={s.name} style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 12, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{s.name}</span>
+                <span style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{s.count}</span>
+              </div>
+              <div style={{ height: 3, borderRadius: 2, background: t.border }}>
+                <div style={{ height: 3, borderRadius: 2, background: t.fg, opacity: 0.5, width: s.count > 0 ? `${Math.round((s.count / maxCount) * 100)}%` : "0%" }}/>
+              </div>
+            </div>
+          ))}
+        </>
+      )
+    }
+    if (view === "people" && selSkill) {
+      const matching = people.filter((p: any) => getRoleData(p).skills.includes(selSkill))
+      return (
+        <>
+          <div style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 4, fontFamily: "var(--font-sans), sans-serif" }}>{selSkill}</div>
+          <div style={{ ...s.caseTitle, marginBottom: 12 }}>{matching.length} People</div>
+          {matching.map((p: any) => renderPersonRow(p))}
+        </>
+      )
+    }
+    if (view === "person-skills" && selPerson) {
+      const roleData = getRoleData(selPerson)
+      const initials = selPerson.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+      return (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 16, borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600, color: t.fg, flexShrink: 0, fontFamily: "var(--font-sans), sans-serif" }}>{initials}</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{selPerson.name}</div>
+              <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{roles[selPerson.roleId]?.name ?? ""}</div>
+            </div>
+          </div>
+          <div style={{ ...s.caseTitle, marginBottom: 10 }}>{roleData.skills.length} Skills</div>
+          {roleData.skills.map((skill: string) => (
+            <div key={skill} style={{ fontSize: 12, color: t.fg, padding: "7px 0", borderBottom: `1px solid ${t.border}`, fontFamily: "var(--font-sans), sans-serif" }}>{skill}</div>
+          ))}
+        </>
+      )
+    }
+    return null
+  }
+
+  return (
+    <div style={{ display: "flex", flex: 1, flexDirection: "column", height: "100%", overflow: "hidden", background: t.bg }}>
+      <SectionHeader label="Skills graph"/>
+      <div style={{ display: "flex", alignItems: "center", padding: "0 24px 12px", gap: 4 }}>
+        <OfficeFilter selected={selectedOffices} onChange={setSelectedOffices}/>
+        <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
+        {[["skills","Skills"],["experience","Experience"]].map(([v,l]) => (
+          <TabBtn key={v} active={graphMode === v} onClick={() => { setGraphMode(v); setView("categories"); setSelCat(null); setSelSkill(null); setSelPerson(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+            <Circle size={10} strokeWidth={1} style={{ fill: graphMode === v ? t.fg : "none" }}/>{l}
+          </TabBtn>
+        ))}
+        <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 10px" }}/>
+        {[["employees","Employees"],["contractors","Contractors"]].map(([v,l]) => (
+          <TabBtn key={v} active={peopleFilter === v} onClick={() => { setPeopleFilter(v) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+            <Circle size={10} strokeWidth={1} style={{ fill: peopleFilter === v ? t.fg : "none" }}/>{l}
+          </TabBtn>
+        ))}
+      </div>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div ref={containerRef} style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        {/* Drill-down back button + hint */}
+        <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          {view !== "categories" && (
+            <button onClick={() => {
+              if (view === "person-skills") { setView("people"); setSelPerson(null) }
+              else if (view === "people") { setView("skills"); setSelSkill(null) }
+              else { setView("categories"); setSelCat(null) }
+            }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 6, border: `1px solid ${t.border}`, background: t.card, color: t.fg, cursor: "pointer", fontSize: 13, fontFamily: "var(--font-sans), sans-serif" }}>
+              <ChevronLeft size={14} strokeWidth={1.5}/>
+              {view === "person-skills" ? selSkill : view === "people" ? selCat : peopleType === "experience" ? "All industries" : "All categories"}
+            </button>
+          )}
+          <span style={{ fontSize: 13, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>
+            {view === "categories" && peopleType === "experience" && "Click an industry to explore clients"}
+            {view === "categories" && peopleType !== "experience" && "Click a category to explore skills"}
+            {view === "skills" && peopleType === "experience" && `${EXPERIENCE_INDUSTRIES.find(i=>i.name===selCat)?.clients.length} clients — click a node`}
+            {view === "skills" && peopleType !== "experience" && `${SKILLS_CATEGORIES.find(c=>c.name===selCat)?.skills.length} skills — click a node`}
+            {view === "people" && `${nodes.filter(n => n.type === "person").length} people`}
+            {view === "person-skills" && selPerson && `${getRoleData(selPerson).skills.length} skills`}
+          </span>
+        </div>
+
+        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+          <defs>
+            <style>{`
+              @keyframes sg-float-0 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(6px,-9px)} 66%{transform:translate(-5px,7px)} }
+              @keyframes sg-float-1 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(-8px,6px)} 66%{transform:translate(7px,-5px)} }
+              @keyframes sg-float-2 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(5px,8px)} 66%{transform:translate(-6px,-6px)} }
+              @keyframes sg-float-3 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(-7px,-5px)} 66%{transform:translate(8px,4px)} }
+              @keyframes sg-float-4 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(9px,4px)} 66%{transform:translate(-4px,-8px)} }
+              @keyframes sg-float-5 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(-6px,9px)} 66%{transform:translate(5px,-4px)} }
+              @keyframes sg-float-6 { 0%,100%{transform:translate(0px,0px)} 33%{transform:translate(4px,-7px)} 66%{transform:translate(-9px,5px)} }
+            `}</style>
+            <filter id="sg-glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect x={-9999} y={-9999} width={99999} height={99999} fill="transparent"/>
+
+          {/* Edges */}
+          {links.map((lk, i) => {
+            const s = lk.source as SGNode, tg = lk.target as SGNode
+            if (!s.x || !tg.x) return null
+            const isHov = hovered === tg.id || hovered === s.id
+            return (
+              <line key={i} x1={s.x} y1={s.y} x2={tg.x} y2={tg.y}
+                stroke={t.fg} strokeWidth={isHov ? 2 : 1}
+                opacity={isHov ? 0.5 : 0.2}
+                style={{ transition: "opacity 0.2s, stroke-width 0.2s" }}/>
+            )
+          })}
+
+          {/* Nodes */}
+          {nodes.map((n, ni) => {
+            const isHov = hovered === n.id
+            const isCenterNode = (view === "skills" && n.id === selCat) || (view === "people" && n.id === selSkill)
+            const isProfileSelected = n.type === "person" && profilePerson?.name === n.id
+            const fillOpacity = isCenterNode ? 0.18 : isProfileSelected ? 0.22 : isHov ? 0.14 : 0.06
+            const strokeOpacity = isCenterNode ? 1 : isProfileSelected ? 1 : isHov ? 0.9 : 0.5
+            const cursor = n.type === "category" ? "pointer"
+              : n.type === "skill" && n.sub !== "—" ? "pointer"
+              : n.type === "person" ? "pointer"
+              : "default"
+            // Staggered fade-in on transition
+            const elapsed = (Date.now() - transitionStart) / 1000
+            const delay = isCenterNode ? 0 : ni * 0.04
+            const fadeIn = view === "categories" ? 1 : Math.min(1, Math.max(0, (elapsed - delay) / 0.3))
+
+            return (
+              <g key={n.id} transform={`translate(${n.x},${n.y})`}
+                style={{ cursor, opacity: fadeIn }}
+                onMouseEnter={() => { setHovered(n.id); setHoveredAt(Date.now()) }}
+                onMouseLeave={() => { setHovered(null) }}
+                onClick={() => {
+                  if (n.type === "category") { setSelCat(n.id); setView("skills") }
+                  else if (n.type === "skill" && n.sub !== "—") { setSelSkill(n.id); setView("people") }
+                  else if (n.type === "person") {
+                    const allPool = [...allEmployees, ...(allContractors ?? [])]
+                    const person = allPool.find((p: any) => p.name === n.id)
+                    setProfilePerson(prev => prev?.name === n.id ? null : (person ?? null))
+                  }
+                }}>
+              <g style={view === "categories" ? {
+                animation: `sg-float-${ni % 7} ${4.5 + ni * 0.7}s ease-in-out infinite`,
+                animationDelay: `${-ni * 0.9}s`,
+              } : {}}>
+                {isCenterNode && <circle cx={0} cy={0} r={n.r + 8} fill="none" stroke={t.fg} strokeWidth={0.5} opacity={0.2}/>}
+                <circle cx={0} cy={0} r={n.r}
+                  fill={t.fg} fillOpacity={fillOpacity}
+                  stroke={t.fg} strokeOpacity={strokeOpacity} strokeWidth={1}
+                  filter={isCenterNode || isHov ? "url(#sg-glow)" : undefined}
+                  style={{ transition: "fill-opacity 0.2s, stroke-opacity 0.2s" }}/>
+                {n.type === "person" ? (
+                  <text x={0} y={5} textAnchor="middle" fill={t.fg} fillOpacity={0.9} fontSize={11} fontWeight={600} fontFamily="var(--font-sans), sans-serif">{n.label}</text>
+                ) : (
+                  <>
+                    <text x={0} y={n.sub ? -4 : 5} textAnchor="middle" fill={t.fg} fillOpacity={isHov || isCenterNode ? 1 : 0.75} fontSize={n.r > 32 ? 13 : 11} fontWeight={600} fontFamily="var(--font-sans), sans-serif">{n.label}</text>
+                    {n.sub && <text x={0} y={12} textAnchor="middle" fill={t.fg} fillOpacity={0.4} fontSize={10} fontFamily="var(--font-sans), sans-serif">{n.sub}</text>}
+                  </>
+                )}
+              </g>
+              </g>
+            )
+          })}
+
+          {/* Hover skill previews — float in on category hover */}
+          {view === "categories" && hovered && (() => {
+            const hovNode = nodes.find(n => n.id === hovered)
+            const catDef = SKILLS_CATEGORIES.find(c => c.name === hovered)
+            if (!hovNode || !catDef) return null
+            const preview = catDef.skills.slice(0, 5)
+            const elapsed = (Date.now() - hoveredAt) / 1000
+            return preview.map((skill, i) => {
+              const angle = (i / preview.length) * Math.PI * 2 - Math.PI / 2
+              const dist = hovNode.r + 52 + i * 4
+              const tx = hovNode.x + Math.cos(angle) * dist
+              const ty = hovNode.y + Math.sin(angle) * dist
+              const delay = i * 0.06
+              const progress = Math.min(1, Math.max(0, (elapsed - delay) / 0.25))
+              const eased = 1 - Math.pow(1 - progress, 3)
+              const cx2 = hovNode.x + Math.cos(angle) * dist * eased
+              const cy2 = hovNode.y + Math.sin(angle) * dist * eased
+              return (
+                <g key={skill} opacity={eased} style={{ pointerEvents: "none" }}>
+                  <line x1={hovNode.x} y1={hovNode.y} x2={cx2} y2={cy2} stroke={t.fg} strokeWidth={0.5} opacity={0.2 * eased}/>
+                  <rect x={cx2 - 38} y={cy2 - 10} width={76} height={20} rx={10} fill={t.fg} fillOpacity={0.07} stroke={t.fg} strokeOpacity={0.25} strokeWidth={0.8}/>
+                  <text x={cx2} y={cy2 + 5} textAnchor="middle" fill={t.fg} fillOpacity={0.7 * eased} fontSize={10} fontFamily="var(--font-sans), sans-serif">{skill}</text>
+                </g>
+              )
+            })
+          })()}
+        </svg>
+
+        {/* Search bar */}
+        <div style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 10, display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: t.card, border: `1px solid ${t.border}`, borderRadius: 12, boxShadow: `0 4px 24px rgba(0,0,0,0.18)`, minWidth: 320, maxWidth: 560 }}>
+          <Search size={14} strokeWidth={1.5} style={{ color: t.mutedFg, flexShrink: 0 }}/>
+          {searchTokens.map(tok => (
+            <span key={tok.name} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, padding: "2px 8px", borderRadius: 99, border: `1px solid ${t.border}`, background: t.fgAlpha10, color: t.fg, whiteSpace: "nowrap" as const, fontFamily: "var(--font-sans), sans-serif" }}>
+              {tok.name}
+              <span onClick={() => setSearchQuery(searchQuery.replace(new RegExp(tok.name, "gi"), "").trim())} style={{ cursor: "pointer", opacity: 0.5, marginLeft: 2, lineHeight: 1 }}>×</span>
+            </span>
+          ))}
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search skills + experience… e.g. Figma and Fashion"
+            style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: t.fg, fontFamily: "var(--font-sans), sans-serif", minWidth: 160 }}
+          />
+          {searchQuery && <span onClick={() => setSearchQuery("")} style={{ cursor: "pointer", color: t.mutedFg, fontSize: 16, lineHeight: 1, flexShrink: 0 }}>×</span>}
+        </div>
+      </div>
+
+      <div style={{ width: sidebarW, borderLeft: `1px solid ${t.border}`, padding: 16, overflowY: "auto", flexShrink: 0 }}>
+        {renderSidebar()}
+      </div>
+
+      {/* Person profile panel */}
+      <div style={{ width: profilePerson ? 280 : 0, overflow: "hidden", borderLeft: profilePerson ? `1px solid ${t.border}` : "none", flexShrink: 0, transition: "width 0.22s ease", background: t.bg }}>
+        {profilePerson && (() => {
+          const rd = getRoleData(profilePerson)
+          const clients = getPersonClients(profilePerson)
+          const initials = profilePerson.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+          const clientsByIndustry = EXPERIENCE_INDUSTRIES.map(ind => ({
+            industry: ind.name,
+            clients: ind.clients.filter((c: string) => clients.includes(c))
+          })).filter(g => g.clients.length > 0)
+          return (
+            <div style={{ width: 280, padding: 16, overflowY: "auto" as const, height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: t.fgAlpha10, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 600, color: t.fg, flexShrink: 0, fontFamily: "var(--font-sans), sans-serif" }}>{initials}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: t.fg, fontFamily: "var(--font-sans), sans-serif" }}>{profilePerson.name}</div>
+                    <div style={{ fontSize: 12, color: t.mutedFg, fontFamily: "var(--font-sans), sans-serif" }}>{roles[profilePerson.roleId]?.name ?? ""}</div>
+                    {profilePerson.office && <div style={{ fontSize: 11, color: t.mutedFg, marginTop: 2, fontFamily: "var(--font-sans), sans-serif" }}>{profilePerson.office}</div>}
+                  </div>
+                </div>
+                <button onClick={() => setProfilePerson(null)} style={{ background: "none", border: "none", cursor: "pointer", color: t.mutedFg, padding: 2, lineHeight: 1, fontSize: 16 }}>×</button>
+              </div>
+
+              <div style={{ ...s.caseTitle, marginBottom: 8 }}>Skills</div>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginBottom: 20 }}>
+                {rd.skills.map((skill: string) => (
+                  <span key={skill} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 99, border: `1px solid ${t.border}`, color: t.fg, background: t.fgAlpha10, fontFamily: "var(--font-sans), sans-serif" }}>{skill}</span>
+                ))}
+              </div>
+
+              <div style={{ ...s.caseTitle, marginBottom: 8 }}>Experience</div>
+              {clientsByIndustry.map(g => (
+                <div key={g.industry} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: t.mutedFg, marginBottom: 5, fontFamily: "var(--font-sans), sans-serif" }}>{g.industry}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
+                    {g.clients.map((c: string) => (
+                      <span key={c} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 99, border: `1px solid ${t.border}`, color: t.fg, background: t.fgAlpha10, fontFamily: "var(--font-sans), sans-serif" }}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+      </div>
+      </div>
+    </div>
+  )
+}
+
+function OrgStructurePage({ people, contractors, departments, onDepartmentsChange, deliveryTeams, onDeliveryTeamsChange, groups, onGroupsChange, roles, deptPeopleCounts, onNavigateToPeople }: any) {
+  const [tab, setTab] = useState("offices")
+  const [selectedIdx, setSelectedIdx] = useState<number|null>(null)
+  const [showModal, setShowModal] = useState(false)
+  const [deliveryTeamMode, setDeliveryTeamMode] = useState<"single"|"multiple">("single")
+  const [groupMode, setGroupMode] = useState<"single"|"multiple">("single")
+  const [teamSettingsOpen, setTeamSettingsOpen] = useState(false)
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
+  const [customGroupTypes, setCustomGroupTypes] = useState<{ id: string; name: string; items: any[] }[]>([])
+  const [showNewGroupTypeModal, setShowNewGroupTypeModal] = useState(false)
+  const [newGroupTypeName, setNewGroupTypeName] = useState("")
+  const [tagsSubTab, setTagsSubTab] = useState<"people"|"project">("people")
+  const [tagGroups, setTagGroups] = useState([
+    { id: "languages", name: "Languages", color: "#D97706", tags: [{ name: "english", count: 4 }, { name: "spanish", count: 16 }, { name: "japanese", count: 8 }] },
+    { id: "location", name: "Location", color: "#7C3AED", tags: [{ name: "montreal", count: 4 }, { name: "tokyo", count: 6 }, { name: "wellington", count: 6 }, { name: "london", count: 5 }, { name: "madrid", count: 5 }, { name: "new york", count: 14 }, { name: "mexico city", count: 3 }, { name: "auckland", count: 2 }] },
+  ])
+  const offices = ALL_OFFICES.filter(o => o !== "Global")
+
+  const officeEmployeeCount = (o: string) => people.filter((p: any) => p.office === o).length
+  const officeContractorCount = (o: string) => (contractors ?? []).filter((p: any) => p.office === o).length
+  const officePeopleCount = (o: string) => officeEmployeeCount(o) + officeContractorCount(o)
+  const officeDeptCount = (o: string) => departments.filter((_: any, i: number) => people.some((p: any) => p.office === o && p.departmentId === i)).length
+  const officeGroupCount = (o: string) => groups.filter((_: any, i: number) => people.some((p: any) => p.office === o && (p.groupIds || []).includes(i))).length
+  const allPeople = [...people, ...(contractors ?? [])]
+  const deliveryTeamCounts = deliveryTeams.map((_: any, i: number) => allPeople.filter((p: any) => (p.deliveryTeamIds || []).includes(i)).length)
+  const groupCounts = groups.map((_: any, i: number) => allPeople.filter((p: any) => (p.groupIds || []).includes(i)).length)
+
+  const selectedOffice = tab === "offices" && selectedIdx !== null ? offices[selectedIdx] : null
+  const selectedDept = tab === "departments" && selectedIdx !== null ? departments[selectedIdx] : null
+  const selectedTeam = tab === "delivery-teams" && selectedIdx !== null ? deliveryTeams[selectedIdx] : null
+  const selectedGroup = tab === "groups" && selectedIdx !== null ? groups[selectedIdx] : null
+  const activeCustomType = customGroupTypes.find(cg => cg.id === tab) ?? null
+  const selectedCustomItem = activeCustomType && selectedIdx !== null ? activeCustomType.items[selectedIdx] : null
+
+  const tabLabel = tab === "offices" ? "Offices" : tab === "departments" ? "Departments" : tab === "delivery-teams" ? "Delivery teams" : tab === "groups" ? "Groups" : (activeCustomType?.name ?? "")
+  const tabCount = tab === "offices" ? offices.length : tab === "departments" ? departments.length : tab === "delivery-teams" ? deliveryTeams.length : tab === "groups" ? groups.length : (activeCustomType?.items.length ?? 0)
+
+  return (
+    <div style={{ display: "flex", flex: 1, overflow: "hidden", background: t.bg }}>
+      {showModal && <AddDepartmentModal onAdd={(item: any) => {
+        if (tab === "departments") onDepartmentsChange([...departments, item])
+        else if (tab === "delivery-teams") onDeliveryTeamsChange([...deliveryTeams, item])
+        else if (tab === "groups") onGroupsChange([...groups, item])
+        else if (activeCustomType) setCustomGroupTypes(prev => prev.map(cg => cg.id === tab ? { ...cg, items: [...cg.items, item] } : cg))
+        setShowModal(false)
+      }} onClose={() => setShowModal(false)}/>}
+      {teamSettingsOpen && <TeamSettingsModal type="delivery-teams" mode={deliveryTeamMode} onSave={(m: any) => setDeliveryTeamMode(m)} onClose={() => setTeamSettingsOpen(false)}/>}
+      {groupSettingsOpen && <TeamSettingsModal type="groups" mode={groupMode} onSave={(m: any) => setGroupMode(m)} onClose={() => setGroupSettingsOpen(false)}/>}
+      <div style={{ display: "flex", flex: 1, flexDirection: "column", overflow: "hidden" }}>
+        <SectionHeader count={tabCount} label={tabLabel} onAdd={(tab !== "offices") ? () => setShowModal(true) : undefined}/>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px 12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {[["offices","Offices"],["departments","Departments"],["tags","Tags"]].map(([v,l]) => (
+              <TabBtn key={v} active={tab === v} onClick={() => { setTab(v); setSelectedIdx(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+                <Circle size={10} strokeWidth={1} style={{ fill: tab === v ? t.fg : "none" }}/>{l}
+              </TabBtn>
+            ))}
+            <div style={{ width: 1, height: 16, background: t.fgAlpha30, margin: "0 6px" }}/>
+            {[["delivery-teams","Delivery teams"],["groups","Groups"]].map(([v,l]) => (
+              <TabBtn key={v} active={tab === v} onClick={() => { setTab(v); setSelectedIdx(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+                <Circle size={10} strokeWidth={1} style={{ fill: tab === v ? t.fg : "none" }}/>{l}
+              </TabBtn>
+            ))}
+            {customGroupTypes.map(cg => (
+              <TabBtn key={cg.id} active={tab === cg.id} onClick={() => { setTab(cg.id); setSelectedIdx(null) }} activeColor={t.fgAlpha30} activeBg={t.fgAlpha10} mutedColor={t.secondaryFg} bg={t.bg} borderColor={t.border}>
+                <Circle size={10} strokeWidth={1} style={{ fill: tab === cg.id ? t.fg : "none" }}/>{cg.name}
+              </TabBtn>
+            ))}
+          </div>
+          <HoverBtn style={s.outlineBtn}><RefreshCw size={11} strokeWidth={1}/>Import/Export</HoverBtn>
+        </div>
+
+        {tab === "offices" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${offices.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Office", size: 240, cell: ({ row }: any) => <span style={{ fontSize: 13, color: t.fg }}>{row.original}</span> },
+                { id: "people", header: "People", size: 120, accessorFn: (row: any) => officePeopleCount(row), cell: ({ row }: any) => { const count = officePeopleCount(row.original); return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => onNavigateToPeople(row.original)}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+                { id: "departments", header: "Departments", size: 140, accessorFn: (row: any) => officeDeptCount(row), cell: ({ row }: any) => { const count = officeDeptCount(row.original); return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setTab("departments"); setSelectedIdx(null) }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+                { id: "groups", header: "Groups", size: 120, enableResizing: false, accessorFn: (row: any) => officeGroupCount(row), cell: ({ row }: any) => { const count = officeGroupCount(row.original); return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count} onClick={() => { setTab("groups"); setSelectedIdx(null) }}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+              ]}
+              data={offices}
+              onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+            />
+
+          </>
+        )}
+        {tab === "departments" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${departments.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDepartmentsChange(departments.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "activePeople", header: "Active people", size: 200, enableResizing: false, accessorFn: (row: any) => deptPeopleCounts[departments.indexOf(row)] ?? 0, cell: ({ row }: any) => { const count = deptPeopleCounts[departments.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+              ]}
+              data={departments}
+              onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+            />
+          </>
+        )}
+        {tab === "tags" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active={tagsSubTab} onChange={(v: any) => setTagsSubTab(v)} tabs={[{ label: `${tagGroups.reduce((a,g)=>a+g.tags.length,0)} People tags`, value: "people" }, { label: "6 Project tags", value: "project" }]}/>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px 24px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {tagGroups.map(group => (
+                  <div key={group.id} style={{ background: t.muted, borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: group.color, flexShrink: 0 }}/>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: t.fg }}>{group.name}</span>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                      {group.tags.map(tag => (
+                        <div key={tag.name} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: group.color + "33", border: `1px solid ${group.color}44`, borderRadius: 4, padding: "2px 4px 2px 6px", fontSize: 11, fontWeight: 500, color: group.color }}>
+                          <span>{tag.name} ({tag.count})</span>
+                          <button onClick={() => setTagGroups(prev => prev.map(g => g.id === group.id ? { ...g, tags: g.tags.filter(tg => tg.name !== tag.name) } : g))} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: group.color, display: "flex", alignItems: "center", lineHeight: 1, fontSize: 13, opacity: 0.7 }}>×</button>
+                        </div>
+                      ))}
+                      <button style={{ display: "flex", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", color: t.mutedFg, fontSize: 11, fontWeight: 500, padding: "2px 4px" }}>
+                        <Plus size={11} strokeWidth={1.5}/> add tag
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+        {tab === "delivery-teams" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${deliveryTeams.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setTeamSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onDeliveryTeamsChange(deliveryTeams.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => deliveryTeamCounts[i] ?? 0, cell: ({ row }: any) => { const count = deliveryTeamCounts[deliveryTeams.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+              ]}
+              data={deliveryTeams}
+              onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+            />
+          </>
+        )}
+        {tab === "groups" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${groups.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+              <HoverBtn onClick={() => setGroupSettingsOpen(true)} style={{ ...s.iconBtn, width: 24, height: 24 }}><MoreVertical size={14} strokeWidth={1}/></HoverBtn>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => onGroupsChange(groups.map((x: any) => x === row.original ? {...x, name: v} : x))} style={{ background: "transparent" }}/></span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, accessorFn: (_: any, i: number) => groupCounts[i] ?? 0, cell: ({ row }: any) => { const count = groupCounts[groups.indexOf(row.original)] ?? 0; return count > 0 ? <span onClick={e => e.stopPropagation()}><Tag label={count}/></span> : <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> } },
+              ]}
+              data={groups}
+              onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+            />
+          </>
+        )}
+        {activeCustomType && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 24px 8px" }}>
+              <Tabs active="active" onChange={() => {}} tabs={[{ label: `${activeCustomType.items.length} Active`, value: "active" }, { label: "0 Archived", value: "archived" }, { label: "All", value: "all" }]}/>
+            </div>
+            <DataTable
+              columns={[
+                { accessorKey: "name", header: "Name", size: 360, cell: ({ row }: any) => <span onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}><InlineEdit value={row.original.name} onChange={(v: any) => setCustomGroupTypes(prev => prev.map(cg => cg.id === tab ? { ...cg, items: cg.items.map((x: any) => x === row.original ? {...x, name: v} : x) } : cg))} style={{ background: "transparent" }}/></span> },
+                { id: "members", header: "Members", size: 200, enableResizing: false, cell: () => <span style={{ fontSize: 13, color: t.mutedFg }}>—</span> },
+              ]}
+              data={activeCustomType.items}
+              onRowClick={(_: any, idx: number) => setSelectedIdx(idx === selectedIdx ? null : idx)}
+              isRowSelected={(_: any, idx: number) => idx === selectedIdx}
+            />
+          </>
+        )}
+      </div>
+
+      {selectedOffice && (
+        <Sheet title={selectedOffice} subtitle={`${officePeopleCount(selectedOffice)} people`} onClose={() => setSelectedIdx(null)}>
+          <DetailGrid items={[
+            { label: "Employees", value: officeEmployeeCount(selectedOffice) },
+            { label: "Contractors", value: officeContractorCount(selectedOffice) },
+            { label: "Departments", value: officeDeptCount(selectedOffice) },
+            { label: "Groups", value: officeGroupCount(selectedOffice) },
+          ]}/>
+          <div style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>Access</div>
+          <div style={{ fontSize: 12, color: t.mutedFg, marginBottom: 10 }}>View and request resources:</div>
+          <ul style={{ margin: "0 0 14px", paddingLeft: 18 }}>
+            <li style={{ fontSize: 12, color: t.fg, marginBottom: 4 }}><strong>Resource planners</strong> in <strong>Sydney</strong> and <strong>New York</strong></li>
+            <li style={{ fontSize: 12, color: t.fg }}><strong>Jean-Pierre</strong> in <strong>Paris</strong></li>
+          </ul>
+          <div style={{ fontSize: 12, color: t.mutedFg, marginBottom: 10 }}>Edit and schedule:</div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            <li style={{ fontSize: 12, color: t.fg }}><strong>Admins</strong></li>
+          </ul>
+        </Sheet>
+      )}
+      {selectedDept && (
+        <Sheet title={selectedDept.name} subtitle={`${deptPeopleCounts[selectedIdx!] ?? 0} active people`} onClose={() => setSelectedIdx(null)}>
+          <DetailGrid items={[{ label: "Active people", value: deptPeopleCounts[selectedIdx!] ?? 0 }, { label: "Status", value: "Active" }]}/>
+        </Sheet>
+      )}
+      {selectedTeam && (() => {
+        const teamIdx = deliveryTeams.indexOf(selectedTeam)
+        const members = allPeople.filter((p: any) => (p.deliveryTeamIds || []).includes(teamIdx))
+        return (
+          <Sheet title={selectedTeam.name} subtitle={`${members.length} members`} onClose={() => setSelectedIdx(null)}>
+            <DetailGrid items={[{ label: "Members", value: members.length }, { label: "Status", value: "Active" }]}/>
+            <div style={{ marginTop: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>People</h3>
+              {members.length > 0 && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, paddingBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Name</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Role</span>
+                  </div>
+                  {members.map((p: any) => (
+                    <div key={p.name} style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, alignItems: "center", borderTop: `1px solid ${t.border}`, padding: "8px 0" }}>
+                      <span style={{ fontSize: 13, color: t.fg }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: t.mutedFg }}>{roles[p.roleId]?.name ?? "—"}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div style={{ paddingTop: 12 }}>
+                <HoverBtn style={{ display: "flex", alignItems: "center", gap: 6, height: 28, padding: "0 10px", borderRadius: 6, border: `1px dashed ${t.border}`, background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12 }}>
+                  <Plus size={12} strokeWidth={1}/>Add people
+                </HoverBtn>
+              </div>
+            </div>
+          </Sheet>
+        )
+      })()}
+      {selectedGroup && (() => {
+        const groupIdx = groups.indexOf(selectedGroup)
+        const members = allPeople.filter((p: any) => (p.groupIds || []).includes(groupIdx))
+        return (
+          <Sheet title={selectedGroup.name} subtitle={`${members.length} members`} onClose={() => setSelectedIdx(null)}>
+            <DetailGrid items={[{ label: "Members", value: members.length }, { label: "Status", value: "Active" }]}/>
+            <div style={{ marginTop: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: t.fg, marginBottom: 12 }}>People</h3>
+              {members.length > 0 && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, paddingBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Name</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: t.mutedFg }}>Role</span>
+                  </div>
+                  {members.map((p: any) => (
+                    <div key={p.name} style={{ display: "grid", gridTemplateColumns: "1fr minmax(120px, auto)", gap: 8, alignItems: "center", borderTop: `1px solid ${t.border}`, padding: "8px 0" }}>
+                      <span style={{ fontSize: 13, color: t.fg }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: t.mutedFg }}>{roles[p.roleId]?.name ?? "—"}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div style={{ paddingTop: 12 }}>
+                <HoverBtn style={{ display: "flex", alignItems: "center", gap: 6, height: 28, padding: "0 10px", borderRadius: 6, border: `1px dashed ${t.border}`, background: "transparent", color: t.secondaryFg, cursor: "pointer", fontSize: 12 }}>
+                  <Plus size={12} strokeWidth={1}/>Add people
+                </HoverBtn>
+              </div>
+            </div>
+          </Sheet>
+        )
+      })()}
+      {selectedCustomItem && (
+        <Sheet title={selectedCustomItem.name} subtitle={activeCustomType?.name} onClose={() => setSelectedIdx(null)}>
+          <DetailGrid items={[{ label: "Members", value: 0 }, { label: "Status", value: "Active" }]}/>
+        </Sheet>
+      )}
+    </div>
+  )
+}
+
 function VersionsToggle({ version, onChange }: any) {
   const [open, setOpen] = useState(false)
   return (
@@ -3480,9 +5329,11 @@ function VersionsToggle({ version, onChange }: any) {
 export default function App() {
   const [version, setVersion] = useState("multi")
   const [activeItem, setActiveItem] = useState("People")
-  const [breadcrumb, setBreadcrumb] = useState(["The Grid", "People"])
+  const [breadcrumb, setBreadcrumb] = useState(["Data centre", "People"])
   const [roles, setRoles] = useState(INITIAL_ROLES)
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS)
+  const [deliveryTeams, setDeliveryTeams] = useState(INITIAL_DELIVERY_TEAMS)
+  const [groups, setGroups] = useState(INITIAL_GROUPS)
   const [people, setPeople] = useState(INITIAL_PEOPLE)
   const [contractors, setContractors] = useState(INITIAL_CONTRACTORS)
   const [projects, setProjects] = useState(() => [...INITIAL_PROJECTS, ...getBusinessUnitProjects()])
@@ -3500,6 +5351,8 @@ export default function App() {
   const [filteredBusinessUnit, setFilteredBusinessUnit] = useState(null)
   const [filteredBusinessUnitForPeople, setFilteredBusinessUnitForPeople] = useState(null)
   const [filteredRoleForPeople, setFilteredRoleForPeople] = useState<string|null>(null)
+  const [filteredOfficeForPeople, setFilteredOfficeForPeople] = useState<string|null>(null)
+  const [initialPeopleView, setInitialPeopleView] = useState<string|null>(null)
   const [settingsOfficeTarget, setSettingsOfficeTarget] = useState<string | null>(null)
   const [savedDashboardCards, setSavedDashboardCards] = useState<string[]>([])
   const [showFloatAgent, setShowFloatAgent] = useState(false)
@@ -3512,14 +5365,18 @@ export default function App() {
   s = getStyles(t)
 
   function renderMain() {
-    if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
-    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)}/>
-    if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clients}/>
+    if (activeItem === "Company") return <OrgStructurePage people={people} contractors={contractors} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} onDeliveryTeamsChange={setDeliveryTeams} groups={groups} onGroupsChange={setGroups} roles={roles} deptPeopleCounts={deptPeopleCounts} onNavigateToPeople={(o: string) => { setFilteredOfficeForPeople(o); setInitialPeopleView(null); setActiveItem("People"); setBreadcrumb(["Data centre", "People"]) }}/>
+    if (activeItem === "Roles") return <RolesAndRates roles={roles} onRolesChange={setRoles} people={people} departments={departments} onNavigateToPeopleByRole={(role: string) => { setFilteredRoleForPeople(role); setFilteredBusinessUnitForPeople(null); setActiveItem("People"); setBreadcrumb(["People"]) }}/>
+    if (activeItem === "People") return <People roles={roles} departments={departments} onDepartmentsChange={setDepartments} deliveryTeams={deliveryTeams} groups={groups} people={people} onPeopleChange={setPeople} contractors={contractors} onContractorsChange={setContractors} deptPeopleCounts={deptPeopleCounts} filteredBusinessUnit={filteredBusinessUnitForPeople} onFilterClear={() => setFilteredBusinessUnitForPeople(null)} filteredRole={filteredRoleForPeople} onRoleFilterClear={() => setFilteredRoleForPeople(null)} filteredOffice={filteredOfficeForPeople} onOfficeFilterClear={() => setFilteredOfficeForPeople(null)} initialView={initialPeopleView} onInitialViewConsumed={() => setInitialPeopleView(null)}/>
+    if (activeItem === "Project tracker") return <ProjectTracker projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull}/>
     if (activeItem === "Projects") return <ProjectsDataHub visibleItems={visibleDataHubItems} projects={projects} onProjectsChange={setProjects} people={people} clients={clientsFull} filteredBusinessUnit={filteredBusinessUnit} onFilterClear={() => setFilteredBusinessUnit(null)} filteredClient={projectsClientFilter} onClientFilterClear={() => setProjectsClientFilter(null)} filteredRateCard={projectsRateCardFilter} onRateCardFilterClear={() => setProjectsRateCardFilter(null)}/>
     if (activeItem === "Clients") return <Clients roles={roles} people={people} clients={clientsFull} onClientsChange={setClientsFull} projects={projects} onNavigateToRateCards={(name: string) => { setRateCardFilter(name); setActiveItem("Rate cards") }} filterClients={clientsFilter} onClearClientsFilter={() => setClientsFilter(null)} onNavigateToProjects={(name: string) => { setProjectsClientFilter(name); setActiveItem("Projects") }}/>
-    if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }} projects={projects} onNavigateToProjects={(clientName: string, rateCardName: string) => { setProjectsClientFilter(null); setProjectsRateCardFilter({ clientName, rateCardName }); setActiveItem("Projects"); setBreadcrumb(["The Grid", "Projects"]) }}/>
+    if (activeItem === "Rate cards") return <RateCards roles={roles} clients={clientsFull} onClientsChange={setClientsFull} filterClient={rateCardFilter} onClearFilter={() => setRateCardFilter(null)} onNavigateToClients={(names: string[]) => { setClientsFilter(names); setActiveItem("Clients") }} projects={projects} onNavigateToProjects={(clientName: string, rateCardName: string) => { setProjectsClientFilter(null); setProjectsRateCardFilter({ clientName, rateCardName }); setActiveItem("Projects"); setBreadcrumb(["Data centre", "Projects"]) }}/>
     if (activeItem === "Brands") return <BusinessUnits roles={roles} onProjectsClick={(unitName: any) => { setFilteredBusinessUnit(unitName); setActiveItem("Projects"); }} onEmployeesClick={(unitName: any) => { setFilteredBusinessUnitForPeople(unitName); setActiveItem("People"); }}/>
     if (activeItem === "Activity log") return <ActivityLog/>
+    if (activeItem === "Talent graph") return <TalentGraphView people={people} roles={roles} departments={departments}/>
+    if (activeItem === "Project graph") return <ProjectGraphView projects={projects} roles={roles} people={people} clientsFull={clientsFull}/>
+    if (activeItem === "Skills graph") return <SkillsGraphView people={people} roles={roles}/>
     if (activeItem === "Float Agent") return <FloatAgentView projects={projects} clientsFull={clientsFull} people={people} onSaveDashboard={cards => { setSavedDashboardCards(cards); setActiveItem("Saved Dashboard"); setBreadcrumb(["Float Agent", "Saved Dashboard"]) }}/>
     if (activeItem === "Saved Dashboard") return <SavedDashboardView cards={savedDashboardCards} projects={projects} clientsFull={clientsFull} people={people}/>
     if (activeItem === "Settings") return <SettingsPage key={settingsOfficeTarget ?? "__org__"} t={t} s={s} locations={LOCATIONS_INIT} officeTarget={settingsOfficeTarget} onBack={() => { setActiveItem("Dashboard"); setBreadcrumb(["Global", "Dashboard"]); setSettingsOfficeTarget(null) }}/>
