@@ -7,6 +7,8 @@ export interface HoverBtnProps {
   title?: string
   disabled?: boolean
   accentColor?: string
+  /** Rest (and hover) outline, e.g. `1px solid #fff` — Figma default variant only */
+  restBorder?: string
 }
 
 export function HoverBtn({
@@ -16,6 +18,7 @@ export function HoverBtn({
   title,
   disabled,
   accentColor = "rgba(0,0,0,0.06)",
+  restBorder,
 }: HoverBtnProps) {
   const [hov, setHov] = useState(false)
   return (
@@ -28,8 +31,11 @@ export function HoverBtn({
       style={{
         ...style,
         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+        fontWeight: 400,
         borderRadius: "6px",
+        opacity: disabled ? 0.55 : 1,
         background: hov ? accentColor : style?.background ?? "transparent",
+        ...(restBorder && !disabled ? { border: restBorder } : {}),
       }}
     >
       {children}

@@ -46,7 +46,7 @@ export function TabBtn({
         color: active ? "inherit" : mutedColor,
         cursor: "pointer",
         fontSize: 12,
-        fontWeight: active ? 500 : 400,
+        fontWeight: 300,
         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
         transition: "background 0.15s ease, border-color 0.15s ease",
         ...style,
